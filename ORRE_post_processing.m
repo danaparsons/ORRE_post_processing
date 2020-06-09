@@ -1,19 +1,22 @@
 % test of folder structurr (needs work!)
 
-fs = 128
-f = 2 % hz
-tf = 2*f^-1
-n = fs*tf
-t = linspace(0,tf-fs^-1,n)
+fs = 128;
+f = 2; % hz
+tf = 2*f^-1;
+n = fs*tf;
+t = linspace(0,tf-fs^-1,n);
+x = sin(2*pi*f*t);
 
+signal = pkg.obj.signalClass(t,x); % test constructor without period T
+% signal = pkg.obj.signalClass(t,x,f^-1) % with T 
 
-x = sin(2*pi*f*t)
+plot(signal.t,signal.x,...
+    signal.t,signal.x,'o'); hold on
+plot(signal.t+tf,signal.x,...
+    signal.t+tf,signal.x,'o')
 
-plot(t,x,...
-    t,x,'o'); hold on
-plot(t+tf,x,...
-    t+tf,x,'o')
+signal.T = pkg.fun.plt_fft(signal.t,signal.x); % test without providing fs
 
-[T] = pkg.fun.plt_fft(t,x)
+signal
 
-[T2] = pkg.fun.plt_fft(t,x,fs)
+% signal.T = pkg.fun.plt_fft(signal.t,signal.x,fs) % with fs
