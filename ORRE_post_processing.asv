@@ -1,7 +1,7 @@
 % test of folder structurr (needs work!)
 
-fs = 128
-f = 2 % hz
+fs = 128*2
+f = 4 % hz
 tf = 2*f^-1
 n = fs*tf
 t = linspace(0,tf-fs^-1,n)
