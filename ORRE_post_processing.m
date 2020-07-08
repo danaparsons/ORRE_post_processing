@@ -1,4 +1,4 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Header %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Filename:     ORRE_post_processing.m
 % Description:  ORRE Post Processing Program input file (test)
 % Authors:      D. Lukas and J. Davis
@@ -6,29 +6,57 @@
 % Last updated: 6-17-20 by J. Davis
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5%%%
 
-% Define data directory (here I have added a \testdata folder with an OSWEC 
-% file for testing purposes):
-main_dir = ".";     % current directory
-sub_dir = "/testdata";
-filename = "090Deg_U_WaveID_Reg 1__20180413_105125_.txt";
-data_dir = strcat(main_dir,sub_dir);
+close all % close any open figures
 
-% Provide some input on the type of data:
+% Define inputs:
+directory = "./testdata/";     % current directory
+filename = "90_deg_reg_run1.txt";
+%filename = "3Decay Test Spring 0Deg_U_WaveID_Freq=0.5Hz Amp=0m ang=0rad__20180412_111119_.txt";
 datatype = 1;
-    % 0 - test data
-    % 1 - user-defined (dataClass)
-    % 2 - signal (signalClass)    
-channeltypes = {'t','wp','wp','wp','wp','wp','strpot','strpot','lc'};
-tagtypes = {'flap_orientation','date','type','run'};
-tagformat = "%s%s%s%d";
-
+     % 1 - user-defined (dataClass)
+  
 % Call the <read_data.m> function to create an instance of the appropriate
-% data class:
+% data class:   
+data = pkg.fun.read_data(directory,filename,datatype);
 
-data = pkg.fun.read_data(data_dir,filename,datatype,channeltypes,tagtypes,tagformat);
+%%% Note:
+% The function <read_data.m> is designed to take a variable number of input 
+% arguments. The complete call options are as follows:
+%
+% data = pkg.fun.read_data(data_dir,filename,datatype,ntaglines,nheaderlines,tagformat,headerformat,dataformat,commentstyle)
+% 
+% Only the first three inputs (data_dir,filename, and datatype) are
+% required. The remaining inputs are optional and pertain only to the
+% user-defined data class (datatype 1)
 
-%%% Note: add a breakpoint here at line 25, run the program, and "step in"
-%%% at this line to enter and follow the read_data function
+
+%%% Plotting example with use of data.map feature:
+
+% Hard-coded:
+figure
+plot(data.ch1,data.ch2)
+xlabel(data.map('ch1'))
+ylabel(data.map('ch2'))
+
+
+% Given the desired channel numbers, this is can be dynamically coded 
+% (I think I made that term up) as the following:
+
+% user-defined channels to plot:
+n = '1';
+m = '2';
+
+figure
+plot(data.(strcat('ch',n)),data.(strcat('ch',m)))
+xlabel(data.map(strcat('ch',n)))
+ylabel(data.map(strcat('ch',m)))
+
+
+
+
+
+
+
 
 
 
@@ -38,6 +66,23 @@ data = pkg.fun.read_data(data_dir,filename,datatype,channeltypes,tagtypes,tagfor
 
 
 %%% deleted stuff saved for later:
+
+
+% Define data directory (here I have added a \testdata folder with an OSWEC 
+% file for testing purposes):
+% main_dir = ".";     % current directory
+% sub_dir = "/testdata";
+% filename = "090Deg_U_WaveID_Reg 1__20180413_105125_.txt";
+% data_dir = strcat(main_dir,sub_dir);
+% 
+% % Provide some input on the type of data:
+% datatype = 1;
+   
+% channeltypes = {'t','wp','wp','wp','wp','wp','strpot','strpot','lc'};
+% tagtypes = {'flap_orientation','date','type','run'};
+% tagformat = "%s%s%s%d";
+
+
 
 % fs = 128;
 % f = 2; % hz

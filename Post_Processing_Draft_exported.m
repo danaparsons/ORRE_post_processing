@@ -27,7 +27,7 @@ classdef Post_Processing_Draft_exported < matlab.apps.AppBase
         % Button pushed function: UploadDataButton
         function UploadDataButtonPushed(app, event)
             %first upload table, user will change to their txt file
-            wavedata = readtable("zerodegdata.txt");
+            wavedata = read_data(filename);
             app.UITable.Data = wavedata;
             app.UITable.ColumnName = wavedata.Properties.VariableNames;
             %next, apply the wave probe data columns to the graph
