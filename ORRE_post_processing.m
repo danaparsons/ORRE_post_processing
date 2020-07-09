@@ -30,6 +30,20 @@ data = pkg.fun.read_data(directory,filename,datatype);
 % user-defined data class (datatype 1)
 
 
+%%% Example of calling a function
+
+% test of call method 1: direct input of data arrays
+dominant_period = pkg.fun.plt_fft(data.ch1,data.ch2);
+
+% test of call method 2: channel indicators
+dominant_period = pkg.fun.plt_fft(1,3,data);
+
+% test of bad calls:
+dominant_period = pkg.fun.plt_fft(10,2,data); % returns error for nonexistent channel
+dominant_period = pkg.fun.plt_fft(1.1,2,data); % returns error for non-int channel indicator
+
+
+
 %%% Plotting example with use of data.map feature:
 
 % Hard-coded:
