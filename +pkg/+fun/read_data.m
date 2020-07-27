@@ -51,12 +51,12 @@ valid_datatypes = @(x) mustBeMember(x,[0,1,2]); % only accept valid datatypes
 addRequired(p,'directory'); % @isstring
 addRequired(p,'filename');
 addRequired(p,'datatype',valid_datatypes);
-addOptional(p,'ntaglines',default_ntaglines,@isnumeric)
-addOptional(p,'nheaderlines',default_nheaderlines,@isnumeric)
-addOptional(p,'tagformat',default_tagformat)
-addOptional(p,'headerformat',default_headerformat);
-addOptional(p,'dataformat',default_dataformat)
-addOptional(p,'commentstyle',default_commentstyle)
+addOptional(p,'ntaglines',default_ntaglines,@isnumeric);
+addOptional(p,'nheaderlines',default_nheaderlines,@isnumeric);
+addOptional(p,'tagformat',default_tagformat,@ischar);
+addOptional(p,'headerformat',default_headerformat,@ischar);
+addOptional(p,'dataformat',default_dataformat,@ischar);
+addOptional(p,'commentstyle',default_commentstyle,@ischar);
 
 % Parse the inputs:
 parse(p,directory,filename,datatype,varargin{:});

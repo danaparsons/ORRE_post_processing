@@ -66,6 +66,7 @@ xlabel(data.map(strcat('ch',n)))
 ylabel(data.map(strcat('ch',m)))
 
 
+run('+app/ORRE_post_processing_app.m');
 
 
 

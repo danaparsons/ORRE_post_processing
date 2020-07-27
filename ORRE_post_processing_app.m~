@@ -273,6 +273,7 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             %%convert color to string name!
             rowname = {};
             value = sort(value);
+            i = 1;
             for lbvalue = value(1:end)
                 %y = app.Filtered_Channels(:,lbvalue);
                 y = app.Wavedata.(strcat('ch',(num2str(lbvalue))));
@@ -285,10 +286,18 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
                 app.UITable2.Data = [app.UITable2.Data;analysisrow];
    
                 rowname{value==lbvalue} = app.Wavedata.headers{lbvalue};
+%                 colors{value==lbvalue} = timehistory.Color;
                 s = uistyle('BackgroundColor',timehistory.Color);
                 addStyle(app.UITable2,s,'cell',[find(value==lbvalue),2]);
+ 
             end
+            %%fix color
+%             app.UITable2.Data = sortrows(app.UITable2.Data);
             app.UITable2.RowName = rowname;
+            
+            
+            
+
         end        
 
 %%%%%%%%%%%%%%%%%%%%%%%%% FFT Frequency Input %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
