@@ -1,43 +1,11 @@
-function [dominant_period,Fs] = plt_fft(t,y,varargin)
+function [dominant_period] = plt_laplace(t,y,varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Header %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Filename:     plt_fft.m    
-% Description:  ORRE Post Processing Program function to plot fft.
+% Filename:     laplace_fft.m    
+% Description:  ORRE Post Processing Program function: laplace transform.
 % Authors:      D. Lukas and J. Davis
-% Created on:   7-9-20
-% Last updated: 7-9-20 by J. Davis
+% Created on:   7-25-20
+% Last updated: 7-25-20 by D. Lukas
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Notes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% The function <plt_fft.m> is designed to have two call methods:
-% (1) Pass the function explicit data arrays:
-%
-%           plt_fft(data.ch1,data.ch2,OPTIONS...)
-%
-%   **To access additional function options when using method 1, it is
-%     neccessary to skip the third input by inserting a tilde (~), as this
-%     optional input is reserved for method 2:
-%
-%           plt_fft(data.ch1,data.ch2,~,option1,option2...)
-%
-% (2) Alternatively, pass the complete data object and channel indicators:
-%
-%           plt_fft(1,2,data,OPTIONS...)
-%
-%     Which is equivalent to the former. Note that the variable "data"
-%     references the data object created upon calling <read_data.m>.
-%
-% The basic syntax for <plt_fft.m> is as follows:
-%
-%           plt_fft(t,y)
-%
-%     Where "t" is the independent variable representing time and "y" is
-%     the dependent variable.
-%
-% The complete call options are as follows:
-%
-%     [dominant_period] = plt_fft(t,y,data,fs,...)
-% 
-%     Where "fs" is the desired sample frequency. More options to come...
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Input Parsing
 
 % Return an error if minimum number of required arguments is not satisfied:
 if nargin < 2
@@ -119,12 +87,10 @@ if isprop(data,'map')
 else
     dependent_varname = 'y(t)';
 end
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Beginning of Function
 
 
-Y = fft(y);
+Y = laplace(y);
 L = length(y);
 
 if isempty(fs)
@@ -133,18 +99,16 @@ else
     Fs = fs;
 end 
 
-
 P2 = abs(Y/L);
 P1 = P2(1:L/2+1);
 P1(2:end-1) = 2*P1(2:end-1);
 f = Fs*(0:(L/2))/L;
-fft_fig = figure;
+laplace_fig = figure;
 plot(f,P1) 
-title(['Single-Sided Amplitude Spectrum of ',dependent_varname])
-xlabel('f (Hz)')
-ylabel('|P1(f)|')
+title(['Laplace Transform of ',dependent_varname])
+xlabel('f (Hz)') %%what should these units be
+ylabel('|P1(f)|') %%what should these units be
 
-[pk_fft, loc_fft]= findpeaks(P1,f);
-dominant_period = loc_fft(pk_fft == max(pk_fft))^-1;
+[pk_laplace, loc_laplace]= findpeaks(P1,f); %%should this part be included?:
+dominant_period = loc_laplace(pk_laplace == max(pk_laplace))^-1;
 end
-

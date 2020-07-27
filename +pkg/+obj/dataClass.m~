@@ -16,7 +16,7 @@ classdef dataClass < dynamicprops
     headers     % Store data headers
     map         % Map data channels to headers
     map_legend  % Store map key and value set for user reference
-%     fs          %Store sampling frequency
+    fs          %Store sampling frequency
     % Channels are added using the dynamic properties function <addprop>
     
     end
@@ -24,7 +24,7 @@ classdef dataClass < dynamicprops
     methods
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Constructor method - constructs instance of this class
-        function dataObj = dataClass(tags,headers,data)
+        function dataObj = dataClass(tags,headers,data,fs)
             
             % Initialize obj when called with no input arguments
             if nargin == 0
@@ -65,12 +65,11 @@ classdef dataClass < dynamicprops
                 % association with the proper heading.
                 % For example, calling the following: dataObj.map('ch1') 
                 % will yield the string 'Time (s)'
-                
-%                 if isempty(fs)
-%                     dataObj.fs = [];
-%                 else
-%                     dataObj.fs = fs;
-%                 end 
+                if isempty(fs)
+                    dataObj.fs = [];
+                else
+                    dataObj.fs = fs;
+                end 
             end
 
         end
