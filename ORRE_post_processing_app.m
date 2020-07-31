@@ -221,17 +221,17 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             app.SelectIndependentVariableTimeListBox_2.Items = app.Wavedata.headers;
             app.SelectDependentVariableListBox_2.Items = app.Wavedata.headers;
             
-
+            headerlength = length(app.Wavedata.headers);
+            columnlength = length(app.Wavedata.ch1);
+           
+            app.FilteredData = zeros(columnlength,headerlength);
         end
         
         function DataOperationButtonPushed(app, event)
             
         end    
 
-            headerlength = length(app.Wavedata.headers);
-            columnlength = length(app.Wavedata.ch1);
-           
-            app.FilteredData = zeros(columnlength,headerlength);
+
             
 %             for freq = 1:(length(app.Wavedata.ch1)-1)
 %                 freq_timesteps(:,freq) = 1/(app.Wavedata.ch1(freq+1)-app.Wavedata.ch1(freq));
