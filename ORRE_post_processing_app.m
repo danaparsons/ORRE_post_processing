@@ -48,18 +48,30 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
         DataOperationPanel                                  matlab.ui.container.Panel
         DataOperationButton                                 matlab.ui.control.Button
         
+        FilterDataTab                                       matlab.ui.container.Tab
+        FilterAxes                                          matlab.ui.control.UIAxes
+        DataFilterPanel                                     matlab.ui.container.Panel
+        DataFilterListBox                                   matlab.ui.control.ListBox
+        SelectDatatoFilterLabel                             matlab.ui.control.Label
+        EnterNumericTimeChannelEditField_2Label             matlab.ui.control.Label
+        TimeFilterEditField                                 matlab.ui.control.NumericEditField
+        FilteringOptionsButtonGroup                         matlab.ui.container.ButtonGroup
+        LowPassButton                                       matlab.ui.control.RadioButton
+        HighPassButton                                      matlab.ui.control.RadioButton
+        NoneButton                                          matlab.ui.control.RadioButton
+        SpecifyPassbandFrequencyEditField                   matlab.ui.control.NumericEditField
+        SpecifyPassbandFrequencyEditFieldLabel              matlab.ui.control.Label
+        OverwriteCheckBox                                   matlab.ui.control.CheckBox
+        FiltFreqPanel                                       matlab.ui.container.Panel
+        PlotFFTButton_Filter                                matlab.ui.control.Button
+        FilterDataTextArea                                  matlab.ui.control.TextArea
+        
         TimeHistoryStatsTab                                 matlab.ui.container.Tab
         UIAxes                                              matlab.ui.control.UIAxes
         UITable2                                            matlab.ui.control.Table
         Panel_2                                             matlab.ui.container.Panel
         SelectDatatoAnalyzeListBox                          matlab.ui.control.ListBox
         CheckBox10                                          matlab.ui.control.CheckBox
-        FilterDataButtonGroup                               matlab.ui.container.ButtonGroup
-        LowPassButton                                       matlab.ui.control.RadioButton
-        HighPassButton                                      matlab.ui.control.RadioButton
-        NoneButton                                          matlab.ui.control.RadioButton
-        SpecifyNormalizedPassbandFrequencyEditField         matlab.ui.control.NumericEditField
-        SpecifyNormalizedPassbandFrequencyEditFieldLabel    matlab.ui.control.Label
         SelectDatatoAnalyzeLabel                            matlab.ui.control.Label
         EnterNumericTimeChannelEditFieldLabel               matlab.ui.control.Label
         EnterNumericTimeChannelEditField                    matlab.ui.control.NumericEditField
@@ -98,7 +110,9 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
         Timevalue    %holds channel to use as time for FFT
         Headers      %headers of wavedata data set
         Combined_Channels
-        Filtered_Channels
+        fs           %for filter data
+        FilteredData
+        filtplot
         SelectedFrequency %holds frequency selection for FFT button
         Timevalue_laplace
         laplacevalue
@@ -193,11 +207,13 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             app.UITable.Data = array2table(combined_data);
             app.TextArea_4.Value = wavedata.tags;
             
+            app.DataFilterListBox.Items = app.Wavedata.headers;
+            
             app.UITable.ColumnName = wavedata.headers;
             app.SelectDatatoAnalyzeListBox.Items = app.Wavedata.headers;
             app.UITable3.Data = wavedata.map_legend;
 
-            app.Filtered_Channels = app.Combined_Channels;
+            %app.Filtered_Channels = app.Combined_Channels;
             app.SelectIndependentVariableTimeListBox.Items = app.Wavedata.headers;
             app.SelectDependentVariableListBox.Items = app.Wavedata.headers;
      
@@ -205,13 +221,28 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             app.SelectIndependentVariableTimeListBox_2.Items = app.Wavedata.headers;
             app.SelectDependentVariableListBox_2.Items = app.Wavedata.headers;
             
+
         end
         
         function DataOperationButtonPushed(app, event)
             
+        end    
+
+            headerlength = length(app.Wavedata.headers);
+            columnlength = length(app.Wavedata.ch1);
+           
+            app.FilteredData = zeros(columnlength,headerlength);
             
+%             for freq = 1:(length(app.Wavedata.ch1)-1)
+%                 freq_timesteps(:,freq) = 1/(app.Wavedata.ch1(freq+1)-app.Wavedata.ch1(freq));
+%             end
+%             app.fs = freq_timesteps;
+
+            %%%% problem, test data set increases time exponentially,
+            %%%% how would we decide fs for this?
+
             
-        end
+        
         
         
 %%%%%%%%%%%%%%%%%%%%%%%%%%% STARTUP FUNCTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -223,26 +254,95 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             app.SelectDatatoAnalyzeListBox.ItemsData = 1:numel(app.SelectDatatoAnalyzeListBox.Items);
             %app.SelectDatatoAnalyzeListBox.Value = [];
             
+            app.OverwriteCheckBox.Enable = 'off';
         end
-        
+%%%%%%%%%%%%%%%%%%%%%%%%%%% FILTER FFT BUTTON %%%%%%%%%%%%%%%%%%%%%%%%%%%%%        
+        function PlotFFTButton_FilterPushed(app, event)
+            %app.SelectIndependentVariableTimeListBox.ItemsData = 1:numel(app.SelectIndependentVariableTimeListBox.Items);           
+            filttimevalue = app.TimeFilterEditField.Value;
+            
+            app.DataFilterListBox.ItemsData = 1:numel(app.DataFilterListBox.Items);           
+            filtdepvalue = app.DataFilterListBox.Value;
+            
+            %app.FFTvalue = depvalue;
+            %app.Timevalue = timevalue;
+            
+%             if app.FrequencyCheckBox.Value == 1
+%                 app.SelectedFrequency = app.DesiredSampleFrequencyEditField.Value;
+%                 %pkg.fun.plt_fft(app.Timevalue,app.FFTvalue,app.Wavedata,app.SelectedFrequency);
+%                 pkg.fun.plt_fft(filttimevalue,filtdepvalue,app.Wavedata,app.SelectedFrequency);
+%             end              
+            app.Wavedata.addprop(strcat('DominantPeriod',(num2str(filtdepvalue))));
+            app.Wavedata.addprop(strcat('FS',(num2str(filtdepvalue))));                
+            %[app.Wavedata.DominantPeriod,app.Wavedata.FS] =  pkg.fun.plt_fft(app.Timevalue,app.FFTvalue,app.Wavedata);
+            %app.Wavedata.DominantPeriod
+            [app.Wavedata.(strcat('DominantPeriod',(num2str(filtdepvalue)))),app.Wavedata.(strcat('FS',(num2str(filtdepvalue))))] =  pkg.fun.plt_fft(filttimevalue,filtdepvalue,app.Wavedata);
+
+        end
+%%%%%%%%%%%%%%%%%%%%%%%%%%% OVERWRITE CHECKBOX %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        function OverwriteCheckBoxValueChanged(app,event)
+            value = app.DataFilterListBox.Value;
+            
+            if app.OverwriteCheckBox.Value
+                %app.filtplot = app.Wavedata.(strcat('ch',(num2str(value))));
+                app.Wavedata.(strcat('ch',(num2str(value)))) = app.FilteredData(:,value);
+            else
+                app.FilteredData(:,value) = app.FilteredData(:,value);
+            end
+
+            %DataFilterListBoxValueChanged(app);
+        end
 %%%%%%%%%%%%%%%%%%%%%%%%%%% FILTER BUTTONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                
-        function FilterButtonGroupSelectionChanged(app, event)
-            fpass = app.SpecifyNormalizedPassbandFrequencyEditField.Value;
+        function FilteringOptionsButtonGroupSelectionChanged(app, event)
+            fpass = app.SpecifyPassbandFrequencyEditField.Value;
+            value = app.DataFilterListBox.Value;
 
             if app.NoneButton.Value == 1
-                app.Filtered_Channels = app.Combined_Channels;
-               % app.TextArea_3.Visible = 'off';
+                app.FilteredData(:,value) = app.Wavedata.(strcat('ch',(num2str(value))));
+                %app.Filtered_Channels = app.Combined_Channels;
+                app.OverwriteCheckBox.Enable = 'off';
+             
             end
             if app.LowPassButton.Value == 1
-                app.Filtered_Channels = lowpass(app.Combined_Channels,fpass,app.fs);
+                app.OverwriteCheckBox.Enable = 'on';
+                %app.Wavedata.(strcat('ch',(num2str(value)))) = lowpass(app.Wavedata.(strcat('ch',(num2str(value)))),fpass,app.Wavedata.(strcat('FS',(num2str(value)))));
+                app.FilteredData(:,value) = lowpass(app.Wavedata.(strcat('ch',(num2str(value)))),fpass,app.Wavedata.(strcat('FS',(num2str(value)))));
+                
+                %fix app.fs
+                %app.Filtered_Channels = lowpass(app.Combined_Channels,fpass,app.fs);
             end
             if app.HighPassButton.Value == 1
-                app.Filtered_Channels = highpass(app.Combined_Channels,fpass,app.fs);
+                app.OverwriteCheckBox.Enable = 'on';
+                %app.Wavedata.(strcat('ch',(num2str(value)))) = lowpass(app.Wavedata.(strcat('ch',(num2str(value)))),fpass,app.Wavedata.(strcat('FS',(num2str(value)))));
+                app.FilteredData(:,value) = highpass(app.Wavedata.(strcat('ch',(num2str(value)))),fpass,app.Wavedata.(strcat('FS',(num2str(value)))));
+%                 if app.OverwriteCheckBox.Value == 1
+%                     app.FilteredData(:,value) = app.Wavedata.(strcat('ch',(num2str(value))));
+%                 end
+               %fix app.fs
+                %app.Filtered_Channels = highpass(app.Combined_Channels,fpass,app.fs);
             end
-            SDtAListBoxValueChanged (app);
+            plot(app.FilterAxes,app.Wavedata.(strcat('ch',(num2str(app.TimeFilterEditField.Value)))),app.FilteredData(:,value));
+       
+%             OverwriteCheckBoxValueChanged(app);
+%             DataFilterListBoxValueChanged(app);
         end
         %create a refresh plot function to update plot when button pushed
-
+        
+%%%%%%%%%%%%%%%%%%%%%%%%%%% FILTER DATA LISTBOX %%%%%%%%%%%%%%%%%%%%%%%%%%         
+        function DataFilterListBoxValueChanged(app, event)
+            app.DataFilterListBox.ItemsData = 1:numel(app.DataFilterListBox.Items);
+            value = app.DataFilterListBox.Value;
+            
+            FilteringOptionsButtonGroupSelectionChanged(app);
+            OverwriteCheckBoxValueChanged(app);
+%             
+%             if app.OverwriteCheckBox.Value
+%                 a = app.Wavedata.(strcat('ch',(num2str(value))));
+%             else
+%                 a = app.FilteredData(:,value);
+%             end
+            %plot(app.FilterAxes,app.Wavedata.(strcat('ch',(num2str(app.TimeFilterEditField.Value)))),app.FilteredData(:,value));
+        end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%% CLEAR BUTTON %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%        
         function CheckBox10ValueChanged(app, event)
             if app.CheckBox10.Value
@@ -258,17 +358,13 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             app.UITable2.Data = [];
             cla(app.UIAxes);
             hold(app.UIAxes);
+            %app.UIAxes.Legend.Visible = 'on';
             app.SelectDatatoAnalyzeListBox.Multiselect = 'on';
             app.SelectDatatoAnalyzeListBox.ItemsData = 1:numel(app.SelectDatatoAnalyzeListBox.Items);
             value = app.SelectDatatoAnalyzeListBox.Value;
-%             number_selections = length(app.SelectDatatoAnalyzeListBox.ItemsData);
-            
-            %this is just for the squared test data sets, change with
-            %normal sets:
-            %app.Filtered_Channels(:,1) = sqrt(app.Combined_Channels(:,1));
-            
+%             number_selections = length(app.SelectDatatoAnalyzeListBox.ItemsData);                        
             %app.Wavedata.(strcat('ch',(num2str(1)))) = sqrt(app.Wavedata.(strcat('ch',(num2str(1)))));
-            %%convert color to string name!
+
             rowname = {};
             value = sort(value);
             for lbvalue = value(1:end)
@@ -279,7 +375,7 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
                 timehistory = plot(app.UIAxes,app.Wavedata.(strcat('ch',(num2str(app.EnterNumericTimeChannelEditField.Value)))),y);
                 hold(app.UIAxes,'off');
                 %analysisrow = [lbvalue,timehistory.Color(1,1),mean(app.Combined_Channels(:,lbvalue)), min(app.Combined_Channels(:,lbvalue)),max(app.Combined_Channels(:,lbvalue)),std(app.Combined_Channels(:,lbvalue))];
-                analysisrow = [lbvalue,timehistory.Color(1,1),mean(y), min(y),max(y),std(y)];               
+                analysisrow = [lbvalue,cell(1),mean(y), min(y),max(y),std(y)];               
                 app.UITable2.Data = [app.UITable2.Data;analysisrow];
    
                 rowname{value==lbvalue} = app.Wavedata.headers{lbvalue};
@@ -552,6 +648,7 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             app.TextArea_4 = uitextarea(app.DataSetInformationPanel);
             app.TextArea_4.Position = [8 7 244 41];
             
+
             % Create DataOperationButton
             app.DataOperationButton = uibutton(app.UploadDataTab, 'push');
             app.DataOperationButton.ButtonPushedFcn = createCallbackFcn(app, @DataOperationButtonPushed, true);
@@ -559,6 +656,109 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             app.DataOperationButton.FontWeight = 'bold';
             app.DataOperationButton.Position = [275 327 86 36];
             app.DataOperationButton.Text = {'Complete Operation'};
+
+            % Create FilterDataTab
+            app.FilterDataTab = uitab(app.TabGroup);
+            app.FilterDataTab.Title = 'Filter Data';
+            app.FilterDataTab.BackgroundColor = [0.651 0.8353 0.9294];
+
+            % Create FilterAxes
+            app.FilterAxes = uiaxes(app.FilterDataTab);
+            title(app.FilterAxes, 'Time History')
+            xlabel(app.FilterAxes, 'Time')
+            ylabel(app.FilterAxes, '') %what should be here
+            app.FilterAxes.XGrid = 'on';
+            app.FilterAxes.YGrid = 'on';
+            app.FilterAxes.Position = [39 9 560 218];
+
+            % Create DataFilterPanel
+            app.DataFilterPanel = uipanel(app.FilterDataTab);
+            app.DataFilterPanel.Position = [9 267 214 166];
+            app.DataFilterPanel.BackgroundColor = [0.8 0.8 0.8];
+
+            % Create DataFilterListBox
+            app.DataFilterListBox = uilistbox(app.DataFilterPanel);
+            %app.DataFilterListBox.Items = {'Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5', ''};
+            app.DataFilterListBox.ValueChangedFcn = createCallbackFcn(app, @DataFilterListBoxValueChanged, true);
+            app.DataFilterListBox.BackgroundColor = [1.00,1.00,1.00];
+            app.DataFilterListBox.Position = [12 6 190 88];
+
+            % Create SelectDatatoFilterLabel
+            app.SelectDatatoFilterLabel = uilabel(app.DataFilterPanel);
+            app.SelectDatatoFilterLabel.FontWeight = 'bold';
+            app.SelectDatatoFilterLabel.Position = [46 139 119 22];
+            app.SelectDatatoFilterLabel.Text = 'Select Data to Filter';
+
+            % Create EnterNumericTimeChannelEditField_2Label
+            app.EnterNumericTimeChannelEditField_2Label = uilabel(app.DataFilterPanel);
+            app.EnterNumericTimeChannelEditField_2Label.HorizontalAlignment = 'center';
+            app.EnterNumericTimeChannelEditField_2Label.Position = [25 105 103 28];
+            app.EnterNumericTimeChannelEditField_2Label.Text = {'Enter Numeric'; 'Time Channel'};
+
+            % Create TimeFilterEditField
+            app.TimeFilterEditField = uieditfield(app.DataFilterPanel, 'numeric');
+            app.TimeFilterEditField.Position = [134 108 54 22];
+            
+            % Create FiltFreqPanel
+            app.FiltFreqPanel = uipanel(app.FilterDataTab);
+            app.FiltFreqPanel.Position = [372 267 246 166];
+            app.FiltFreqPanel.BackgroundColor = [0.8 0.8 0.8];
+            
+             % Create FilteringOptionsButtonGroup
+            app.FilteringOptionsButtonGroup = uibuttongroup(app.FiltFreqPanel);
+            app.FilteringOptionsButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @FilteringOptionsButtonGroupSelectionChanged, true);
+            app.FilteringOptionsButtonGroup.Title = 'Filtering Options';
+            app.FilteringOptionsButtonGroup.BackgroundColor = [1.0 1.0 1.0];
+            app.FilteringOptionsButtonGroup.FontWeight = 'bold';
+            app.FilteringOptionsButtonGroup.Position = [7 40 232 59];
+            
+            % Create NoneButton
+            app.NoneButton = uiradiobutton(app.FilteringOptionsButtonGroup);
+            app.NoneButton.Text = 'None';
+            app.NoneButton.Position = [4 13 51 22];
+            app.NoneButton.Value = true;
+            
+            % Create LowPassButton
+            app.LowPassButton = uiradiobutton(app.FilteringOptionsButtonGroup);
+            app.LowPassButton.Text = 'Low-Pass';
+            app.LowPassButton.Position = [63 13 76 22];
+            
+            % Create HighPassButton
+            app.HighPassButton = uiradiobutton(app.FilteringOptionsButtonGroup);
+            app.HighPassButton.Text = 'High-Pass';
+            app.HighPassButton.Position = [149 13 78 22];
+            
+             % Create SpecifyPassbandFrequencyEditFieldLabel
+            app.SpecifyPassbandFrequencyEditFieldLabel = uilabel(app.FiltFreqPanel);
+            %app.SpecifyPassbandFrequencyEditFieldLabel.BackgroundColor = [0.8 0.8 0.8];
+            app.SpecifyPassbandFrequencyEditFieldLabel.HorizontalAlignment = 'center';
+            app.SpecifyPassbandFrequencyEditFieldLabel.FontWeight = 'bold';
+            app.SpecifyPassbandFrequencyEditFieldLabel.Position = [17 105 134 50];
+            app.SpecifyPassbandFrequencyEditFieldLabel.Text = {'Specify Passband'; 'Frequency'};
+
+            % Create SpecifyPassbandFrequencyEditField
+            app.SpecifyPassbandFrequencyEditField = uieditfield(app.FiltFreqPanel, 'numeric');
+            %app.SpecifyPassbandFrequencyEditField.BackgroundColor = [0.8 0.8 0.8];
+            app.SpecifyPassbandFrequencyEditField.Position = [157 116 69 28];
+            
+            % Create OverwriteCheckBox
+            app.OverwriteCheckBox = uicheckbox(app.FiltFreqPanel);
+            app.OverwriteCheckBox.ValueChangedFcn = createCallbackFcn(app, @OverwriteCheckBoxValueChanged, true);
+            app.OverwriteCheckBox.Text = 'Overwrite Channel with Filtered Data?';
+            app.OverwriteCheckBox.Position = [12 14 227 22];
+
+            % Create PlotFFTButton_Filter
+            app.PlotFFTButton_Filter = uibutton(app.FilterDataTab, 'push');
+            app.PlotFFTButton_Filter.ButtonPushedFcn = createCallbackFcn(app, @PlotFFTButton_FilterPushed, true);
+            app.PlotFFTButton_Filter.Position = [248 283 100 22];
+            app.PlotFFTButton_Filter.BackgroundColor = [1.00,1.00,1.00];
+            app.PlotFFTButton_Filter.Text = 'Plot FFT';
+
+            % Create FilterDataTextArea
+            app.FilterDataTextArea = uitextarea(app.FilterDataTab);
+            app.FilterDataTextArea.Position = [235 316 125 106];
+            app.FilterDataTextArea.Value = {'Use the Fourier Transform to determine the Passband Freqency and enter it into the box below to filter the data.'};
+
             
             % Create TimeHistoryStatsTab
             app.TimeHistoryStatsTab = uitab(app.TabGroup);
@@ -580,7 +780,8 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             app.UITable2.ColumnName = {'Ch';'Color';'Mean'; 'Min'; 'Max'; 'Std Dev'};
             %app.UITable2.ColumnWidth = {1.5};
             %app.UITable2.RowName = {};
-            app.UITable2.Position = [258 306 361 141];
+            app.UITable2.Position = [235 240 393 207];
+            %app.UITable2.BackgroundColor = [0.8 0.8 0.8]; 
             
             % Create Panel_2
             app.Panel_2 = uipanel(app.TimeHistoryStatsTab);
@@ -614,42 +815,6 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             app.CheckBox10.ValueChangedFcn = createCallbackFcn(app, @CheckBox10ValueChanged, true);
             app.CheckBox10.Text = 'CLEAR';
             app.CheckBox10.Position = [7 8 79 22];
-            
-            % Create FilterDataButtonGroup
-            app.FilterDataButtonGroup = uibuttongroup(app.TimeHistoryStatsTab);
-            app.FilterDataButtonGroup.SelectionChangedFcn = createCallbackFcn(app, @FilterButtonGroupSelectionChanged, true);
-            app.FilterDataButtonGroup.Title = 'Filter Data?';
-            app.FilterDataButtonGroup.BackgroundColor = [0.8 0.8 0.8];
-            app.FilterDataButtonGroup.FontWeight = 'bold';
-            app.FilterDataButtonGroup.Position = [235 240 232 51];
-            
-            % Create NoneButton
-            app.NoneButton = uiradiobutton(app.FilterDataButtonGroup);
-            app.NoneButton.Text = 'None';
-            app.NoneButton.Position = [4 5 51 22];
-            
-            % Create LowPassButton
-            app.LowPassButton = uiradiobutton(app.FilterDataButtonGroup);
-            app.LowPassButton.Text = 'Low-Pass';
-            app.LowPassButton.Position = [63 5 76 22];
-            
-            % Create HighPassButton
-            app.HighPassButton = uiradiobutton(app.FilterDataButtonGroup);
-            app.HighPassButton.Text = 'High-Pass';
-            app.HighPassButton.Position = [149 5 78 22];
-            
-             % Create SpecifyNormalizedPassbandFrequencyEditFieldLabel
-            app.SpecifyNormalizedPassbandFrequencyEditFieldLabel = uilabel(app.TimeHistoryStatsTab);
-            app.SpecifyNormalizedPassbandFrequencyEditFieldLabel.BackgroundColor = [0.8 0.8 0.8];
-            app.SpecifyNormalizedPassbandFrequencyEditFieldLabel.HorizontalAlignment = 'center';
-            app.SpecifyNormalizedPassbandFrequencyEditFieldLabel.FontWeight = 'bold';
-            app.SpecifyNormalizedPassbandFrequencyEditFieldLabel.Position = [480 235 78 63];
-            app.SpecifyNormalizedPassbandFrequencyEditFieldLabel.Text = {'Specify '; 'Passband '; 'Frequency'};
-
-            % Create SpecifyNormalizedPassbandFrequencyEditField
-            app.SpecifyNormalizedPassbandFrequencyEditField = uieditfield(app.TimeHistoryStatsTab, 'numeric');
-            app.SpecifyNormalizedPassbandFrequencyEditField.BackgroundColor = [0.8 0.8 0.8];
-            app.SpecifyNormalizedPassbandFrequencyEditField.Position = [565 257 53 22];
             
             % Create FourierTransformTab
             app.FourierTransformTab = uitab(app.TabGroup);
@@ -717,7 +882,7 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             % Create FFTLabel
             app.FourierTransformLabel = uilabel(app.FourierTransformTab);
             app.FourierTransformLabel.HorizontalAlignment = 'center';
-            app.FourierTransformLabel.Position = [258 419 127 26];
+            app.FourierTransformLabel.Position = [263 419 127 26];
             app.FourierTransformLabel.BackgroundColor = [0.8 0.8 0.8];
             app.FourierTransformLabel.FontWeight = 'bold';
             app.FourierTransformLabel.Text = 'Fourier Transform';
