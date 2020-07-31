@@ -45,6 +45,8 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
         CommentStyleDropDown                                matlab.ui.control.DropDown
         DataSetInformationPanel                             matlab.ui.container.Panel
         TextArea_4                                          matlab.ui.control.TextArea
+        DataOperationPanel                                  matlab.ui.container.Panel
+        DataOperationButton                                 matlab.ui.control.Button
         
         TimeHistoryStatsTab                                 matlab.ui.container.Tab
         UIAxes                                              matlab.ui.control.UIAxes
@@ -97,7 +99,6 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
         Headers      %headers of wavedata data set
         Combined_Channels
         Filtered_Channels
-        fs           %for filter data
         SelectedFrequency %holds frequency selection for FFT button
         Timevalue_laplace
         laplacevalue
@@ -178,15 +179,18 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             %%%%%% End Data Settings Drop Down %%%%%%%
 
             app.Wavedata = pkg.fun.read_data(data_dir,filename,datatype,ntaglines,nheaderlines,tagformat,headerformat,dataformat,commentstyle);
-            wavedata = app.Wavedata;
+           
+            %%% this needs to be fixed
+            wavedata = app.Wavedata; 
             app.Headers = wavedata.headers;
+            %%%
             
             for ch = 1:length(wavedata.headers)
                 combined_data(:,ch) = wavedata.(strcat('ch',num2str(ch)));
             end
             app.Combined_Channels = combined_data;
-            app.UITable.Data = array2table(app.Combined_Channels);
-            %app.UITable.Data = array2table(combined_data);
+            %app.UITable.Data = array2table(app.Combined_Channels);
+            app.UITable.Data = array2table(combined_data);
             app.TextArea_4.Value = wavedata.tags;
             
             app.UITable.ColumnName = wavedata.headers;
@@ -196,25 +200,19 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             app.Filtered_Channels = app.Combined_Channels;
             app.SelectIndependentVariableTimeListBox.Items = app.Wavedata.headers;
             app.SelectDependentVariableListBox.Items = app.Wavedata.headers;
-            
-            %%%%%% DELETE %%%%%%
-            app.Wavedata.ch1 = sqrt(app.Wavedata.ch1);
-            
-            %%ch 1 might not always be time
-            app.fs = 1/(app.Wavedata.ch1(2)-app.Wavedata.ch1(1));
-            
+     
+        
             app.SelectIndependentVariableTimeListBox_2.Items = app.Wavedata.headers;
             app.SelectDependentVariableListBox_2.Items = app.Wavedata.headers;
             
-%             for freq = 1:(length(app.Wavedata.ch1)-1)
-%                 freq_timesteps(:,freq) = 1/(app.Wavedata.ch1(freq+1)-app.Wavedata.ch1(freq));
-%             end
-%             app.fs = freq_timesteps;
-
-            %%%% problem, test data set increases time exponentially,
-            %%%% how would we decide fs for this?
+        end
+        
+        function DataOperationButtonPushed(app, event)
+            
+            
             
         end
+        
         
 %%%%%%%%%%%%%%%%%%%%%%%%%%% STARTUP FUNCTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         function startupFcn(app)
@@ -422,7 +420,12 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
 
             % Create UITable
             app.UITable = uitable(app.UploadDataTab);
-            app.UITable.ColumnName = {''; ''; ''; ''; ''; ''; ''; ''; ''};
+            
+            %%% not neccessary
+           % app.UITable.ColumnName = {''; ''; ''; ''; ''; ''; ''; ''; ''}; %{''}*app.Wavedata.
+            %%%
+            
+            app.UITable.ColumnName = {};
             app.UITable.RowName = {};
             app.UITable.Position = [12 9 616 218];
     
@@ -534,9 +537,28 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             app.DataSetInformationPanel.FontWeight = 'bold';
             app.DataSetInformationPanel.Position = [359 380 259 68];
             
+            % Create DataOperationPanel
+            app.DataOperationPanel = uipanel(app.UploadDataTab);
+            app.DataOperationPanel.TitlePosition = 'centertop';
+            app.DataOperationPanel.Title = 'Legend';
+            app.DataOperationPanel.BackgroundColor = [0.8 0.8 0.8];
+            app.DataOperationPanel.FontWeight = 'bold';
+            app.DataOperationPanel.Position = [12 140 200 133];
+            
+          % app.DataSettingsPanel.Position = [12 240 220 208];
+            
+            
             % Create TextArea_4
             app.TextArea_4 = uitextarea(app.DataSetInformationPanel);
             app.TextArea_4.Position = [8 7 244 41];
+            
+            % Create DataOperationButton
+            app.DataOperationButton = uibutton(app.UploadDataTab, 'push');
+            app.DataOperationButton.ButtonPushedFcn = createCallbackFcn(app, @DataOperationButtonPushed, true);
+            app.DataOperationButton.BackgroundColor = [0.8 0.8 0.8];
+            app.DataOperationButton.FontWeight = 'bold';
+            app.DataOperationButton.Position = [275 327 86 36];
+            app.DataOperationButton.Text = {'Complete Operation'};
             
             % Create TimeHistoryStatsTab
             app.TimeHistoryStatsTab = uitab(app.TabGroup);
