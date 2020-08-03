@@ -7,9 +7,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5%%%
 
 close all % close any open figures
-ORRE_post_processing_app()
 
-pkg.app.ORRE_post_processing_app()
+% Execute app:
+pkg.ORRE_post_processing_app
 
 % Define inputs:
 directory = "./testdata/";     % current directory
