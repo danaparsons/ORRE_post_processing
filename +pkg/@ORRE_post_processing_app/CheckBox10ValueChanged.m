@@ -1,8 +1,8 @@
 function CheckBox10ValueChanged(app, event)
-if app.CheckBox10.Value
-    cla(app.UIAxes)
-    app.UITable2.Data = [];
+if app.ClearButton.Value
+    cla(app.TimeHistoryAxes)
+    app.StatsTable.Data = [];
     app.SelectDatatoAnalyzeListBox.Value = [];
-    app.CheckBox10.Value = false;
+    app.ClearButton.Value = false;
 end
 end

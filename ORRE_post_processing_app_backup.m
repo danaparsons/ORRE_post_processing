@@ -11,7 +11,7 @@
 % checkboxes, and tabs.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-classdef ORRE_post_processing_app < matlab.apps.AppBase
+classdef ORRE_post_processing_app_backup < matlab.apps.AppBase
 
     % Properties that correspond to app components
     properties (Access = public)
