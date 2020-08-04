@@ -81,19 +81,18 @@ for ch = 1:length(wavedata.headers)
 end
 app.Combined_Channels = combined_data;
 %app.UITable.Data = array2table(app.Combined_Channels);
-app.UITable.Data = array2table(combined_data);
-app.TextArea_4.Value = wavedata.tags;
+app.UploadDataTable.Data = array2table(combined_data);
+app.TagInformation.Value = wavedata.tags;
 
 app.DataFilterListBox.Items = app.Wavedata.headers;
 
-app.UITable.ColumnName = wavedata.headers;
+app.UploadDataTable.ColumnName = wavedata.headers;
 app.SelectDatatoAnalyzeListBox.Items = app.Wavedata.headers;
-app.UITable3.Data = wavedata.map_legend;
+app.DataLegendTable.Data = wavedata.map_legend;
 
 %app.Filtered_Channels = app.Combined_Channels;
 app.SelectIndependentVariableTimeListBox.Items = app.Wavedata.headers;
 app.SelectDependentVariableListBox.Items = app.Wavedata.headers;
-
 
 app.SelectIndependentVariableTimeListBox_2.Items = app.Wavedata.headers;
 app.SelectDependentVariableListBox_2.Items = app.Wavedata.headers;
@@ -102,5 +101,10 @@ headerlength = length(app.Wavedata.headers);
 columnlength = length(app.Wavedata.ch1);
 
 app.FilteredData = zeros(columnlength,headerlength);
+
+%%%%%% DELETE %%%%%%
+%%%%%% fixes dataset specific time issue %%%%%%
+app.Wavedata.ch1 = sqrt(app.Wavedata.ch1);
+%%%%%% DELETE %%%%%%
 end
 
