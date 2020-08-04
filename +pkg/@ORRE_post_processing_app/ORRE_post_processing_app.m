@@ -21,16 +21,16 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
         WelcomeTab                                          matlab.ui.container.Tab
         TextArea                                            matlab.ui.control.TextArea
         Image                                               matlab.ui.control.Image
-        WelcomeLabel                                        matlab.ui.control.Label
-        ImportantNotesLabel                                 matlab.ui.control.Label
-        UpdatingThisAppLabel                                matlab.ui.control.Label
+%         WelcomeLabel                                        matlab.ui.control.Label
+%         ImportantNotesLabel                                 matlab.ui.control.Label
+%         UpdatingThisAppLabel                                matlab.ui.control.Label
         
         % Upload data tab components
         UploadDataTab                                       matlab.ui.container.Tab
         UploadDataButton                                    matlab.ui.control.Button
-        UITable                                             matlab.ui.control.Table
+        UploadDataTable                                     matlab.ui.control.Table
         LegendPanel                                         matlab.ui.container.Panel
-        UITable3                                            matlab.ui.control.Table
+        DataLegendTable                                     matlab.ui.control.Table
         DataSettingsPanel                                   matlab.ui.container.Panel
         TagLinesDropDownLabel                               matlab.ui.control.Label
         TagLinesDropDown                                    matlab.ui.control.DropDown
@@ -45,7 +45,7 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
         CommentStyleDropDownLabel                           matlab.ui.control.Label
         CommentStyleDropDown                                matlab.ui.control.DropDown
         DataSetInformationPanel                             matlab.ui.container.Panel
-        TextArea_4                                          matlab.ui.control.TextArea
+        TagInformation                                      matlab.ui.control.TextArea
         DataOperationPanel                                  matlab.ui.container.Panel
         DataOperationButton                                 matlab.ui.control.Button
         
@@ -70,19 +70,20 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
         
         % Time history stats tab components
         TimeHistoryStatsTab                                 matlab.ui.container.Tab
-        UIAxes                                              matlab.ui.control.UIAxes
-        UITable2                                            matlab.ui.control.Table
-        Panel_2                                             matlab.ui.container.Panel
+        TimeHistoryAxes                                     matlab.ui.control.UIAxes
+        StatsTable                                          matlab.ui.control.Table
+        SelectDatatoAnalyzePANEL                            matlab.ui.container.Panel
         SelectDatatoAnalyzeListBox                          matlab.ui.control.ListBox
-        CheckBox10                                          matlab.ui.control.CheckBox
+        ClearButton                                         matlab.ui.control.CheckBox
         SelectDatatoAnalyzeLabel                            matlab.ui.control.Label
         EnterNumericTimeChannelEditFieldLabel               matlab.ui.control.Label
         EnterNumericTimeChannelEditField                    matlab.ui.control.NumericEditField
+        FiltFreqTable                                       matlab.ui.control.Table
   
         % Fourier transform tab components
         FourierTransformTab                                 matlab.ui.container.Tab
-        Panel                                               matlab.ui.container.Panel
-        TextArea_2                                          matlab.ui.control.TextArea
+        FFTPanel                                            matlab.ui.container.Panel
+        FFTInfo                                             matlab.ui.control.TextArea
         SelectIndependentVariableTimeLabel                  matlab.ui.control.Label
         SelectIndependentVariableTimeListBox                matlab.ui.control.ListBox
         SelectDependentVariableListBoxLabel                 matlab.ui.control.Label
@@ -95,8 +96,8 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
         
         % Laplace transform tab components
         LaplaceTransformTab                                 matlab.ui.container.Tab
-        Panel_3                                             matlab.ui.container.Panel
-        TextArea_5                                          matlab.ui.control.TextArea
+        LaplacePanel                                            matlab.ui.container.Panel
+        LaplaceInfo                                          matlab.ui.control.TextArea
         SelectIndependentVariableTimeListBox_2Label         matlab.ui.control.Label
         SelectIndependentVariableTimeListBox_2              matlab.ui.control.ListBox
         SelectDependentVariableListBox_2Label               matlab.ui.control.Label
@@ -159,7 +160,7 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
         DataFilterListBoxValueChanged(app, event)
         
         % Clear button    
-        CheckBox10ValueChanged(app, event)
+        ClearButtonValueChanged(app, event)
         
         % SelectDatatoAnalyze listbox
         SDtAListBoxValueChanged (app, event)     
@@ -193,12 +194,12 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             
             % Create UIFigure and hide until all components are created
             app.UIFigure = uifigure('Visible', 'off');
-            app.UIFigure.Position = [100 100 640 480];
+            app.UIFigure.Position = [100 100 777 480];
             app.UIFigure.Name = 'MATLAB App';
 
             % Create TabGroup
             app.TabGroup = uitabgroup(app.UIFigure);
-            app.TabGroup.Position = [1 1 640 480];
+            app.TabGroup.Position = [1 1 777 480];
    
             %% ---------------------- WELCOME TAB ---------------------- %%
             
@@ -209,40 +210,40 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
 
             % Create TextArea
             app.TextArea = uitextarea(app.WelcomeTab);
-            app.TextArea.Position = [12 10 616 437];
-            app.TextArea.Value = {''; ''; ''; ''; 'Start with the "Upload Data" tab to choose a data set from your computer that you''d like to analyze. From there, create tables, plots, and more by interacting with the other tabs.'; 
-            ''; ''; ''; ''; ''; ''; ''; ''; '**instructions here about where to add a new function, tab, etc. as the app evolves over time**'; ''; 'STEPS:'; '1. Create your function and save it in the +fun folder';
+            app.TextArea.Position = [12 16 756 426];
+            app.TextArea.Value = {''; ''; 'Welcome!'; ''; 'Start with the "Upload Data" tab to choose a data set from your computer that you''d like to analyze. From there, create tables, plots, and more by interacting with the other tabs.'; 
+            ''; ''; ''; ''; ''; ''; ''; ''; 'Updating/Adding to the App:'; ''; 'STEPS:'; '1. Create your function and save it in the +fun folder';
             '2. Create a new component (tab, table, buttons, etc.) by first defining it as a property in the ORRE_post_processing_app.m script '; '3. Create actions for these new properties as methods in the first methods section of the ORRE_post_processing_app.m script'; 
-            '4. Initialize the new component in the second methods section in the ORRE_post_processing_app.m script'; ''; ''; ''; ''; ''; ''; '- J. Davis and D. Lukas '};
+            '4. Initialize the new component in the second methods section in the ORRE_post_processing_app.m script'; ''; ''; ''; ''; ''; ''; 'Created by D. Lukas and J. Davis'};
             
              % Create Image
             app.Image = uiimage(app.WelcomeTab);
-            app.Image.Position = [358 342 261 153];
+            app.Image.Position = [500 382 261 58];
             app.Image.ImageSource = 'ORRE.png';
             
-            % Create WelcomeLabel
-            app.WelcomeLabel = uilabel(app.WelcomeTab);
-            app.WelcomeLabel.FontSize = 15;
-            app.WelcomeLabel.FontWeight = 'bold';
-            app.WelcomeLabel.FontColor = [0.0392 0.5216 0.7412];
-            app.WelcomeLabel.Position = [17 407 75 22];
-            app.WelcomeLabel.Text = 'Welcome!';
-            
-             % Create ImportantNotesLabel
-            app.ImportantNotesLabel = uilabel(app.WelcomeTab);
-            app.ImportantNotesLabel.FontSize = 15;
-            app.ImportantNotesLabel.FontWeight = 'bold';
-            app.ImportantNotesLabel.FontColor = [0.0392 0.5216 0.7412];
-            app.ImportantNotesLabel.Position = [16 321 126 22];
-            app.ImportantNotesLabel.Text = 'Important Notes:';
-            
-             % Create UpdatingThisAppLabel
-            app.UpdatingThisAppLabel = uilabel(app.WelcomeTab);
-            app.UpdatingThisAppLabel.FontSize = 15;
-            app.UpdatingThisAppLabel.FontWeight = 'bold';
-            app.UpdatingThisAppLabel.FontColor = [0.0392 0.5216 0.7412];
-            app.UpdatingThisAppLabel.Position = [16 253 142 22];
-            app.UpdatingThisAppLabel.Text = 'Updating This App:';
+%             % Create WelcomeLabel
+%             app.WelcomeLabel = uilabel(app.WelcomeTab);
+%             app.WelcomeLabel.FontSize = 15;
+%             app.WelcomeLabel.FontWeight = 'bold';
+%             app.WelcomeLabel.FontColor = [0.0392 0.5216 0.7412];
+%             app.WelcomeLabel.Position = [17 407 75 22];
+%             app.WelcomeLabel.Text = 'Welcome!';
+%             
+%              % Create ImportantNotesLabel
+%             app.ImportantNotesLabel = uilabel(app.WelcomeTab);
+%             app.ImportantNotesLabel.FontSize = 15;
+%             app.ImportantNotesLabel.FontWeight = 'bold';
+%             app.ImportantNotesLabel.FontColor = [0.0392 0.5216 0.7412];
+%             app.ImportantNotesLabel.Position = [16 321 126 22];
+%             app.ImportantNotesLabel.Text = 'Important Notes:';
+%             
+%              % Create UpdatingThisAppLabel
+%             app.UpdatingThisAppLabel = uilabel(app.WelcomeTab);
+%             app.UpdatingThisAppLabel.FontSize = 15;
+%             app.UpdatingThisAppLabel.FontWeight = 'bold';
+%             app.UpdatingThisAppLabel.FontColor = [0.0392 0.5216 0.7412];
+%             app.UpdatingThisAppLabel.Position = [16 253 142 22];
+%             app.UpdatingThisAppLabel.Text = 'Updating This App:';
             
             %% -------------------- UPLOAD DATA TAB -------------------- %%
        
@@ -256,14 +257,14 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             app.UploadDataButton.ButtonPushedFcn = createCallbackFcn(app, @UploadDataButtonPushed, true);
             app.UploadDataButton.BackgroundColor = [0.8 0.8 0.8];
             app.UploadDataButton.FontWeight = 'bold';
-            app.UploadDataButton.Position = [248 327 86 36];
+            app.UploadDataButton.Position = [406 378 87 40];
             app.UploadDataButton.Text = {'Click to';'Upload Data'};
 
-            % Create UITable
-            app.UITable = uitable(app.UploadDataTab);
-            app.UITable.ColumnName = {};
-            app.UITable.RowName = {};
-            app.UITable.Position = [12 9 616 218];
+            % Create UploadDataTable
+            app.UploadDataTable = uitable(app.UploadDataTab);
+            app.UploadDataTable.ColumnName = {};
+            app.UploadDataTable.RowName = {};
+            app.UploadDataTable.Position = [9 13 757 212];
     
             % Create DataSettingsPanel
             app.DataSettingsPanel = uipanel(app.UploadDataTab);
@@ -271,84 +272,84 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             app.DataSettingsPanel.Title = 'Edit Data Settings';
             app.DataSettingsPanel.BackgroundColor = [0.8 0.8 0.8];
             app.DataSettingsPanel.FontWeight = 'bold';
-            app.DataSettingsPanel.Position = [12 240 220 208];
+            app.DataSettingsPanel.Position = [8 335 382 113];
 
             % Create TagLinesDropDownLabel
             app.TagLinesDropDownLabel = uilabel(app.DataSettingsPanel);
             app.TagLinesDropDownLabel.HorizontalAlignment = 'right';
             app.TagLinesDropDownLabel.FontWeight = 'bold';
-            app.TagLinesDropDownLabel.Position = [4 155 60 22];
+            app.TagLinesDropDownLabel.Position = [10 68 60 22];
             app.TagLinesDropDownLabel.Text = 'Tag Lines';
 
             % Create TagLinesDropDown
             app.TagLinesDropDown = uidropdown(app.DataSettingsPanel);
             app.TagLinesDropDown.Items = {'Default (1)', '2', '3', '4', '5'};
-            app.TagLinesDropDown.Position = [79 155 132 22];
+            app.TagLinesDropDown.Position = [95 68 83 22];
             app.TagLinesDropDown.Value = 'Default (1)';
 
             % Create HeaderLinesDropDownLabel
             app.HeaderLinesDropDownLabel = uilabel(app.DataSettingsPanel);
             app.HeaderLinesDropDownLabel.HorizontalAlignment = 'right';
             app.HeaderLinesDropDownLabel.FontWeight = 'bold';
-            app.HeaderLinesDropDownLabel.Position = [4 126 81 22];
+            app.HeaderLinesDropDownLabel.Position = [191 68 81 22];
             app.HeaderLinesDropDownLabel.Text = 'Header Lines';
 
             % Create HeaderLinesDropDown
             app.HeaderLinesDropDown = uidropdown(app.DataSettingsPanel);
             app.HeaderLinesDropDown.Items = {'Default (1)', '2', '3', '4', '5'};
-            app.HeaderLinesDropDown.Position = [96 126 115 22];
+            app.HeaderLinesDropDown.Position = [289 68 84 22];
             app.HeaderLinesDropDown.Value = 'Default (1)';
 
             % Create TagFormatDropDownLabel
             app.TagFormatDropDownLabel = uilabel(app.DataSettingsPanel);
             app.TagFormatDropDownLabel.HorizontalAlignment = 'right';
             app.TagFormatDropDownLabel.FontWeight = 'bold';
-            app.TagFormatDropDownLabel.Position = [4 94 68 22];
+            app.TagFormatDropDownLabel.Position = [10 40 68 22];
             app.TagFormatDropDownLabel.Text = 'Tag Format';
 
             % Create TagFormatDropDown
             app.TagFormatDropDown = uidropdown(app.DataSettingsPanel);
             app.TagFormatDropDown.Items = {'Default (String)', 'Float', 'Integer'};
-            app.TagFormatDropDown.Position = [89 94 122 22];
+            app.TagFormatDropDown.Position = [95 40 83 22];
             app.TagFormatDropDown.Value = 'Default (String)';
 
             % Create HeaderFormatDropDownLabel
             app.HeaderFormatDropDownLabel = uilabel(app.DataSettingsPanel);
             app.HeaderFormatDropDownLabel.HorizontalAlignment = 'right';
             app.HeaderFormatDropDownLabel.FontWeight = 'bold';
-            app.HeaderFormatDropDownLabel.Position = [4 64 91 22];
+            app.HeaderFormatDropDownLabel.Position = [191 40 91 22];
             app.HeaderFormatDropDownLabel.Text = 'Header Format';
 
             % Create HeaderFormatDropDown
             app.HeaderFormatDropDown = uidropdown(app.DataSettingsPanel);
             app.HeaderFormatDropDown.Items = {'Default (String)', 'Float', 'Integer'};
-            app.HeaderFormatDropDown.Position = [100 64 111 22];
+            app.HeaderFormatDropDown.Position = [289 40 83 22];
             app.HeaderFormatDropDown.Value = 'Default (String)';
 
             % Create DataFormatDropDownLabel
             app.DataFormatDropDownLabel = uilabel(app.DataSettingsPanel);
             app.DataFormatDropDownLabel.HorizontalAlignment = 'right';
             app.DataFormatDropDownLabel.FontWeight = 'bold';
-            app.DataFormatDropDownLabel.Position = [4 36 76 22];
+            app.DataFormatDropDownLabel.Position = [10 11 76 22];
             app.DataFormatDropDownLabel.Text = 'Data Format';
 
             % Create DataFormatDropDown
             app.DataFormatDropDown = uidropdown(app.DataSettingsPanel);
             app.DataFormatDropDown.Items = {'Default (Float)', 'String', 'Integer'};
-            app.DataFormatDropDown.Position = [95 36 116 22];
+            app.DataFormatDropDown.Position = [95 11 83 22];
             app.DataFormatDropDown.Value = 'Default (Float)';
 
             % Create CommentStyleDropDownLabel
             app.CommentStyleDropDownLabel = uilabel(app.DataSettingsPanel);
             app.CommentStyleDropDownLabel.HorizontalAlignment = 'right';
             app.CommentStyleDropDownLabel.FontWeight = 'bold';
-            app.CommentStyleDropDownLabel.Position = [4 7 92 22];
+            app.CommentStyleDropDownLabel.Position = [191 11 92 22];
             app.CommentStyleDropDownLabel.Text = 'Comment Style';
 
             % Create CommentStyleDropDown
             app.CommentStyleDropDown = uidropdown(app.DataSettingsPanel);
             app.CommentStyleDropDown.Items = {'Default (%)', '#'};
-            app.CommentStyleDropDown.Position = [111 7 100 22];
+            app.CommentStyleDropDown.Position = [289 11 84 22];
             app.CommentStyleDropDown.Value = 'Default (%)';
             
             % Create LegendPanel
@@ -357,13 +358,13 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             app.LegendPanel.Title = 'Legend';
             app.LegendPanel.BackgroundColor = [0.8 0.8 0.8];
             app.LegendPanel.FontWeight = 'bold';
-            app.LegendPanel.Position = [358 240 260 133];
+            app.LegendPanel.Position = [507 238 260 133];
             
-            % Create UITable3
-            app.UITable3 = uitable(app.LegendPanel);
-            app.UITable3.ColumnName = {};
-            app.UITable3.RowName = {};
-            app.UITable3.Position = [9 8 244 102];
+            % Create DataLegendTable
+            app.DataLegendTable = uitable(app.LegendPanel);
+            app.DataLegendTable.ColumnName = {};
+            app.DataLegendTable.RowName = {};
+            app.DataLegendTable.Position = [9 8 244 102];
             
             % Create DataSetInformationPanel
             app.DataSetInformationPanel = uipanel(app.UploadDataTab);
@@ -371,7 +372,11 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             app.DataSetInformationPanel.Title = 'Data Set Information';
             app.DataSetInformationPanel.BackgroundColor = [0.8 0.8 0.8];
             app.DataSetInformationPanel.FontWeight = 'bold';
-            app.DataSetInformationPanel.Position = [359 380 259 68];
+            app.DataSetInformationPanel.Position = [508 375 259 73];
+            
+            % Create TagInformation
+            app.TagInformation = uitextarea(app.DataSetInformationPanel);
+            app.TagInformation.Position = [8 7 244 46];
             
 %             % Create DataOperationPanel
 %             app.DataOperationPanel = uipanel(app.UploadDataTab);
@@ -382,11 +387,7 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
 %             app.DataOperationPanel.Position = [12 140 200 133];
 %             
 %             % app.DataSettingsPanel.Position = [12 240 220 208];
-%                   
-%             % Create TextArea_4
-%             app.TextArea_4 = uitextarea(app.DataSetInformationPanel);
-%             app.TextArea_4.Position = [8 7 244 41];
-  
+                    
 %             % Create DataOperationButton
 %             app.DataOperationButton = uibutton(app.UploadDataTab, 'push');
 %             app.DataOperationButton.ButtonPushedFcn = createCallbackFcn(app, @DataOperationButtonPushed, true);
@@ -409,11 +410,11 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             ylabel(app.FilterAxes, '') %what should be here
             app.FilterAxes.XGrid = 'on';
             app.FilterAxes.YGrid = 'on';
-            app.FilterAxes.Position = [39 9 560 218];
+            app.FilterAxes.Position = [8 13 758 274];
 
             % Create DataFilterPanel
             app.DataFilterPanel = uipanel(app.FilterDataTab);
-            app.DataFilterPanel.Position = [9 267 214 166];
+            app.DataFilterPanel.Position = [9 302 303 146];
             app.DataFilterPanel.BackgroundColor = [0.8 0.8 0.8];
 
             % Create DataFilterListBox
@@ -421,27 +422,27 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             %app.DataFilterListBox.Items = {'Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5', ''};
             app.DataFilterListBox.ValueChangedFcn = createCallbackFcn(app, @DataFilterListBoxValueChanged, true);
             app.DataFilterListBox.BackgroundColor = [1.00,1.00,1.00];
-            app.DataFilterListBox.Position = [12 6 190 88];
+            app.DataFilterListBox.Position = [102 12 187 101];
 
             % Create SelectDatatoFilterLabel
             app.SelectDatatoFilterLabel = uilabel(app.DataFilterPanel);
             app.SelectDatatoFilterLabel.FontWeight = 'bold';
-            app.SelectDatatoFilterLabel.Position = [46 139 119 22];
+            app.SelectDatatoFilterLabel.Position = [93 119 119 22];
             app.SelectDatatoFilterLabel.Text = 'Select Data to Filter';
 
             % Create EnterNumericTimeChannelEditField_2Label
             app.EnterNumericTimeChannelEditField_2Label = uilabel(app.DataFilterPanel);
             app.EnterNumericTimeChannelEditField_2Label.HorizontalAlignment = 'center';
-            app.EnterNumericTimeChannelEditField_2Label.Position = [25 105 103 28];
+            app.EnterNumericTimeChannelEditField_2Label.Position = [7 82 82 28];
             app.EnterNumericTimeChannelEditField_2Label.Text = {'Enter Numeric'; 'Time Channel'};
 
             % Create TimeFilterEditField
             app.TimeFilterEditField = uieditfield(app.DataFilterPanel, 'numeric');
-            app.TimeFilterEditField.Position = [134 108 54 22];
+            app.TimeFilterEditField.Position = [13 47 70 22];
             
             % Create FiltFreqPanel
             app.FiltFreqPanel = uipanel(app.FilterDataTab);
-            app.FiltFreqPanel.Position = [372 267 246 166];
+            app.FiltFreqPanel.Position = [480 302 286 146];
             app.FiltFreqPanel.BackgroundColor = [0.8 0.8 0.8];
             
              % Create FilteringOptionsButtonGroup
@@ -450,53 +451,53 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             app.FilteringOptionsButtonGroup.Title = 'Filtering Options';
             app.FilteringOptionsButtonGroup.BackgroundColor = [1.0 1.0 1.0];
             app.FilteringOptionsButtonGroup.FontWeight = 'bold';
-            app.FilteringOptionsButtonGroup.Position = [7 40 232 59];
+            app.FilteringOptionsButtonGroup.Position = [14 27 246 68];
             
             % Create NoneButton
             app.NoneButton = uiradiobutton(app.FilteringOptionsButtonGroup);
             app.NoneButton.Text = 'None';
-            app.NoneButton.Position = [4 13 51 22];
+            app.NoneButton.Position = [8 14 51 22];
             app.NoneButton.Value = true;
             
             % Create LowPassButton
             app.LowPassButton = uiradiobutton(app.FilteringOptionsButtonGroup);
             app.LowPassButton.Text = 'Low-Pass';
-            app.LowPassButton.Position = [63 13 76 22];
+            app.LowPassButton.Position = [76 14 76 22];
             
             % Create HighPassButton
             app.HighPassButton = uiradiobutton(app.FilteringOptionsButtonGroup);
             app.HighPassButton.Text = 'High-Pass';
-            app.HighPassButton.Position = [149 13 78 22];
+            app.HighPassButton.Position = [165 14 78 22];
             
              % Create SpecifyPassbandFrequencyEditFieldLabel
             app.SpecifyPassbandFrequencyEditFieldLabel = uilabel(app.FiltFreqPanel);
             %app.SpecifyPassbandFrequencyEditFieldLabel.BackgroundColor = [0.8 0.8 0.8];
             app.SpecifyPassbandFrequencyEditFieldLabel.HorizontalAlignment = 'center';
             app.SpecifyPassbandFrequencyEditFieldLabel.FontWeight = 'bold';
-            app.SpecifyPassbandFrequencyEditFieldLabel.Position = [17 105 134 50];
+            app.SpecifyPassbandFrequencyEditFieldLabel.Position = [14 106 158 32];
             app.SpecifyPassbandFrequencyEditFieldLabel.Text = {'Specify Passband'; 'Frequency'};
 
             % Create SpecifyPassbandFrequencyEditField
             app.SpecifyPassbandFrequencyEditField = uieditfield(app.FiltFreqPanel, 'numeric');
             %app.SpecifyPassbandFrequencyEditField.BackgroundColor = [0.8 0.8 0.8];
-            app.SpecifyPassbandFrequencyEditField.Position = [157 116 69 28];
+            app.SpecifyPassbandFrequencyEditField.Position = [187 109 73 28];
             
             % Create OverwriteCheckBox
             app.OverwriteCheckBox = uicheckbox(app.FiltFreqPanel);
             app.OverwriteCheckBox.ValueChangedFcn = createCallbackFcn(app, @OverwriteCheckBoxValueChanged, true);
             app.OverwriteCheckBox.Text = 'Overwrite Channel with Filtered Data?';
-            app.OverwriteCheckBox.Position = [12 14 227 22];
+            app.OverwriteCheckBox.Position = [14 4 246 22];
 
             % Create PlotFFTButton_Filter
             app.PlotFFTButton_Filter = uibutton(app.FilterDataTab, 'push');
             app.PlotFFTButton_Filter.ButtonPushedFcn = createCallbackFcn(app, @PlotFFTButton_FilterPushed, true);
-            app.PlotFFTButton_Filter.Position = [248 283 100 22];
+            app.PlotFFTButton_Filter.Position = [343 320 100 22];
             app.PlotFFTButton_Filter.BackgroundColor = [1.00,1.00,1.00];
             app.PlotFFTButton_Filter.Text = 'Plot FFT';
 
             % Create FilterDataTextArea
             app.FilterDataTextArea = uitextarea(app.FilterDataTab);
-            app.FilterDataTextArea.Position = [235 316 125 106];
+            app.FilterDataTextArea.Position = [324 364 146 81];
             app.FilterDataTextArea.Value = {'Use the Fourier Transform to determine the Passband Freqency and enter it into the box below to filter the data.'};
 
             %% ----------------- TIME HISTORY STATS TAB ---------------- %%
@@ -506,56 +507,59 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             app.TimeHistoryStatsTab.Title = 'Time History/Stats';
             app.TimeHistoryStatsTab.BackgroundColor = [0.651 0.8353 0.9294];
 
-            % Create UIAxes
-            app.UIAxes = uiaxes(app.TimeHistoryStatsTab);
-            title(app.UIAxes, 'Time History')
-            xlabel(app.UIAxes, 'Time')
-            ylabel(app.UIAxes, '') %what should be here
-            app.UIAxes.ColorOrder = [0 0.4471 0.7412;0.851 0.3255 0.098;0.9294 0.6941 0.1255;0.4941 0.1843 0.5569;0.4667 0.6745 0.1882;0.302 0.7451 0.9333;0.6353 0.0784 0.1843];
-            app.UIAxes.XGrid = 'on';
-            app.UIAxes.YGrid = 'on';
-            app.UIAxes.Position = [39 9 560 218];           
+            % Create TimeHistoryAxes
+            app.TimeHistoryAxes = uiaxes(app.TimeHistoryStatsTab);
+            title(app.TimeHistoryAxes, 'Time History')
+            xlabel(app.TimeHistoryAxes, 'Time')
+            ylabel(app.TimeHistoryAxes, '') %what should be here
+            app.TimeHistoryAxes.ColorOrder = [0 0.4471 0.7412;0.851 0.3255 0.098;0.9294 0.6941 0.1255;0.4941 0.1843 0.5569;0.4667 0.6745 0.1882;0.302 0.7451 0.9333;0.6353 0.0784 0.1843];
+            app.TimeHistoryAxes.XGrid = 'on';
+            app.TimeHistoryAxes.YGrid = 'on';
+            app.TimeHistoryAxes.Position = [12 13 754 220];           
 
-            % Create UITable2
-            app.UITable2 = uitable(app.TimeHistoryStatsTab);
-            app.UITable2.ColumnName = {'Ch';'Color';'Mean'; 'Min'; 'Max'; 'Std Dev'};
-            %app.UITable2.ColumnWidth = {1.5};
-            %app.UITable2.RowName = {};
-            app.UITable2.Position = [235 240 393 207];
-            %app.UITable2.BackgroundColor = [0.8 0.8 0.8]; 
+            % Create StatsTable
+            app.StatsTable = uitable(app.TimeHistoryStatsTab);
+            app.StatsTable.ColumnName = {'Ch';'Color';'Mean'; 'Min'; 'Max'; 'Std Dev'};
+            app.StatsTable.Position = [235 240 336 207]; 
             
-            % Create Panel_2
-            app.Panel_2 = uipanel(app.TimeHistoryStatsTab);
-            app.Panel_2.Position = [9 240 214 208];
-            app.Panel_2.BackgroundColor = [0.8 0.8 0.8];           
+            % Create FiltFreqTable
+            app.FiltFreqTable = uitable(app.TimeHistoryStatsTab);
+            app.FiltFreqTable.ColumnName = {'Channel'; 'Passband Frequency'};
+            app.FiltFreqTable.RowName = {};
+            app.FiltFreqTable.Position = [583 240 183 207];
+            
+            % Create SelectDatatoAnalyzePANEL
+            app.SelectDatatoAnalyzePANEL = uipanel(app.TimeHistoryStatsTab);
+            app.SelectDatatoAnalyzePANEL.Position = [9 240 214 208];
+            app.SelectDatatoAnalyzePANEL.BackgroundColor = [0.8 0.8 0.8];           
 
             % Create SelectDatatoAnalyzeListBox
-            app.SelectDatatoAnalyzeListBox = uilistbox(app.Panel_2);
+            app.SelectDatatoAnalyzeListBox = uilistbox(app.SelectDatatoAnalyzePANEL);
             app.SelectDatatoAnalyzeListBox.Multiselect = 'on';
             app.SelectDatatoAnalyzeListBox.ValueChangedFcn = createCallbackFcn(app, @SDtAListBoxValueChanged, true);
             app.SelectDatatoAnalyzeListBox.Position = [7 37 190 99];
 
             % Create SelectDatatoAnalyzeLabel
-            app.SelectDatatoAnalyzeLabel = uilabel(app.Panel_2);
+            app.SelectDatatoAnalyzeLabel = uilabel(app.SelectDatatoAnalyzePANEL);
             app.SelectDatatoAnalyzeLabel.FontWeight = 'bold';
             app.SelectDatatoAnalyzeLabel.Position = [46 181 134 22];
             app.SelectDatatoAnalyzeLabel.Text = 'Select Data to Analyze';
             
             % Create EnterNumericTimeChannelEditFieldLabel
-            app.EnterNumericTimeChannelEditFieldLabel = uilabel(app.Panel_2);
+            app.EnterNumericTimeChannelEditFieldLabel = uilabel(app.SelectDatatoAnalyzePANEL);
             app.EnterNumericTimeChannelEditFieldLabel.HorizontalAlignment = 'center';
             app.EnterNumericTimeChannelEditFieldLabel.Position = [25 147 103 28];
             app.EnterNumericTimeChannelEditFieldLabel.Text = {'Enter Numeric'; 'Time Channel'};
 
             % Create EnterNumericTimeChannelEditField
-            app.EnterNumericTimeChannelEditField = uieditfield(app.Panel_2, 'numeric');
+            app.EnterNumericTimeChannelEditField = uieditfield(app.SelectDatatoAnalyzePANEL, 'numeric');
             app.EnterNumericTimeChannelEditField.Position = [134 150 54 22];
             
-            % Create CheckBox10
-            app.CheckBox10 = uicheckbox(app.Panel_2);
-            app.CheckBox10.ValueChangedFcn = createCallbackFcn(app, @CheckBox10ValueChanged, true);
-            app.CheckBox10.Text = 'CLEAR';
-            app.CheckBox10.Position = [7 8 79 22];
+            % Create ClearButton  
+            app.ClearButton= uicheckbox(app.SelectDatatoAnalyzePANEL);
+            app.ClearButton.ValueChangedFcn = createCallbackFcn(app, @CheckBox10ValueChangedValueChanged, true);
+            app.ClearButton.Text = 'CLEAR';
+            app.ClearButton.Position = [7 8 79 22];
             
             %% ----------------- FOURIER TRANSFORM TAB ----------------- %%
             
@@ -564,39 +568,39 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             app.FourierTransformTab.Title = 'Fourier Transform';
             app.FourierTransformTab.BackgroundColor = [0.651 0.8353 0.9294];
             
-            % Create Panel
-            app.Panel = uipanel(app.FourierTransformTab);
-            app.Panel.Position = [160 226 333 189];
-            app.Panel.BackgroundColor = [0.8 0.8 0.8];
-            app.Panel.FontWeight = 'bold';
+            % Create FFTPanel
+            app.FFTPanel = uipanel(app.FourierTransformTab);
+            app.FFTPanel.Position = [186 220 409 189];
+            app.FFTPanel.BackgroundColor = [0.8 0.8 0.8];
+            app.FFTPanel.FontWeight = 'bold';
             
             % Create SelectIndependentVariableTimeLabel
-            app.SelectIndependentVariableTimeLabel = uilabel(app.Panel);
+            app.SelectIndependentVariableTimeLabel = uilabel(app.FFTPanel);
             app.SelectIndependentVariableTimeLabel.HorizontalAlignment = 'center';
-            app.SelectIndependentVariableTimeLabel.Position = [25 88 113 28];
+            app.SelectIndependentVariableTimeLabel.Position = [44 88 113 28];
             app.SelectIndependentVariableTimeLabel.Text = {'Select Independent '; 'Variable (Time)'};
 
             % Create SelectIndependentVariableTimeListBox
-            app.SelectIndependentVariableTimeListBox = uilistbox(app.Panel);
-            app.SelectIndependentVariableTimeListBox.Position = [11 12 141 74];
+            app.SelectIndependentVariableTimeListBox = uilistbox(app.FFTPanel);
+            app.SelectIndependentVariableTimeListBox.Position = [13 12 172 74];
             app.SelectIndependentVariableTimeListBox.ValueChangedFcn = createCallbackFcn(app, @SIVTListBoxValueChanged, true);
 
             % Create SelectDependentVariableListBoxLabel
-            app.SelectDependentVariableListBoxLabel = uilabel(app.Panel);
+            app.SelectDependentVariableListBoxLabel = uilabel(app.FFTPanel);
             app.SelectDependentVariableListBoxLabel.HorizontalAlignment = 'center';
-            app.SelectDependentVariableListBoxLabel.Position = [198 88 102 28];
+            app.SelectDependentVariableListBoxLabel.Position = [258 88 102 28];
             app.SelectDependentVariableListBoxLabel.Text = {'Select Dependent'; 'Variable'};
 
             % Create SelectDependentVariableListBox
-            app.SelectDependentVariableListBox = uilistbox(app.Panel);
-            app.SelectDependentVariableListBox.Position = [176 12 145 74];
+            app.SelectDependentVariableListBox = uilistbox(app.FFTPanel);
+            app.SelectDependentVariableListBox.Position = [220 12 172 74];
             app.SelectDependentVariableListBox.ValueChangedFcn = createCallbackFcn(app, @SDVListBoxValueChanged, true);
             
-            % Create TextArea_2
-            app.TextArea_2 = uitextarea(app.Panel);
-            app.TextArea_2.HorizontalAlignment = 'center';
-            app.TextArea_2.Position = [56 130 221 48];
-            app.TextArea_2.Value = {'Choose channel values from the boxes below to compute Fourier Transform.'};
+            % Create FFTInfo
+            app.FFTInfo = uitextarea(app.FFTPanel);
+            app.FFTInfo.HorizontalAlignment = 'center';
+            app.FFTInfo.Position = [95 133 221 38];
+            app.FFTInfo.Value = {'Choose channel values from the boxes below to compute Fourier Transform.'};
             
             % Create OptionalSpecificationsPanel
             app.OptionalSpecificationsPanel = uipanel(app.FourierTransformTab);
@@ -604,7 +608,7 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             app.OptionalSpecificationsPanel.BackgroundColor = [0.8 0.8 0.8];
             app.OptionalSpecificationsPanel.FontWeight = 'bold';
             app.OptionalSpecificationsPanel.Title = 'Optional Specifications';
-            app.OptionalSpecificationsPanel.Position = [197 65 260 143];
+            app.OptionalSpecificationsPanel.Position = [260 65 260 143];
             
            % Create FrequencyCheckBox
             app.FrequencyCheckBox = uicheckbox(app.OptionalSpecificationsPanel);
@@ -619,13 +623,13 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             % Create FFTButton
             app.FFTButton = uibutton(app.FourierTransformTab, 'push');
             app.FFTButton.ButtonPushedFcn = createCallbackFcn(app, @FFTButtonPushed, true);
-            app.FFTButton.Position = [277 23 100 22];
+            app.FFTButton.Position = [339 21 100 22];
             app.FFTButton.Text = 'Plot FFT';
             
             % Create FFTLabel
             app.FourierTransformLabel = uilabel(app.FourierTransformTab);
             app.FourierTransformLabel.HorizontalAlignment = 'center';
-            app.FourierTransformLabel.Position = [263 419 127 26];
+            app.FourierTransformLabel.Position = [330 421 127 26];
             app.FourierTransformLabel.BackgroundColor = [0.8 0.8 0.8];
             app.FourierTransformLabel.FontWeight = 'bold';
             app.FourierTransformLabel.Text = 'Fourier Transform';
@@ -637,47 +641,47 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             app.LaplaceTransformTab.Title = 'Laplace Transform';
             app.LaplaceTransformTab.BackgroundColor = [0.651 0.8353 0.9294];
             
-             % Create Panel_3
-            app.Panel_3 = uipanel(app.LaplaceTransformTab);
-            app.Panel_3.Position = [160 226 333 189];
-            app.Panel_3.BackgroundColor = [0.8 0.8 0.8];
+             % Create LaplacePanel
+            app.LaplacePanel = uipanel(app.LaplaceTransformTab);
+            app.LaplacePanel.Position = [179 243 421 189];
+            app.LaplacePanel.BackgroundColor = [0.8 0.8 0.8];
 
-            % Create TextArea_5
-            app.TextArea_5 = uitextarea(app.Panel_3);
-            app.TextArea_5.Position = [56 130 221 48];
-            app.TextArea_5.Value = {'Choose channel values from the boxes below to compute Laplace Transform.'};
+            % Create LaplaceInfo
+            app.LaplaceInfo = uitextarea(app.LaplacePanel);
+            app.LaplaceInfo.Position = [101 138 221 40];
+            app.LaplaceInfo.Value = {'Choose channel values from the boxes below to compute Laplace Transform.'};
 
             % Create SelectIndependentVariableTimeListBox_2Label
-            app.SelectIndependentVariableTimeListBox_2Label = uilabel(app.Panel_3);
+            app.SelectIndependentVariableTimeListBox_2Label = uilabel(app.LaplacePanel);
             app.SelectIndependentVariableTimeListBox_2Label.HorizontalAlignment = 'center';
-            app.SelectIndependentVariableTimeListBox_2Label.Position = [25 88 113 28];
+            app.SelectIndependentVariableTimeListBox_2Label.Position = [43 88 113 28];
             app.SelectIndependentVariableTimeListBox_2Label.Text = {'Select Independent '; 'Variable (Time)'};
 
             % Create SelectIndependentVariableTimeListBox_2
-            app.SelectIndependentVariableTimeListBox_2 = uilistbox(app.Panel_3);
-            app.SelectIndependentVariableTimeListBox_2.Position = [11 12 141 74];
+            app.SelectIndependentVariableTimeListBox_2 = uilistbox(app.LaplacePanel);
+            app.SelectIndependentVariableTimeListBox_2.Position = [11 12 178 74];
 
             % Create SelectDependentVariableListBox_2Label
-            app.SelectDependentVariableListBox_2Label = uilabel(app.Panel_3);
+            app.SelectDependentVariableListBox_2Label = uilabel(app.LaplacePanel);
             app.SelectDependentVariableListBox_2Label.HorizontalAlignment = 'center';
-            app.SelectDependentVariableListBox_2Label.Position = [198 88 102 28];
+            app.SelectDependentVariableListBox_2Label.Position = [268 91 102 28];
             app.SelectDependentVariableListBox_2Label.Text = {'Select Dependent'; 'Variable'};
 
             % Create SelectDependentVariableListBox_2
-            app.SelectDependentVariableListBox_2 = uilistbox(app.Panel_3);
-            app.SelectDependentVariableListBox_2.Position = [176 12 145 74];
+            app.SelectDependentVariableListBox_2 = uilistbox(app.LaplacePanel);
+            app.SelectDependentVariableListBox_2.Position = [233 15 172 74];
 
             % Create PlotLaplaceTransformButton
             app.PlotLaplaceTransformButton = uibutton(app.LaplaceTransformTab, 'push');
             app.PlotLaplaceTransformButton.ButtonPushedFcn = createCallbackFcn(app, @PlotLaplaceTransformButtonPushed, true);
-            app.PlotLaplaceTransformButton.Position = [277 172 100 36];
+            app.PlotLaplaceTransformButton.Position = [339 83 100 36];
             app.PlotLaplaceTransformButton.BackgroundColor = [0.8 0.8 0.8];
             app.PlotLaplaceTransformButton.Text = {'Plot Laplace'; 'Transform'};
             
             % Create LaplaceTransformLabel
             app.LaplaceTransformLabel = uilabel(app.LaplaceTransformTab);
             app.LaplaceTransformLabel.HorizontalAlignment = 'center';
-            app.LaplaceTransformLabel.Position = [258 419 127 26];
+            app.LaplaceTransformLabel.Position = [325 421 127 26];
             app.LaplaceTransformLabel.BackgroundColor = [0.8 0.8 0.8];
             app.LaplaceTransformLabel.FontWeight = 'bold';
             app.LaplaceTransformLabel.Text = 'Laplace Transform';
@@ -1229,4 +1233,5 @@ end
 % %             for w = 1:number_selections
 % %                 plot(app.UIAxes,app.filtered_one,w);
 % %             end
+
 
