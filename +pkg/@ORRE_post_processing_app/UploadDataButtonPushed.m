@@ -86,6 +86,8 @@ app.TagInformation.Value = wavedata.tags;
 
 app.DataFilterListBox.Items = app.Wavedata.headers;
 
+app.SelectChannelDropDown.Items = app.Wavedata.headers;
+
 app.UploadDataTable.ColumnName = wavedata.headers;
 app.SelectDatatoAnalyzeListBox.Items = app.Wavedata.headers;
 app.DataLegendTable.Data = wavedata.map_legend;
@@ -105,9 +107,5 @@ columnlength = length(app.Wavedata.ch1);
 
 app.FilteredData = zeros(columnlength,headerlength);
 
-%%%%%% DELETE %%%%%%
-%%%%%% fixes dataset specific time issue %%%%%%
-app.Wavedata.ch1 = sqrt(app.Wavedata.ch1);
-%%%%%% DELETE %%%%%%
 end
 
