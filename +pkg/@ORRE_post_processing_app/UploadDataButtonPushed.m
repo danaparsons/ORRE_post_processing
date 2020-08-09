@@ -86,7 +86,7 @@ app.TagInformation.Value = wavedata.tags;
 
 app.DataFilterListBox.Items = app.Wavedata.headers;
 
-app.SelectChannelDropDown.Items = app.Wavedata.headers;
+app.DataOperationChannelDropDown.Items = app.Wavedata.headers;
 
 app.UploadDataTable.ColumnName = wavedata.headers;
 app.SelectDatatoAnalyzeListBox.Items = app.Wavedata.headers;
