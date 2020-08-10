@@ -1,16 +1,25 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Header %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% ------------------------------ Header ------------------------------- %%
 % Filename:     ORRE_post_processing.m
 % Description:  ORRE Post Processing Program input file (test)
 % Authors:      D. Lukas and J. Davis
 % Created on:   6-10-20
-% Last updated: 6-17-20 by J. Davis
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5%%%
+% Last updated: 8-9-20 by J. Davis
+%% --------------------------- Settings -------------------------------- %%
 
 close all % close any open figures
 
 % Execute app:
-pkg.ORRE_post_processing_app
 
+run_app = 0;
+show_examples = 0;
+
+if run_app == 1
+    pkg.ORRE_post_processing_app
+end
+
+
+%% ----------------------------- Examples ------------------------------ %%
+if show_examples == 1
 % Define inputs:
 directory = "./testdata/";     % current directory
 filename = "90_deg_reg_run1.txt";
@@ -32,7 +41,6 @@ data = pkg.fun.read_data(directory,filename,datatype);
 % required. The remaining inputs are optional and pertain only to the
 % user-defined data class (datatype 1)
 
-
 %%% Example of calling a function
 
 % test of call method 1: direct input of data arrays
@@ -44,7 +52,6 @@ dominant_period = pkg.fun.plt_fft(1,3,data);
 % test of bad calls:
 dominant_period = pkg.fun.plt_fft(10,2,data); % returns error for nonexistent channel
 dominant_period = pkg.fun.plt_fft(1.1,2,data); % returns error for non-int channel indicator
-
 
 
 %%% Plotting example with use of data.map feature:
@@ -68,58 +75,28 @@ plot(data.(strcat('ch',n)),data.(strcat('ch',m)))
 xlabel(data.map(strcat('ch',n)))
 ylabel(data.map(strcat('ch',m)))
 
+end
 
-run('+app/ORRE_post_processing_app.m');
+%% ----------------------------- Scripting ----------------------------- %%
 
-
-
-
-
-
-
-
-
-
-
-
-
-%%% deleted stuff saved for later:
-
-
-% Define data directory (here I have added a \testdata folder with an OSWEC 
-% file for testing purposes):
-% main_dir = ".";     % current directory
-% sub_dir = "/testdata";
-% filename = "090Deg_U_WaveID_Reg 1__20180413_105125_.txt";
-% data_dir = strcat(main_dir,sub_dir);
-% 
-% % Provide some input on the type of data:
-% datatype = 1;
-   
-% channeltypes = {'t','wp','wp','wp','wp','wp','strpot','strpot','lc'};
-% tagtypes = {'flap_orientation','date','type','run'};
-% tagformat = "%s%s%s%d";
+% Define inputs:
+directory = "C:\Users\jacob\Documents\ORRE_Offline\NREL TCF\OSWEC\W2 Testing\From Mike\WEC testing\Labview DATA\Damping\";     % current directory
+filename = "9Decay Test  0Deg_U_WaveID_Freq=0.5Hz Amp=0m ang=0rad__20180412_113132_.txt";
+datatype = 1;
+     % 1 - user-defined (dataClass)
+  
+% Call the <read_data.m> function to create an instance of the appropriate
+% data class:   
+data = pkg.fun.read_data(directory,filename,datatype);
 
 
 
-% fs = 128;
-% f = 2; % hz
-% tf = 2*f^-1;
-% n = fs*tf;
-% t = linspace(0,tf-fs^-1,n);
-% x = sin(2*pi*f*t);
-% 
-% signal = pkg.obj.signalClass(t,x); % test constructor without period T
-% % signal = pkg.obj.signalClass(t,x,f^-1) % with T 
-% 
-% plot(signal.t,signal.x,...
-%     signal.t,signal.x,'o'); hold on
-% plot(signal.t+tf,signal.x,...
-%     signal.t+tf,signal.x,'o')
-% 
-% signal.T = pkg.fun.plt_fft(signal.t,signal.x); % test without providing fs
-% 
-% 
-% signal
-% 
-% % signal.T = pkg.fun.plt_fft(signal.t,signal.x,fs) % with fs
+
+Ts = 0.020000; % s
+
+
+
+
+
+
+
