@@ -10,7 +10,7 @@ close all % close any open figures
 
 % Execute app:
 
-run_app = 0;
+run_app = 1;
 show_examples = 0;
 
 if run_app == 1
@@ -78,22 +78,20 @@ ylabel(data.map(strcat('ch',m)))
 end
 
 %% ----------------------------- Scripting ----------------------------- %%
-
-% Define inputs:
-directory = "C:\Users\jacob\Documents\ORRE_Offline\NREL TCF\OSWEC\W2 Testing\From Mike\WEC testing\Labview DATA\Damping\";     % current directory
-filename = "9Decay Test  0Deg_U_WaveID_Freq=0.5Hz Amp=0m ang=0rad__20180412_113132_.txt";
-datatype = 1;
-     % 1 - user-defined (dataClass)
-  
-% Call the <read_data.m> function to create an instance of the appropriate
-% data class:   
-data = pkg.fun.read_data(directory,filename,datatype);
-
-
-
-
-Ts = 0.020000; % s
-
+if run_app ~= 1;
+    % Define inputs:
+    directory = "C:\Users\jacob\Documents\ORRE_Offline\NREL TCF\OSWEC\W2 Testing\From Mike\WEC testing\Labview DATA\Damping\";     % current directory
+    filename = "9Decay Test  0Deg_U_WaveID_Freq=0.5Hz Amp=0m ang=0rad__20180412_113132_.txt";
+    datatype = 1;
+    % 1 - user-defined (dataClass)
+    
+    % Call the <read_data.m> function to create an instance of the appropriate
+    % data class:
+    data = pkg.fun.read_data(directory,filename,datatype);
+   
+    
+    Ts = 0.020000; % s
+end
 
 
 
