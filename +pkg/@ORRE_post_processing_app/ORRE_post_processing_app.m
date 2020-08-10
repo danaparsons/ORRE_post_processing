@@ -1293,7 +1293,7 @@ end
 %                 app.UITable2.Data = unique(row,'rows');
 %             end
 %             %%% needs to be fixed, 9 channels hard coded instead of %%%%%%
-%             %%% selecting all channels                              %%%%%%
+%             %%% selecting all channels                              %%%%%%%
 %             
 % %             for w = 1:number_selections
 % %                 plot(app.UIAxes,app.filtered_one,w);
