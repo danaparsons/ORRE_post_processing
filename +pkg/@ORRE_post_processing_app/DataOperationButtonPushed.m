@@ -1,8 +1,6 @@
 function DataOperationButtonPushed(app, event)
 
-
 operation_input = app.DataOperationField.Value;
-
 
 if contains(operation_input,'@(x)') == 1
     input_fun = str2func(operation_input);

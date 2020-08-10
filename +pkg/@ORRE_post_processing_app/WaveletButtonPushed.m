@@ -1,4 +1,10 @@
 function WaveletButtonPushed(app, event)
+
+if license('test','Wavelet Toolbox') == 0
+    error(['Wavelet Toolbox is not installed. To use this feature please '...
+        'navigate to Home > Add-Ons > Get Add-Ons > Install Wavelet Toolbox.'])
+end
+
 app.WaveletSelectIndependentVariableTimeListBox.ItemsData = 1:numel(app.WaveletSelectIndependentVariableTimeListBox.Items);
 wavelettimevalue = app.WaveletSelectIndependentVariableTimeListBox.Value;
 
