@@ -21,9 +21,9 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
         WelcomeTab                                          matlab.ui.container.Tab
         TextArea                                            matlab.ui.control.TextArea
         Image                                               matlab.ui.control.Image
-%         WelcomeLabel                                        matlab.ui.control.Label
-%         ImportantNotesLabel                                 matlab.ui.control.Label
-%         UpdatingThisAppLabel                                matlab.ui.control.Label
+        WelcomeLabel                                        matlab.ui.control.Label
+        ImportantNotesLabel                                 matlab.ui.control.Label
+        UpdatingThisAppLabel                                matlab.ui.control.Label
         
         % Upload data tab components
         UploadDataTab                                       matlab.ui.container.Tab
@@ -47,7 +47,11 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
         DataSetInformationPanel                             matlab.ui.container.Panel
         TagInformation                                      matlab.ui.control.TextArea
         DataOperationPanel                                  matlab.ui.container.Panel
+        DataOperationFieldLabel                             matlab.ui.control.Label
+        DataOperationField                                  matlab.ui.control.EditField
         DataOperationButton                                 matlab.ui.control.Button
+        DataOperationChannelDropDownLabel                   matlab.ui.control.Label
+        DataOperationChannelDropDown                        matlab.ui.control.DropDown
         
         % Fliter data tab components
         FilterDataTab                                       matlab.ui.container.Tab
@@ -154,6 +158,8 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
        
         % Data operation button
 %         DataOperationButtonPushed(app, event)
+
+        PerformDataOperationButtonPushed(app, event)
     
         %% ---------------------- FILTER DATA TAB ----------------------- %%
         
@@ -395,23 +401,44 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             app.TagInformation = uitextarea(app.DataSetInformationPanel);
             app.TagInformation.Position = [8 7 244 46];
             
-%             % Create DataOperationPanel
-%             app.DataOperationPanel = uipanel(app.UploadDataTab);
-%             app.DataOperationPanel.TitlePosition = 'centertop';
-%             app.DataOperationPanel.Title = 'Legend';
-%             app.DataOperationPanel.BackgroundColor = [0.8 0.8 0.8];
-%             app.DataOperationPanel.FontWeight = 'bold';
-%             app.DataOperationPanel.Position = [12 140 200 133];
-%             
-%             % app.DataSettingsPanel.Position = [12 240 220 208];
-                    
-%             % Create DataOperationButton
-%             app.DataOperationButton = uibutton(app.UploadDataTab, 'push');
-%             app.DataOperationButton.ButtonPushedFcn = createCallbackFcn(app, @DataOperationButtonPushed, true);
-%             app.DataOperationButton.BackgroundColor = [0.8 0.8 0.8];
-%             app.DataOperationButton.FontWeight = 'bold';
-%             app.DataOperationButton.Position = [275 327 86 36];
-%             app.DataOperationButton.Text = {'Complete Operation'};
+            % Create DataOperationPanel
+            app.DataOperationPanel = uipanel(app.UploadDataTab);
+            app.DataOperationPanel.TitlePosition = 'centertop';
+            app.DataOperationPanel.Title = 'Perform Element-Wise Data Operation';
+            app.DataOperationPanel.BackgroundColor = [0.8 0.8 0.8];
+            app.DataOperationPanel.FontWeight = 'bold';
+            app.DataOperationPanel.Position = [9 238 381 88];
+
+            % Create DataOperationFieldLabel
+            app.DataOperationFieldLabel = uilabel(app.DataOperationPanel);
+            app.DataOperationFieldLabel.HorizontalAlignment = 'right';
+            app.DataOperationFieldLabel.FontWeight = 'bold';
+            app.DataOperationFieldLabel.Position = [3 11 96 22];
+            app.DataOperationFieldLabel.Text = 'f(x) =';
+
+            % Create DataOperationField
+            app.DataOperationField = uieditfield(app.DataOperationPanel, 'text');
+            app.DataOperationField.Position = [114 11 147 22];
+
+            % Create PerformButton
+            app.DataOperationButton = uibutton(app.DataOperationPanel, 'push');
+            app.DataOperationButton.ButtonPushedFcn = createCallbackFcn(app, @DataOperationButtonPushed, true);
+            app.DataOperationButton.Position = [270 11 100 22];
+            app.DataOperationButton.Text = 'Perform';
+
+            % Create DataOperationChannelDropDownLabel
+            app.DataOperationChannelDropDownLabel = uilabel(app.DataOperationPanel);
+            app.DataOperationChannelDropDownLabel.HorizontalAlignment = 'right';
+            app.DataOperationChannelDropDownLabel.FontWeight = 'bold';
+            app.DataOperationChannelDropDownLabel.Position = [3 41 92 22];
+            app.DataOperationChannelDropDownLabel.Text = 'Select Channel';
+
+            % Create DataOperationSelectChannelDropDown
+            app.DataOperationChannelDropDown = uidropdown(app.DataOperationPanel);
+            app.DataOperationChannelDropDown.Position = [114 41 147 22];
+            app.DataOperationChannelDropDown.Items = {};
+            app.DataOperationChannelDropDown.Items = {'(Upload Data Required)'};
+            
 
             %% -------------------- FILTER DATA TAB -------------------- %%
 
