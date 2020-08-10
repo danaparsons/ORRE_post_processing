@@ -94,6 +94,17 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
         FFTButton                                           matlab.ui.control.Button
         FourierTransformLabel                               matlab.ui.control.Label
         
+        % Wavelet transform tab components
+        WaveletTransformTab                                 matlab.ui.container.Tab
+        WaveletTransformLabel                               matlab.ui.control.Label
+        WaveletPanel                                        matlab.ui.container.Panel
+        WaveletText                                         matlab.ui.control.TextArea
+        WaveletSelectIndependentVariableTimeListBoxLabel    matlab.ui.control.Label
+        WaveletSelectIndependentVariableTimeListBox         matlab.ui.control.ListBox
+        WaveletSelectDependentVariableListBoxLabel          matlab.ui.control.Label
+        WaveletSelectDependentVariableListBox               matlab.ui.control.ListBox
+        PlotWaveletTransformButton                          matlab.ui.control.Button
+        
         % Laplace transform tab components
         LaplaceTransformTab                                 matlab.ui.container.Tab
         LaplacePanel                                            matlab.ui.container.Panel
@@ -104,9 +115,6 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
         SelectDependentVariableListBox_2                    matlab.ui.control.ListBox
         PlotLaplaceTransformButton                          matlab.ui.control.Button
         LaplaceTransformLabel                               matlab.ui.control.Label
-        
-        % Wavelet transform tab components
-        WaveletTransformTab                                 matlab.ui.container.Tab
         
         % Create report tab components
         CreateReportTab                                     matlab.ui.container.Tab
@@ -126,6 +134,9 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
         SelectedFrequency %holds frequency selection for FFT button
         Timevalue_laplace
         laplacevalue
+        
+        Waveletvalue
+        WaveletTimevalue
     end
 
 %-------------------------------------------------------------------------%
@@ -143,8 +154,9 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
        
         % Data operation button
 %         DataOperationButtonPushed(app, event)
-        
+    
         %% ---------------------- FILTER DATA TAB ----------------------- %%
+        
 
         % Filter FFT button       
         PlotFFTButton_FilterPushed(app, event)
@@ -162,9 +174,11 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
         % Clear button    
         ClearButtonValueChanged(app, event)
         
+        %% --------------------- TIME HISTORY TAB ---------------------- %%
+        
         % SelectDatatoAnalyze listbox
         SDtAListBoxValueChanged (app, event)     
-
+        
         %% ------------------- FOURIER TRANSFORM TAB ------------------- %%
 
         % FFT Frequency Input 
@@ -182,13 +196,13 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
         %% ------------------- LAPLACE TRANSFORM TAB ------------------- %%
 
         % Laplace transform button
-        PlotLaplaceTransformButtonPushed(app, event)       
+        PlotLaplaceTransformButtonPushed(app, event)    
         
     end 
 
 %-------------------------------------------------------------------------%
     
-    methods (Access = private)      %  COMPONENT INTIALIZATION METHODS 
+    methods (Access = private)      %  COMPONENT INITIALIZATION METHODS 
         function createComponents(app)
             %% ------------------ GENERAL NAV AND UI ------------------- %%
             
@@ -211,10 +225,12 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             % Create TextArea
             app.TextArea = uitextarea(app.WelcomeTab);
             app.TextArea.Position = [12 16 756 426];
-            app.TextArea.Value = {''; ''; 'Welcome!'; ''; 'Start with the "Upload Data" tab to choose a data set from your computer that you''d like to analyze. From there, create tables, plots, and more by interacting with the other tabs.'; 
-            ''; ''; ''; ''; ''; ''; ''; ''; 'Updating/Adding to the App:'; ''; 'STEPS:'; '1. Create your function and save it in the +fun folder';
-            '2. Create a new component (tab, table, buttons, etc.) by first defining it as a property in the ORRE_post_processing_app.m script '; '3. Create actions for these new properties as methods in the first methods section of the ORRE_post_processing_app.m script'; 
-            '4. Initialize the new component in the second methods section in the ORRE_post_processing_app.m script'; ''; ''; ''; ''; ''; ''; 'Created by D. Lukas and J. Davis'};
+            app.TextArea.Value = {''; ''; 'Welcome!'; ''; 'Start with the Upload Data Tab to choose a data set from your computer that you''d like to analyze. From there, create tables, plots, and more by interacting with the other tabs.'; 
+            ''; 'Please refer to the ORRE Laboratory Post Processing MatLab Application Documentation for questions and instructions about how to update this app'; ''; ''; ''; ''; ''; ''; 'Important Notes:'; 
+            'To use the multiselect feature in the Time History/ Stats Tab, hold down the command button as you select options on a mac, and the crtl button on a PC'; ''; 
+            'When filtering data, select one channel at a time and determine the passband freqency by first plotting the FFT. After specifying the frequency, select a filtering option, and play around with it until you are happy with the result. Then check the "Overwrite Channel with Filtered Data?" box. You will see this channel and your chosen frequency listed in the table on the Time History/Stats tab. Once ready to move onto the next channel, click the new channel from the listbox.';
+            ''; ''; ''; ''; ''; ''; ''; ''; ''; 'Created by D. Lukas and J. Davis'};
+            app.TextArea.FontSize = 12;
             
              % Create Image
             app.Image = uiimage(app.WelcomeTab);
@@ -265,6 +281,7 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             app.UploadDataTable.ColumnName = {};
             app.UploadDataTable.RowName = {};
             app.UploadDataTable.Position = [9 13 757 212];
+            app.UploadDataTable.ColumnEditable = [true];
     
             % Create DataSettingsPanel
             app.DataSettingsPanel = uipanel(app.UploadDataTab);
@@ -418,8 +435,7 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             app.DataFilterPanel.BackgroundColor = [0.8 0.8 0.8];
 
             % Create DataFilterListBox
-            app.DataFilterListBox = uilistbox(app.DataFilterPanel);
-            %app.DataFilterListBox.Items = {'Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5', ''};
+            app.DataFilterListBox = uilistbox(app.DataFilterPanel); 
             app.DataFilterListBox.ValueChangedFcn = createCallbackFcn(app, @DataFilterListBoxValueChanged, true);
             app.DataFilterListBox.BackgroundColor = [1.00,1.00,1.00];
             app.DataFilterListBox.Position = [102 12 187 101];
@@ -520,17 +536,19 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             % Create StatsTable
             app.StatsTable = uitable(app.TimeHistoryStatsTab);
             app.StatsTable.ColumnName = {'Ch';'Color';'Mean'; 'Min'; 'Max'; 'Std Dev'};
-            app.StatsTable.Position = [235 240 336 207]; 
+            app.StatsTable.ColumnWidth = {30, 50,'auto','auto','auto','auto'};
+            app.StatsTable.Position = [227 238 360 207]; 
             
             % Create FiltFreqTable
             app.FiltFreqTable = uitable(app.TimeHistoryStatsTab);
-            app.FiltFreqTable.ColumnName = {'Channel'; 'Passband Frequency'};
+            app.FiltFreqTable.ColumnName = {'Ch'; 'Passband Frequency'};
             app.FiltFreqTable.RowName = {};
-            app.FiltFreqTable.Position = [583 240 183 207];
+            app.FiltFreqTable.ColumnWidth = {40, 'auto'};
+            app.FiltFreqTable.Position = [593 238 175 207];
             
             % Create SelectDatatoAnalyzePANEL
             app.SelectDatatoAnalyzePANEL = uipanel(app.TimeHistoryStatsTab);
-            app.SelectDatatoAnalyzePANEL.Position = [9 240 214 208];
+            app.SelectDatatoAnalyzePANEL.Position = [7 237 214 208];
             app.SelectDatatoAnalyzePANEL.BackgroundColor = [0.8 0.8 0.8];           
 
             % Create SelectDatatoAnalyzeListBox
@@ -570,70 +588,124 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             
             % Create FFTPanel
             app.FFTPanel = uipanel(app.FourierTransformTab);
-            app.FFTPanel.Position = [186 220 409 189];
+            app.FFTPanel.Position = [186 13 409 432];
             app.FFTPanel.BackgroundColor = [0.8 0.8 0.8];
             app.FFTPanel.FontWeight = 'bold';
             
             % Create SelectIndependentVariableTimeLabel
             app.SelectIndependentVariableTimeLabel = uilabel(app.FFTPanel);
             app.SelectIndependentVariableTimeLabel.HorizontalAlignment = 'center';
-            app.SelectIndependentVariableTimeLabel.Position = [44 88 113 28];
+            app.SelectIndependentVariableTimeLabel.Position = [41 301 113 28];
             app.SelectIndependentVariableTimeLabel.Text = {'Select Independent '; 'Variable (Time)'};
 
             % Create SelectIndependentVariableTimeListBox
             app.SelectIndependentVariableTimeListBox = uilistbox(app.FFTPanel);
-            app.SelectIndependentVariableTimeListBox.Position = [13 12 172 74];
+            app.SelectIndependentVariableTimeListBox.Position = [13 225 169 74];
             app.SelectIndependentVariableTimeListBox.ValueChangedFcn = createCallbackFcn(app, @SIVTListBoxValueChanged, true);
 
             % Create SelectDependentVariableListBoxLabel
             app.SelectDependentVariableListBoxLabel = uilabel(app.FFTPanel);
             app.SelectDependentVariableListBoxLabel.HorizontalAlignment = 'center';
-            app.SelectDependentVariableListBoxLabel.Position = [258 88 102 28];
+            app.SelectDependentVariableListBoxLabel.Position = [258 301 102 28];
             app.SelectDependentVariableListBoxLabel.Text = {'Select Dependent'; 'Variable'};
 
             % Create SelectDependentVariableListBox
             app.SelectDependentVariableListBox = uilistbox(app.FFTPanel);
-            app.SelectDependentVariableListBox.Position = [220 12 172 74];
+            app.SelectDependentVariableListBox.Position = [220 225 172 74];
             app.SelectDependentVariableListBox.ValueChangedFcn = createCallbackFcn(app, @SDVListBoxValueChanged, true);
             
             % Create FFTInfo
             app.FFTInfo = uitextarea(app.FFTPanel);
             app.FFTInfo.HorizontalAlignment = 'center';
-            app.FFTInfo.Position = [95 133 221 38];
+            app.FFTInfo.Position = [95 343 221 38];
             app.FFTInfo.Value = {'Choose channel values from the boxes below to compute Fourier Transform.'};
             
             % Create OptionalSpecificationsPanel
-            app.OptionalSpecificationsPanel = uipanel(app.FourierTransformTab);
+            app.OptionalSpecificationsPanel = uipanel(app.FFTPanel);
             app.OptionalSpecificationsPanel.TitlePosition = 'centertop';
             app.OptionalSpecificationsPanel.BackgroundColor = [0.8 0.8 0.8];
             app.OptionalSpecificationsPanel.FontWeight = 'bold';
             app.OptionalSpecificationsPanel.Title = 'Optional Specifications';
-            app.OptionalSpecificationsPanel.Position = [260 65 260 143];
+            app.OptionalSpecificationsPanel.Position = [78 73 260 122];
             
            % Create FrequencyCheckBox
             app.FrequencyCheckBox = uicheckbox(app.OptionalSpecificationsPanel);
             app.FrequencyCheckBox.ValueChangedFcn = createCallbackFcn(app, @FrequencyCheckBoxValueChanged, true);
             app.FrequencyCheckBox.Text = {'Input Sample'; 'Frequency?'};
-            app.FrequencyCheckBox.Position = [7 87 93 28];
+            app.FrequencyCheckBox.Position = [7 66 93 28];
 
             % Create DesiredSampleFrequencyEditField
             app.DesiredSampleFrequencyEditField = uieditfield(app.OptionalSpecificationsPanel, 'numeric');
-            app.DesiredSampleFrequencyEditField.Position = [146 87 100 22];
+            app.DesiredSampleFrequencyEditField.Position = [146 66 100 22];
              
             % Create FFTButton
-            app.FFTButton = uibutton(app.FourierTransformTab, 'push');
+            app.FFTButton = uibutton(app.FFTPanel, 'push');
             app.FFTButton.ButtonPushedFcn = createCallbackFcn(app, @FFTButtonPushed, true);
-            app.FFTButton.Position = [339 21 100 22];
+            app.FFTButton.Position = [140 17 142 22];
+            %app.FFTButton.BackgroundColor = [0.8 0.8 0.8];
+            app.FFTButton.FontWeight = 'bold';
             app.FFTButton.Text = 'Plot FFT';
             
             % Create FFTLabel
-            app.FourierTransformLabel = uilabel(app.FourierTransformTab);
+            app.FourierTransformLabel = uilabel(app.FFTPanel);
             app.FourierTransformLabel.HorizontalAlignment = 'center';
-            app.FourierTransformLabel.Position = [330 421 127 26];
-            app.FourierTransformLabel.BackgroundColor = [0.8 0.8 0.8];
+            app.FourierTransformLabel.Position = [145 395 127 26];
+            %app.FourierTransformLabel.BackgroundColor = [0.8 0.8 0.8];
             app.FourierTransformLabel.FontWeight = 'bold';
             app.FourierTransformLabel.Text = 'Fourier Transform';
-          
+
+            %% ----------------- WAVELET TRANSFORM TAB ----------------- %%
+            
+             % Create WaveletTransformTab
+            app.WaveletTransformTab = uitab(app.TabGroup);
+            app.WaveletTransformTab.Title = 'Wavelet Transform';
+            app.WaveletTransformTab.BackgroundColor = [0.651 0.8353 0.9294];
+
+            % Create WaveletPanel
+            app.WaveletPanel = uipanel(app.WaveletTransformTab);
+            app.WaveletPanel.Position = [186 13 409 432];
+            app.WaveletPanel.BackgroundColor = [0.8 0.8 0.8];
+            
+             % Create WaveletTransformLabel
+            app.WaveletTransformLabel = uilabel(app.WaveletPanel);
+            app.WaveletTransformLabel.HorizontalAlignment = 'center';
+            app.WaveletTransformLabel.Position = [145 395 127 26];
+            %app.WaveletTransformLabel.BackgroundColor = [0.8 0.8 0.8];
+            app.WaveletTransformLabel.FontWeight = 'bold';
+            app.WaveletTransformLabel.Text = 'Wavelet Transform';
+
+            % Create WaveletText
+            app.WaveletText = uitextarea(app.WaveletPanel);
+            app.WaveletText.Position = [95 343 221 38];
+
+            % Create WaveletSelectIndependentVariableTimeListBoxLabel
+            app.WaveletSelectIndependentVariableTimeListBoxLabel = uilabel(app.WaveletPanel);
+            app.WaveletSelectIndependentVariableTimeListBoxLabel.HorizontalAlignment = 'center';
+            app.WaveletSelectIndependentVariableTimeListBoxLabel.Position = [41 301 113 28];
+            app.WaveletSelectIndependentVariableTimeListBoxLabel.Text = {'Select Independent '; 'Variable (Time)'};
+
+            % Create WaveletSelectIndependentVariableTimeListBox
+            app.WaveletSelectIndependentVariableTimeListBox = uilistbox(app.WaveletPanel);
+            app.WaveletSelectIndependentVariableTimeListBox.Position = [13 225 169 74];
+
+            % Create WaveletSelectDependentVariableListBoxLabel
+            app.WaveletSelectDependentVariableListBoxLabel = uilabel(app.WaveletPanel);
+            app.WaveletSelectDependentVariableListBoxLabel.HorizontalAlignment = 'center';
+            app.WaveletSelectDependentVariableListBoxLabel.Position = [258 301 102 28];
+            app.WaveletSelectDependentVariableListBoxLabel.Text = {'Select Dependent'; 'Variable'};
+
+            % Create WaveletSelectDependentVariableListBox
+            app.WaveletSelectDependentVariableListBox = uilistbox(app.WaveletPanel);
+            app.WaveletSelectDependentVariableListBox.Position = [220 225 172 74];
+
+            % Create PlotWaveletTransformButton
+            app.PlotWaveletTransformButton = uibutton(app.WaveletPanel, 'push');
+            app.PlotWaveletTransformButton.ButtonPushedFcn = createCallbackFcn(app, @WaveletButtonPushed, true);
+            app.PlotWaveletTransformButton.Position = [140 17 142 22];
+            %app.PlotWaveletTransformButton.BackgroundColor = [0.8,0.8,0.8];
+            app.PlotWaveletTransformButton.FontWeight = 'bold';
+            app.PlotWaveletTransformButton.Text = 'Plot Wavelet Transform';
+
             %% ----------------- LAPLACE TRANSFORM TAB ----------------- %%
             
             % Create LaplaceTransformTab
@@ -685,14 +757,7 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             app.LaplaceTransformLabel.BackgroundColor = [0.8 0.8 0.8];
             app.LaplaceTransformLabel.FontWeight = 'bold';
             app.LaplaceTransformLabel.Text = 'Laplace Transform';
-            
-            %% ----------------- WAVELET TRANSFORM TAB ----------------- %%
-            
-             % Create WaveletTransformTab
-            app.WaveletTransformTab = uitab(app.TabGroup);
-            app.WaveletTransformTab.Title = 'Wavelet Transform';
-            app.WaveletTransformTab.BackgroundColor = [0.651 0.8353 0.9294];
-
+                       
             %% -------------- CREATE REPORT TRANSFORM TAB -------------- %%
             
             % Create CreateReportTab
@@ -1228,7 +1293,7 @@ end
 %                 app.UITable2.Data = unique(row,'rows');
 %             end
 %             %%% needs to be fixed, 9 channels hard coded instead of %%%%%%
-%             %%% selecting all channels                              %%%%%%
+%             %%% selecting all channels                              %%%%%%%
 %             
 % %             for w = 1:number_selections
 % %                 plot(app.UIAxes,app.filtered_one,w);
