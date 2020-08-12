@@ -102,6 +102,9 @@ app.SelectDependentVariableListBox_2.Items = app.Wavedata.headers;
 app.WaveletSelectIndependentVariableTimeListBox.Items = app.Wavedata.headers;
 app.WaveletSelectDependentVariableListBox.Items = app.Wavedata.headers;
 
+app.FilterTimeDropDown.Items = app.Wavedata.headers;
+app.TimeHistTimeDropDown.Items = app.Wavedata.headers;
+
 headerlength = length(app.Wavedata.headers);
 columnlength = length(app.Wavedata.ch1);
 
