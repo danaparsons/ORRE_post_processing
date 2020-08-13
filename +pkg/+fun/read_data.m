@@ -1,27 +1,33 @@
-function [data_obj] = read_data(directory,filename,datatype,varargin)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Header %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% ------------------------------ Header ------------------------------- %%
 % Filename:     read_data.m    
 % Description:  ORRE Post Processing Program function to read data and 
 %               create an instance of the appropriate data class.
 % Authors:      D. Lukas and J. Davis
 % Created on:   6-10-20
-% Last updated: 6-17-20 by J. Davis
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Notes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% The function <read_data.m> is designed to take a variable number of input 
-% arguments. The complete call options are as follows:
+% Last updated: 8-12-20 by J. Davis
+% Notes: The function <read_data.m> is designed to take a variable number 
+% of input arguments. The complete call options are as follows:
 %
 % data = pkg.fun.read_data(data_dir,filename,datatype,ntaglines,
-%        nheaderlines,tagformat,headerformat,dataformat,commentstyle)
+%    nheaderlines,tagformat,headerformat,dataformat,delimiter,commentstyle)
 % 
 % Only the first three inputs (data_dir,filename, and datatype) are
 % required. The remaining inputs are optional and pertain only to the
 % user-defined data class (datatype 1)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Input Parsing
-% Since this function can take a variable number of inputs (varargin), it
-% is best practice to parse the inputs and define whether they are required
-% or optional. This process also assigns any default values for the optional
-% inputs (if neccessary). See the following to learn more:
+%
+% IMPORTANT: To skip an input, use '~' in place of the input position. This
+% will set the input to its default value:
+% 
+% data = pkg.fun.read_data(data_dir,filename,datatype,ntaglines,
+%    nheaderlines,'~','~','~',delimiter,'~')
+%
+%% ----------------------------- Function ------------------------------ %%
+function [data_obj] = read_data(directory,filename,datatype,varargin)
+%% -------------------------- Input Parsing ---------------------------- %%
+% Note on input parsing: Since this function can take a variable number of 
+% inputs (varargin), it is best practice to parse the inputs and define 
+% whether they are required or optional. This process also assigns any default 
+% values for the optional inputs (if neccessary). See the following to learn more:
 % https://www.mathworks.com/company/newsletters/articles/tips-and-tricks-writing-matlab-functions-with-flexible-calling-syntax.html
 % https://www.mathworks.com/help/matlab/ref/inputparser.html
 
@@ -31,12 +37,24 @@ if nargin < 3
 end
    
 % Define default values for optional input arguments:
-default_ntaglines = 1;
-default_nheaderlines = 1;
-default_tagformat = '%s';
-default_headerformat = '%s';
-default_dataformat = '%f';
+default_ntaglines =      1; 
+default_nheaderlines =   1;
+default_tagformat =   '%s'; 
+default_headerformat ='%s'; 
+default_dataformat =  '%f'; 
+default_delimiter =    ',';
 default_commentstyle = '%';
+
+% Handle defaulting of inputs using '~'
+if ~isempty(varargin)
+    if varargin{1} == '~'; varargin{1} = default_ntaglines;     end
+    if varargin{2} == '~'; varargin{2} = default_nheaderlines;  end
+    if varargin{3} == '~'; varargin{3} = default_tagformat;     end
+    if varargin{4} == '~'; varargin{4} = default_headerformat;  end
+    if varargin{5} == '~'; varargin{5} = default_dataformat;    end
+    if varargin{6} == '~'; varargin{6} = default_delimiter;     end
+    if varargin{7} == '~'; varargin{7} = default_commentstyle;  end
+end
 
 % Create input parser object
 p = inputParser;
@@ -56,6 +74,7 @@ addOptional(p,'nheaderlines',default_nheaderlines,@isnumeric);
 addOptional(p,'tagformat',default_tagformat,@ischar);
 addOptional(p,'headerformat',default_headerformat,@ischar);
 addOptional(p,'dataformat',default_dataformat,@ischar);
+addOptional(p,'delimiter',default_delimiter,@ischar);
 addOptional(p,'commentstyle',default_commentstyle,@ischar);
 
 % Parse the inputs:
@@ -70,10 +89,10 @@ nheaderlines = p.Results.nheaderlines;
 tagformat = p.Results.tagformat;
 headerformat = p.Results.headerformat;
 dataformat = p.Results.dataformat;
+delimiter = p.Results.delimiter;
 commentstyle = p.Results.commentstyle;
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Begin reading data
+%% ------------------------ Begin reading data ------------------------- %%
 
 % Concatenate file location from provided directory and filename; assign a 
 % fileID for later use in textscan function:
@@ -87,13 +106,15 @@ if datatype == 1 % generic channel-based dataClass
     % Read tags, headers, and data from file using textscan:
     tags = textscan(fileID,tagformat,ntaglines,'delimiter','\n','CommentStyle',commentstyle);
     headers = textscan(fileID,headerformat,nheaderlines,'delimiter','\n','CommentStyle',commentstyle);
-    headers = transpose(split(headers{1},','));
-    data = textscan(fileID,repmat(dataformat,1,length(headers)),'Delimiter',',','CommentStyle',commentstyle);
+    headers = transpose(split(headers{1},delimiter));
+    data = textscan(fileID,repmat(dataformat,1,length(headers)),'Delimiter',delimiter,'CommentStyle',commentstyle);
 
    % Create dataClass object: 
-    data_obj = pkg.obj.dataClass(tags{1},headers,data);
+    data_obj = pkg.obj.dataClass(filename,tags{1},headers,data);
     
-    fprintf(['\n','A new instance of dataClass was created with ',num2str(data_obj.map.Count),' channels.\n'])
+    fprintf(['\n','A new instance of dataClass was created with ',num2str(data_obj.map.Count),...
+             ' channels from the file:\n\n']); fprintf('    ');
+    disp(filename); fprintf('\n')
     fprintf(['The following tags are associated with the data:\n\n'])
     disp(data_obj.tags)
     fprintf('The channels are mapped to the data headers as follows:\n\n')
@@ -107,9 +128,8 @@ fclose(fileID);
 
 end
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% deleted stuff saved for later:
-%
+%% ------------------------------ Deleted ------------------------------ %%
+
 % Define default values for optional input arguments:
 % default_channeltypes = [];
 % default_tagtypes = [];

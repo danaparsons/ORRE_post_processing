@@ -8,35 +8,51 @@ datatype = 1;
 
 %%%%%% Data Settings Drop Down %%%%%%%
 %%%%%% Tag Lines %%%%%%%
-if(strcmp(app.TagLinesDropDown.Value,'Default (1)'))
-    %ntaglines = pkg.fun.read_data.default_ntaglines;
-    ntaglines = 1;
-elseif(strcmp(app.TagLinesDropDown.Value,'2'))
-    ntaglines = 2;
-elseif(strcmp(app.TagLinesDropDown.Value,'3'))
-    ntaglines = 3;
-elseif(strcmp(app.TagLinesDropDown.Value,'4'))
-    ntaglines = 4;
-elseif(strcmp(app.TagLinesDropDown.Value,'5'))
-    ntaglines = 5;
+
+if app.TagLinesSpinner.Value >= 0
+    ntaglines = app.TagLinesSpinner.Value;
+else
+    error('The number of tag line rows cannot be a negative value.')  
 end
 
+%     
+% if(strcmp(app.TagLinesDropDown.Value,'Default (1)'))
+%     %ntaglines = pkg.fun.read_data.default_ntaglines;
+%     ntaglines = 1;
+% elseif(strcmp(app.TagLinesDropDown.Value,'2'))
+%     ntaglines = 2;
+% elseif(strcmp(app.TagLinesDropDown.Value,'3'))
+%     ntaglines = 3;
+% elseif(strcmp(app.TagLinesDropDown.Value,'4'))
+%     ntaglines = 4;
+% elseif(strcmp(app.TagLinesDropDown.Value,'5'))
+%     ntaglines = 5;
+% end
+
 %%%%%% Header Lines %%%%%%%
-if(strcmp(app.HeaderLinesDropDown.Value,'Default (1)'))
-    nheaderlines = 1;
-elseif(strcmp(app.HeaderLinesDropDown.Value,'2'))
-    nheaderlines = 2;
-elseif(strcmp(app.HeaderLinesDropDown.Value,'3'))
-    nheaderlines = 3;
-elseif(strcmp(app.HeaderLinesDropDown.Value,'4'))
-    nheaderlines = 4;
-elseif(strcmp(app.HeaderLinesDropDown.Value,'5'))
-    nheaderlines = 5;
+
+if app.HeaderLinesSpinner.Value >= 0
+    nheaderlines = app.HeaderLinesSpinner.Value;
+else
+    error('The number of header line rows cannot be a negative value.')  
 end
+
+% 
+% if(strcmp(app.HeaderLinesDropDown.Value,'Default (1)'))
+%     nheaderlines = 1;
+% elseif(strcmp(app.HeaderLinesDropDown.Value,'2'))
+%     nheaderlines = 2;
+% elseif(strcmp(app.HeaderLinesDropDown.Value,'3'))
+%     nheaderlines = 3;
+% elseif(strcmp(app.HeaderLinesDropDown.Value,'4'))
+%     nheaderlines = 4;
+% elseif(strcmp(app.HeaderLinesDropDown.Value,'5'))
+%     nheaderlines = 5;
+% end
 
 %%%%% Tag Format %%%%%%%
 if(strcmp(app.TagFormatDropDown.Value,'Default (String)'))
-    tagformat = '%s';
+    tagformat = '~'; % (accept default value defined in read_data.m)
 elseif(strcmp(app.TagFormatDropDown.Value,'Float'))
     tagformat = '%f';
 elseif(strcmp(app.TagFormatDropDown.Value,'Integer'))
@@ -45,7 +61,7 @@ end
 
 %%%%% Header Format %%%%%%%
 if(strcmp(app.HeaderFormatDropDown.Value,'Default (String)'))
-    headerformat = '%s';
+    headerformat = '~'; % (accept default value defined in read_data.m)
 elseif(strcmp(app.HeaderFormatDropDown.Value,'Float'))
     headerformat = '%f';
 elseif(strcmp(app.HeaderFormatDropDown.Value,'Integer'))
@@ -54,22 +70,36 @@ end
 
 %%%%% Data Format %%%%%%%
 if(strcmp(app.DataFormatDropDown.Value,'Default (Float)'))
-    dataformat = '%f';
+    dataformat = '~'; % (accept default value defined in read_data.m)
 elseif(strcmp(app.DataFormatDropDown.Value,'String'))
     dataformat = '%s';
 elseif(strcmp(app.DataFormatDropDown.Value,'Integer'))
     dataformat = '%int64';
 end
 
+% %%%%% Delmiiter %%%%%%%
+if isempty(app.DelimiterEditField.Value)
+ 	delimiter = '~'; % (accept default value defined in read_data.m)
+else
+    delimiter = app.DelimiterEditField.Value;
+end
+
+% if(strcmp(app.CommentStyleDropDown.Value,'Default (%)'))
+%     delimiter = '%';
+% elseif(strcmp(app.CommentStyleDropDown.Value,'#'))
+%     commentstyle = '#';
+% end
+
 %%%%% Comment Style %%%%%%%
 if(strcmp(app.CommentStyleDropDown.Value,'Default (%)'))
-    commentstyle = '%';
+    commentstyle = '~'; % (accept default value defined in read_data.m)
 elseif(strcmp(app.CommentStyleDropDown.Value,'#'))
     commentstyle = '#';
 end
 %%%%%% End Data Settings Drop Down %%%%%%%
 
-app.Wavedata = pkg.fun.read_data(data_dir,filename,datatype,ntaglines,nheaderlines,tagformat,headerformat,dataformat,commentstyle);
+app.Wavedata = pkg.fun.read_data(data_dir,filename,datatype,ntaglines,...
+    nheaderlines,tagformat,headerformat,dataformat,delimiter,commentstyle);
 
 %%% this needs to be fixed
 wavedata = app.Wavedata;

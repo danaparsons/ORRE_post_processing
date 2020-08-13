@@ -34,16 +34,22 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
         DataSettingsPanel                                   matlab.ui.container.Panel
         TagLinesDropDownLabel                               matlab.ui.control.Label
         TagLinesDropDown                                    matlab.ui.control.DropDown
-        HeaderLinesDropDownLabel                            matlab.ui.control.Label
-        HeaderLinesDropDown                                 matlab.ui.control.DropDown
-        TagFormatDropDownLabel                              matlab.ui.control.Label
-        TagFormatDropDown                                   matlab.ui.control.DropDown
+            HeaderLinesDropDownLabel                            matlab.ui.control.Label
+            HeaderLinesDropDown                                 matlab.ui.control.DropDown
+        HeaderLinesSpinnerLabel                             matlab.ui.control.Label
+        HeaderLinesSpinner                                  matlab.ui.control.Spinner
+            TagFormatDropDownLabel                              matlab.ui.control.Label
+            TagFormatDropDown                                   matlab.ui.control.DropDown
+        TagLinesSpinnerLabel                                matlab.ui.control.Label
+        TagLinesSpinner                                     matlab.ui.control.Spinner
         HeaderFormatDropDownLabel                           matlab.ui.control.Label
         HeaderFormatDropDown                                matlab.ui.control.DropDown
         DataFormatDropDownLabel                             matlab.ui.control.Label
         DataFormatDropDown                                  matlab.ui.control.DropDown
         CommentStyleDropDownLabel                           matlab.ui.control.Label
         CommentStyleDropDown                                matlab.ui.control.DropDown
+        DelimiterEditFieldLabel                             matlab.ui.control.Label
+        DelimiterEditField                                  matlab.ui.control.EditField
         DataSetInformationPanel                             matlab.ui.container.Panel
         TagInformation                                      matlab.ui.control.TextArea
         DataOperationPanel                                  matlab.ui.container.Panel
@@ -274,14 +280,7 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             app.UploadDataTab.Title = 'Upload Data';
             app.UploadDataTab.BackgroundColor = [0.651 0.8353 0.9294];
 
-            % Create UploadDataButton
-            app.UploadDataButton = uibutton(app.UploadDataTab, 'push');
-            app.UploadDataButton.ButtonPushedFcn = createCallbackFcn(app, @UploadDataButtonPushed, true);
-            app.UploadDataButton.BackgroundColor = [0.8 0.8 0.8];
-            app.UploadDataButton.FontWeight = 'bold';
-            app.UploadDataButton.Position = [406 378 87 40];
-            app.UploadDataButton.Text = {'Click to';'Upload Data'};
-
+            
             % Create UploadDataTable
             app.UploadDataTable = uitable(app.UploadDataTab);
             app.UploadDataTable.ColumnName = {};
@@ -292,40 +291,80 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             % Create DataSettingsPanel
             app.DataSettingsPanel = uipanel(app.UploadDataTab);
             app.DataSettingsPanel.TitlePosition = 'centertop';
-            app.DataSettingsPanel.Title = 'Edit Data Settings';
+            app.DataSettingsPanel.Title = 'Data File Settings';
             app.DataSettingsPanel.BackgroundColor = [0.8 0.8 0.8];
             app.DataSettingsPanel.FontWeight = 'bold';
-            app.DataSettingsPanel.Position = [8 335 382 113];
+            app.DataSettingsPanel.Position = [8 335 493 113];
+            
+            % Create UploadDataButton
+            app.UploadDataButton = uibutton(app.DataSettingsPanel, 'push');
+            app.UploadDataButton.ButtonPushedFcn = createCallbackFcn(app, @UploadDataButtonPushed, true);
+            app.UploadDataButton.BackgroundColor = [0.9608 0.9608 0.9608];
+            app.UploadDataButton.FontWeight = 'bold';
+            app.UploadDataButton.Position = [365 11 119 51];
+            app.UploadDataButton.Text = {'Click to';'Upload Data'};
 
-            % Create TagLinesDropDownLabel
-            app.TagLinesDropDownLabel = uilabel(app.DataSettingsPanel);
-            app.TagLinesDropDownLabel.HorizontalAlignment = 'right';
-            app.TagLinesDropDownLabel.FontWeight = 'bold';
-            app.TagLinesDropDownLabel.Position = [10 68 60 22];
-            app.TagLinesDropDownLabel.Text = 'Tag Lines';
 
-            % Create TagLinesDropDown
-            app.TagLinesDropDown = uidropdown(app.DataSettingsPanel);
-            app.TagLinesDropDown.Items = {'Default (1)', '2', '3', '4', '5'};
-            app.TagLinesDropDown.Position = [95 68 83 22];
-            app.TagLinesDropDown.Value = 'Default (1)';
+%                 % Create TagLinesDropDownLabel
+%                 app.TagLinesDropDownLabel = uilabel(app.DataSettingsPanel);
+%                 app.TagLinesDropDownLabel.HorizontalAlignment = 'right';
+%                 app.TagLinesDropDownLabel.FontWeight = 'bold';
+%                 app.TagLinesDropDownLabel.Position = [10 68 60 22];
+%                 app.TagLinesDropDownLabel.Text = 'Tag Lines';
+% 
+%                 % Create TagLinesDropDown
+%                 app.TagLinesDropDown = uidropdown(app.DataSettingsPanel);
+%                 app.TagLinesDropDown.Items = {'Default (1)', '2', '3', '4', '5'};
+%                 app.TagLinesDropDown.Position = [95 68 83 22];
+%                 app.TagLinesDropDown.Value = 'Default (1)';
+            
+            
+            % Create TagLinesSpinnerLabel
+            app.TagLinesSpinnerLabel = uilabel(app.DataSettingsPanel);
+            app.TagLinesSpinnerLabel.HorizontalAlignment = 'right';
+            app.TagLinesSpinnerLabel.FontWeight = 'bold';
+            app.TagLinesSpinnerLabel.Position = [4 68 61 22];
+            app.TagLinesSpinnerLabel.Text = 'Tag Lines';
 
-            % Create HeaderLinesDropDownLabel
-            app.HeaderLinesDropDownLabel = uilabel(app.DataSettingsPanel);
-            app.HeaderLinesDropDownLabel.HorizontalAlignment = 'right';
-            app.HeaderLinesDropDownLabel.FontWeight = 'bold';
-            app.HeaderLinesDropDownLabel.Position = [191 68 81 22];
-            app.HeaderLinesDropDownLabel.Text = 'Header Lines';
+            % Create TagLinesSpinner
+            app.TagLinesSpinner = uispinner(app.DataSettingsPanel);
+            app.TagLinesSpinner.Position = [86 68 84 22];
+            app.TagLinesSpinner.Value = 1;
+            app.TagLinesSpinner.Tooltip = {['Enter the number of tag line rows ',...
+                'that exist in the data file. The default value is 1.']};
+% 
+%                 % Create HeaderLinesDropDownLabel
+%                 app.HeaderLinesDropDownLabel = uilabel(app.DataSettingsPanel);
+%                 app.HeaderLinesDropDownLabel.HorizontalAlignment = 'right';
+%                 app.HeaderLinesDropDownLabel.FontWeight = 'bold';
+%                 app.HeaderLinesDropDownLabel.Position = [191 68 81 22];
+%                 app.HeaderLinesDropDownLabel.Text = 'Header Lines';
+% 
+%                 % Create HeaderLinesDropDown
+%                 app.HeaderLinesDropDown = uidropdown(app.DataSettingsPanel);
+%                 app.HeaderLinesDropDown.Items = {'Default (1)', '2', '3', '4', '5'};
+%                 app.HeaderLinesDropDown.Position = [289 68 84 22];
+%                 app.HeaderLinesDropDown.Value = 'Default (1)';
 
-            % Create HeaderLinesDropDown
-            app.HeaderLinesDropDown = uidropdown(app.DataSettingsPanel);
-            app.HeaderLinesDropDown.Items = {'Default (1)', '2', '3', '4', '5'};
-            app.HeaderLinesDropDown.Position = [289 68 84 22];
-            app.HeaderLinesDropDown.Value = 'Default (1)';
+            % Create HeaderLinesSpinnerLabel
+            app.HeaderLinesSpinnerLabel = uilabel(app.DataSettingsPanel);
+            app.HeaderLinesSpinnerLabel.HorizontalAlignment = 'right';
+            app.HeaderLinesSpinnerLabel.FontWeight = 'bold';
+            app.HeaderLinesSpinnerLabel.Position = [173 68 81 22];
+            app.HeaderLinesSpinnerLabel.Text = 'Header Lines';
 
+            % Create HeaderLinesSpinner
+            app.HeaderLinesSpinner = uispinner(app.DataSettingsPanel);
+            app.HeaderLinesSpinner.Position = [272 68 84 22];
+            app.HeaderLinesSpinner.Value = 1;
+            app.HeaderLinesSpinner.Tooltip = {['Enter the number of header ',...
+                'line rows here that exist in the data file. The ',...
+                'default value is 1.']};
+            
+            
             % Create TagFormatDropDownLabel
             app.TagFormatDropDownLabel = uilabel(app.DataSettingsPanel);
-            app.TagFormatDropDownLabel.HorizontalAlignment = 'right';
+%             app.TagFormatDropDownLabel.HorizontalAlignment = 'right';
             app.TagFormatDropDownLabel.FontWeight = 'bold';
             app.TagFormatDropDownLabel.Position = [10 40 68 22];
             app.TagFormatDropDownLabel.Text = 'Tag Format';
@@ -333,47 +372,70 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             % Create TagFormatDropDown
             app.TagFormatDropDown = uidropdown(app.DataSettingsPanel);
             app.TagFormatDropDown.Items = {'Default (String)', 'Float', 'Integer'};
-            app.TagFormatDropDown.Position = [95 40 83 22];
+            app.TagFormatDropDown.Position = [86 40 83 22];
             app.TagFormatDropDown.Value = 'Default (String)';
-
+            app.TagFormatDropDown.Tooltip = {['Define the expected format of ',...
+              'the data file tag information.']};
+            
             % Create HeaderFormatDropDownLabel
             app.HeaderFormatDropDownLabel = uilabel(app.DataSettingsPanel);
-            app.HeaderFormatDropDownLabel.HorizontalAlignment = 'right';
+%             app.HeaderFormatDropDownLabel.HorizontalAlignment = 'right';
             app.HeaderFormatDropDownLabel.FontWeight = 'bold';
-            app.HeaderFormatDropDownLabel.Position = [191 40 91 22];
+            app.HeaderFormatDropDownLabel.Position = [178 40 91 22];
             app.HeaderFormatDropDownLabel.Text = 'Header Format';
 
             % Create HeaderFormatDropDown
             app.HeaderFormatDropDown = uidropdown(app.DataSettingsPanel);
             app.HeaderFormatDropDown.Items = {'Default (String)', 'Float', 'Integer'};
-            app.HeaderFormatDropDown.Position = [289 40 83 22];
+            app.HeaderFormatDropDown.Position = [272 40 83 22];
             app.HeaderFormatDropDown.Value = 'Default (String)';
-
+            app.HeaderFormatDropDown.Tooltip = {['Define the expected format of ',...
+              'the data file header information.']};
+            
             % Create DataFormatDropDownLabel
             app.DataFormatDropDownLabel = uilabel(app.DataSettingsPanel);
-            app.DataFormatDropDownLabel.HorizontalAlignment = 'right';
+%             app.DataFormatDropDownLabel.HorizontalAlignment = 'right';
             app.DataFormatDropDownLabel.FontWeight = 'bold';
-            app.DataFormatDropDownLabel.Position = [10 11 76 22];
+            app.DataFormatDropDownLabel.Position = [10 12 76 22];
             app.DataFormatDropDownLabel.Text = 'Data Format';
 
             % Create DataFormatDropDown
             app.DataFormatDropDown = uidropdown(app.DataSettingsPanel);
             app.DataFormatDropDown.Items = {'Default (Float)', 'String', 'Integer'};
-            app.DataFormatDropDown.Position = [95 11 83 22];
+            app.DataFormatDropDown.Position = [86 12 83 22];
             app.DataFormatDropDown.Value = 'Default (Float)';
+            app.DataFormatDropDown.Tooltip = {['Define the expected format of ',...
+              'the data.']};
 
             % Create CommentStyleDropDownLabel
             app.CommentStyleDropDownLabel = uilabel(app.DataSettingsPanel);
-            app.CommentStyleDropDownLabel.HorizontalAlignment = 'right';
+%             app.CommentStyleDropDownLabel.HorizontalAlignment = 'right';
             app.CommentStyleDropDownLabel.FontWeight = 'bold';
-            app.CommentStyleDropDownLabel.Position = [191 11 92 22];
+            app.CommentStyleDropDownLabel.Position = [178 12 92 22];
             app.CommentStyleDropDownLabel.Text = 'Comment Style';
 
             % Create CommentStyleDropDown
             app.CommentStyleDropDown = uidropdown(app.DataSettingsPanel);
             app.CommentStyleDropDown.Items = {'Default (%)', '#'};
-            app.CommentStyleDropDown.Position = [289 11 84 22];
+            app.CommentStyleDropDown.Position = [271 12 84 22];
             app.CommentStyleDropDown.Value = 'Default (%)';
+            app.CommentStyleDropDown.Tooltip = {['Define the expected format of ',...
+              'any data file comments.']};
+          
+            % Create DelimiterEditFieldLabel
+            app.DelimiterEditFieldLabel = uilabel(app.DataSettingsPanel);
+            app.DelimiterEditFieldLabel.HorizontalAlignment = 'right';
+            app.DelimiterEditFieldLabel.FontWeight = 'bold';
+            app.DelimiterEditFieldLabel.Position = [361 68 57 22];
+            app.DelimiterEditFieldLabel.Text = 'Delimiter';
+
+            % Create DelimiterEditField
+            app.DelimiterEditField = uieditfield(app.DataSettingsPanel, 'text');
+            app.DelimiterEditField.Value = ',';
+            app.DelimiterEditField.Tooltip = {['Enter the expected delimiter style. ',...
+                'If left empty, the default value is a comma. Other common values ',...
+                'include a space '' '' or a tab ''\t''.']};
+            app.DelimiterEditField.Position = [426 68 58 22];
             
             % Create LegendPanel
             app.LegendPanel = uipanel(app.UploadDataTab);
@@ -407,7 +469,7 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             app.DataOperationPanel.Title = 'Perform Element-Wise Data Operation';
             app.DataOperationPanel.BackgroundColor = [0.8 0.8 0.8];
             app.DataOperationPanel.FontWeight = 'bold';
-            app.DataOperationPanel.Position = [9 238 381 88];
+            app.DataOperationPanel.Position = [9 238 331 88];
 
             % Create DataOperationFieldLabel
             app.DataOperationFieldLabel = uilabel(app.DataOperationPanel);
@@ -418,24 +480,29 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
 
             % Create DataOperationField
             app.DataOperationField = uieditfield(app.DataOperationPanel, 'text');
-            app.DataOperationField.Position = [114 11 147 22];
+            app.DataOperationField.Position = [109 11 103 22];
+            app.DataOperationField.Tooltip = {['Use this text field to enter the ',...
+                'element-wise operation. ',...
+                'The operation should be defined as a function of x (e.g. x^2*3). ',...
+                'It is not neccessary to use dots to indicate element-wise ',...
+                'operations, nor do you need to define a function handle using @(x).']};
 
-            % Create PerformButton
+            % Create DataOperationButton
             app.DataOperationButton = uibutton(app.DataOperationPanel, 'push');
             app.DataOperationButton.ButtonPushedFcn = createCallbackFcn(app, @DataOperationButtonPushed, true);
-            app.DataOperationButton.Position = [270 11 100 22];
+            app.DataOperationButton.Position = [221 11 100 22];
             app.DataOperationButton.Text = 'Perform';
 
             % Create DataOperationChannelDropDownLabel
             app.DataOperationChannelDropDownLabel = uilabel(app.DataOperationPanel);
             app.DataOperationChannelDropDownLabel.HorizontalAlignment = 'right';
             app.DataOperationChannelDropDownLabel.FontWeight = 'bold';
-            app.DataOperationChannelDropDownLabel.Position = [3 41 92 22];
+            app.DataOperationChannelDropDownLabel.Position = [2 41 92 22];
             app.DataOperationChannelDropDownLabel.Text = 'Select Channel';
 
             % Create DataOperationSelectChannelDropDown
             app.DataOperationChannelDropDown = uidropdown(app.DataOperationPanel);
-            app.DataOperationChannelDropDown.Position = [114 41 147 22];
+            app.DataOperationChannelDropDown.Position = [109 41 212 22];
             app.DataOperationChannelDropDown.Items = {};
             app.DataOperationChannelDropDown.Items = {'(Upload Data Required)'};
             
