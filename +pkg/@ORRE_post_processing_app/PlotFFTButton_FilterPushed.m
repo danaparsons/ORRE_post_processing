@@ -1,6 +1,6 @@
 function PlotFFTButton_FilterPushed(app, event)
 %app.SelectIndependentVariableTimeListBox.ItemsData = 1:numel(app.SelectIndependentVariableTimeListBox.Items);
-filttimevalue = app.TimeFilterEditField.Value;
+filttimevalue = app.FilterTimeDropDown.Value;
 
 app.DataFilterListBox.ItemsData = 1:numel(app.DataFilterListBox.Items);
 filtdepvalue = app.DataFilterListBox.Value;
