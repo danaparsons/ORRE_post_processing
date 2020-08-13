@@ -78,20 +78,93 @@ ylabel(data.map(strcat('ch',m)))
 end
 
 %% ----------------------------- Scripting ----------------------------- %%
-if run_app ~= 1;
-    % Define inputs:
-    directory = "C:\Users\jacob\Documents\ORRE_Offline\NREL TCF\OSWEC\W2 Testing\From Mike\WEC testing\Labview DATA\Damping\";     % current directory
-    filename = "9Decay Test  0Deg_U_WaveID_Freq=0.5Hz Amp=0m ang=0rad__20180412_113132_.txt";
+if run_app ~= 1
+     
+    writedata = 0;
+    
+    Ts = 0.020000;
+    
     datatype = 1;
-    % 1 - user-defined (dataClass)
     
-    % Call the <read_data.m> function to create an instance of the appropriate
-    % data class:
-    data = pkg.fun.read_data(directory,filename,datatype);
+    myDir = 'C:\Users\jacob\Documents\ORRE_Offline\NREL TCF\OSWEC\W2 Testing\Regular Wave Response\0 Deg\';
+    myFiles = dir(fullfile(myDir,'*.txt'));
    
+    dataset = cell(length(myFiles),1);
     
-    Ts = 0.020000; % s
+    for k = 1:length(myFiles)
+        baseFileName = myFiles(k).name;
+        fullFileName = fullfile(myDir, baseFileName);  % Changed myFolder to myDir
+        fprintf(1, 'Now reading %s\n', fullFileName);
+        data = pkg.fun.read_data(myDir,baseFileName,datatype,0,1,'~','~','~',' ','~');
+        dataset{k,1} = data;
+        
+    end
+    
+    
+    myDir2 = 'C:\Users\jacob\Documents\ORRE_Offline\NREL TCF\OSWEC\W2 Testing\From Mike\WEC testing\Labview DATA\Waves 0Deg\Test\';
+    myFiles2 = dir(fullfile(myDir2,'*.txt'));
+   
+    dataset2 = cell(length(myFiles2),1);
+    
+    for k = 1:length(myFiles2)
+        baseFileName2 = myFiles2(k).name;
+        fullFileName2 = fullfile(myDir2, baseFileName2);  % Changed myFolder to myDir
+        fprintf(1, 'Now reading %s\n', fullFileName2);
+        data2 = pkg.fun.read_data(myDir2,baseFileName2,datatype);
+        data2.ch1 = sqrt(data2.ch1).*Ts;
+        dataset2{k,1} = data2;
+    end
+    
+    plot(dataset{14}.ch1,dataset{14}.ch2)
+    
+    plot(dataset2{14}.ch1,dataset2{14}.ch7); hold on
+    plot(dataset2{14}.ch1,dataset2{14}.ch8);
+    
+    h = 0.631/2;
+    asin((dataset2{14}.ch7 - mean(dataset2{14}.ch7))/h)*180/pi;
+    
+     plot(dataset2{14}.ch1,dataset2{14}.ch7 - dataset2{14}.ch8)
+     
+     response = asin(abs(dataset2{14}.ch7)/h);
+     
+     
 end
+
+
+% 
+%   for k = 1:length(myFiles)
+%         baseFileName = myFiles(k).name;
+%         fullFileName = fullfile(myDir, baseFileName);  % Changed myFolder to myDir
+%         fprintf(1, 'Now reading %s\n', fullFileName);
+%         data = pkg.fun.read_data(myDir,baseFileName,datatype);
+%         data.ch1 = sqrt(data.ch1).*Ts;
+%         dataset{k,1} = data;
+%         if writedata == 1
+%             combined_data = [];
+%             for ch = 1:length(data.headers)
+%                 combined_data(:,ch) = data.(strcat('ch',num2str(ch)));
+%             end
+%             
+%             data.tags = split(data.tags{1},char(9));
+%             datestring = split(data.tags{2},'_');
+%             Y = extractBetween(datestring{2},1,4);
+%             M = extractBetween(datestring{2},5,6);
+%             D = extractBetween(datestring{2},7,8);
+%             
+%             data.tags{2} = datestr(datetime(cellfun(@str2num,{Y{1} M{1} D{1}})));
+%             
+%             outputdir = 'C:\Users\jacob\Documents\ORRE_Offline\NREL TCF\OSWEC\W2 Testing\Fixed\';
+%             headerfmt = [repmat('%s,',1,length(data.headers)-1),'%s'];
+%             
+%             fid = fopen(strcat(outputdir,data.filename),'wt'); 
+%             fprintf(fid, '%s %s %s \n', data.tags{1}, data.tags{3}, data.tags{2});
+%             fprintf(fid, headerfmt, data.headers{:});
+%             fclose(fid);
+%             
+% %           dlmwrite(strcat(outputdir,data.filename),combined_data,'delimiter','\t','-append','precision','%10.8f')           
+%             writematrix(combined_data,strcat(outputdir,data.filename),'WriteMode','append')      
+%         end
+%     end
 
 
 

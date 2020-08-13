@@ -1,17 +1,20 @@
-classdef dataClass < dynamicprops
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Header %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% ------------------------------ Header ------------------------------- %%
 % Filename:     dataClass.m    
 % Description:  ORRE Post Processing Program generic channel-based class to
 %               store user data.
 % Authors:      D. Lukas and J. Davis
 % Created on:   7-8-20
-% Last updated: 7-8-20 by J. Davis
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Notes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Uses dynamicprops superclass to enable dynamic creation of properties:
+% Last updated: 8-12-20 by J. Davis
+% Notes: Uses dynamicprops superclass to enable the dynamic creation 
+% of class properties:
 % https://www.mathworks.com/help/matlab/matlab_oop/dynamic-properties-adding-properties-to-an-instance.html
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% ------------------------------- Class ------------------------------- %%
+    
+classdef dataClass < dynamicprops
     
     properties
+    filename    % Store original filename 
     tags        % Store any data tags relevant to the experiment 
     headers     % Store data headers
     map         % Map data channels to headers
@@ -24,18 +27,23 @@ classdef dataClass < dynamicprops
     methods
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Constructor method - constructs instance of this class
-        function dataObj = dataClass(tags,headers,data)
+        function dataObj = dataClass(filename,tags,headers,data)
             
             % Initialize obj when called with no input arguments
             if nargin == 0
                 dataObj.tags = [];
                 dataObj.headers = [];
                    
-            elseif nargin < 3
+            elseif nargin < 4
                 error('Not enough inputs.')
                 
             else
+                % Handle empty inputs:
+                if isempty(filename); filename = '(Empty)'; end
+                if isempty(tags); tags = '(Empty)'; end
+                
                 % Construct tag and header properties from input:
+                dataObj.filename = filename;
                 dataObj.tags = tags;
                 dataObj.headers = headers; 
                 

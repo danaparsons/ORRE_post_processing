@@ -1,10 +1,5 @@
 function WaveletButtonPushed(app, event)
 
-% if license('test','Wavelet_Toolbox') == 0
-%     error(['Wavelet Toolbox is not installed. To use this feature please '...
-%         'navigate to Home > Add-Ons > Get Add-Ons > Install Wavelet Toolbox.'])
-% end
-
 v = ver;
 if ~any(strcmp({v.Name}, 'Wavelet Toolbox'))
     error(['Wavelet Toolbox is not installed. To use this feature please '...
