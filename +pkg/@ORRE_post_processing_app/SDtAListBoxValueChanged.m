@@ -27,4 +27,7 @@ for lbvalue = value(1:end)
     addStyle(app.StatsTable,s,'cell',[find(value==lbvalue),2]);
 end
 app.StatsTable.RowName = rowname;
+
+pkg.fun.Save_UI_Axes.copyUIAxes(app.TimeHistoryAxes);
+savefig(strcat('+output/TimeHistory_',(app.Wavedata.headers{value}),'.fig')); 
 end

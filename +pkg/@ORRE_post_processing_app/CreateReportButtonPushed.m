@@ -1,7 +1,10 @@
 function CreateReportButtonPushed(app,event)
-documentObj = Document(ORRE_post_processing, docx);
-imageObj = mlreportgen.dom.Image(ORRE.png);
-image = FormalImage(imageObj);
+
+% documentObj = Document(ORRE_post_processing, docx);
+% imageObj = mlreportgen.dom.Image(ORRE.png);
+% image = FormalImage(imageObj);
+
+
 
 end
 

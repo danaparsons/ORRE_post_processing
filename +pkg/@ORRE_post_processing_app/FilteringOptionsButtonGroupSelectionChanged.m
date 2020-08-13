@@ -29,6 +29,10 @@ filtertimevalue = app.FilterTimeDropDown.Value;
 
 %plot(app.FilterAxes,app.Wavedata.(strcat('ch',(num2str(app.TimeFilterEditField.Value)))),app.FilteredData(:,value));
 plot(app.FilterAxes,app.Wavedata.(strcat('ch',(num2str(app.FilterTimeDropDown.Value)))),app.FilteredData(:,value));
+%savefig('filter.fig')
+
+pkg.fun.Save_UI_Axes.copyUIAxes(app.FilterAxes);
+savefig(strcat('+output/FilterTimeHistory_',(app.Wavedata.headers{value}),'.fig')); 
 
 end
 

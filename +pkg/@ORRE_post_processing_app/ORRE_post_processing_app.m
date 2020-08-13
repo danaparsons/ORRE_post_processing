@@ -142,9 +142,12 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
         FourierTransformsCheckBox                           matlab.ui.control.CheckBox
         LaplaceTransformsCheckBox                           matlab.ui.control.CheckBox
         WaveletTransformsCheckBox                           matlab.ui.control.CheckBox
-        GraphFileTypeDropDownLabel                            matlab.ui.control.Label
+        GraphFileTypeDropDownLabel                          matlab.ui.control.Label
         GraphFileTypeDropDown                               matlab.ui.control.DropDown
         SaveGraphsButton                                    matlab.ui.control.Button
+        Tree                                                matlab.ui.container.Tree
+        Node                                                matlab.ui.container.TreeNode
+        UpdateTreeButton                                    matlab.ui.control.Button
     end
 
 %-------------------------------------------------------------------------%
@@ -206,7 +209,8 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
         %% --------------------- TIME HISTORY TAB ---------------------- %%
         
         % SelectDatatoAnalyze listbox
-        SDtAListBoxValueChanged (app, event)     
+        SDtAListBoxValueChanged (app, event) 
+        CheckBox10ValueChanged(app, event)
         
         %% ------------------- FOURIER TRANSFORM TAB ------------------- %%
 
@@ -231,7 +235,9 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
         
         SaveTablesButtonPushed(app, event)
         SaveGraphsButtonPushed(app, event)
+        UpdateTreeButtonPushed(app, event)
         CreateReportButtonPushed(app,event)
+%         TreeNodeTextChanged(app, event)
     end 
 
 %-------------------------------------------------------------------------%
@@ -948,6 +954,23 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             app.SaveGraphsButton.ButtonPushedFcn = createCallbackFcn(app, @SaveGraphsButtonPushed, true);
             app.SaveGraphsButton.Position = [66 13 100 22];
             app.SaveGraphsButton.Text = 'Save Graphs';
+            
+            % Create Tree
+            app.Tree = uitree(app.CreateReportTab);
+            app.Tree.SelectionChangedFcn = createCallbackFcn(app, @TreeSelectionChanged, true);
+            app.Tree.NodeExpandedFcn = createCallbackFcn(app, @TreeNodeExpanded, true);
+            app.Tree.NodeTextChangedFcn = createCallbackFcn(app, @TreeNodeTextChanged, true);
+            app.Tree.Position = [514 118 235 300];
+
+            % Create Node
+            app.Node = uitreenode(app.Tree);
+            app.Node.Text = 'Node';
+            
+            % Create UpdateTreeButton
+            app.UpdateTreeButton = uibutton(app.CreateReportTab, 'push');
+            app.UpdateTreeButton.ButtonPushedFcn = createCallbackFcn(app, @UpdateTreeButtonPushed, true);
+            app.UpdateTreeButton.Position = [579 426 100 22];
+            app.UpdateTreeButton.Text = 'Update Tree';
             
             %% ------------------ FIGURE VISIBILITY -------------------- %%
             % Show the figure after all components are created

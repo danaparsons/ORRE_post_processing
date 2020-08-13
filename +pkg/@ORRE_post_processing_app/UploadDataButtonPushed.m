@@ -110,5 +110,7 @@ columnlength = length(app.Wavedata.ch1);
 
 app.FilteredData = zeros(columnlength,headerlength);
 
+
+
 end
 
