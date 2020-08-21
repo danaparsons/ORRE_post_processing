@@ -32,16 +32,12 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
         LegendPanel                                         matlab.ui.container.Panel
         DataLegendTable                                     matlab.ui.control.Table
         DataSettingsPanel                                   matlab.ui.container.Panel
-        TagLinesDropDownLabel                               matlab.ui.control.Label
-        TagLinesDropDown                                    matlab.ui.control.DropDown
-            HeaderLinesDropDownLabel                            matlab.ui.control.Label
-            HeaderLinesDropDown                                 matlab.ui.control.DropDown
         HeaderLinesSpinnerLabel                             matlab.ui.control.Label
         HeaderLinesSpinner                                  matlab.ui.control.Spinner
-            TagFormatDropDownLabel                              matlab.ui.control.Label
-            TagFormatDropDown                                   matlab.ui.control.DropDown
         TagLinesSpinnerLabel                                matlab.ui.control.Label
         TagLinesSpinner                                     matlab.ui.control.Spinner
+        TagFormatDropDownLabel                              matlab.ui.control.Label
+        TagFormatDropDown                                   matlab.ui.control.DropDown
         HeaderFormatDropDownLabel                           matlab.ui.control.Label
         HeaderFormatDropDown                                matlab.ui.control.DropDown
         DataFormatDropDownLabel                             matlab.ui.control.Label
@@ -67,8 +63,6 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
         SelectDatatoFilterLabel                             matlab.ui.control.Label
         FilterTimeDropDown                                  matlab.ui.control.DropDown
         FilterTimeLabel                                     matlab.ui.control.Label
-%         EnterNumericTimeChannelEditField_2Label             matlab.ui.control.Label
-%         TimeFilterEditField                                 matlab.ui.control.NumericEditField
         FilteringOptionsButtonGroup                         matlab.ui.container.ButtonGroup
         LowPassButton                                       matlab.ui.control.RadioButton
         HighPassButton                                      matlab.ui.control.RadioButton
@@ -88,8 +82,6 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
         SelectDatatoAnalyzeListBox                          matlab.ui.control.ListBox
         ClearButton                                         matlab.ui.control.CheckBox
         SelectDatatoAnalyzeLabel                            matlab.ui.control.Label
-%         EnterNumericTimeChannelEditFieldLabel               matlab.ui.control.Label
-%         EnterNumericTimeChannelEditField                    matlab.ui.control.NumericEditField  
         TimeHistTimeDropDownLabel                           matlab.ui.control.Label
         TimeHistTimeDropDown                                matlab.ui.control.DropDown
         FiltFreqTable                                       matlab.ui.control.Table
@@ -160,14 +152,14 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
     
     properties (Access = public)    % DATA STORAGE PROPERTIES
         Wavedata     %holds user chosen data set
-        FFTvalue     %holds channel to plot in Fourier Transform
-        Timevalue    %holds channel to use as time for FFT
+%         FFTvalue     %holds channel to plot in Fourier Transform
+%         Timevalue    %holds channel to use as time for FFT
         Headers      %headers of wavedata data set
         Combined_Channels
-        fs           %for filter data
+%         fs           %for filter data
         FilteredData
         filtplot
-        SelectedFrequency %holds frequency selection for FFT button
+%         SelectedFrequency %holds frequency selection for FFT button
         Timevalue_laplace
         laplacevalue
         
@@ -228,7 +220,7 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
         
         % SelectDependVariable LISTBOX
         SDVListBoxValueChanged(app, event)
-
+        
         % FFT button              
         FFTButtonPushed(app, event)
         
@@ -365,19 +357,6 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             app.TagLinesSpinner.Value = 1;
             app.TagLinesSpinner.Tooltip = {['Enter the number of tag line rows ',...
                 'that exist in the data file. The default value is 1.']};
-% 
-%                 % Create HeaderLinesDropDownLabel
-%                 app.HeaderLinesDropDownLabel = uilabel(app.DataSettingsPanel);
-%                 app.HeaderLinesDropDownLabel.HorizontalAlignment = 'right';
-%                 app.HeaderLinesDropDownLabel.FontWeight = 'bold';
-%                 app.HeaderLinesDropDownLabel.Position = [191 68 81 22];
-%                 app.HeaderLinesDropDownLabel.Text = 'Header Lines';
-% 
-%                 % Create HeaderLinesDropDown
-%                 app.HeaderLinesDropDown = uidropdown(app.DataSettingsPanel);
-%                 app.HeaderLinesDropDown.Items = {'Default (1)', '2', '3', '4', '5'};
-%                 app.HeaderLinesDropDown.Position = [289 68 84 22];
-%                 app.HeaderLinesDropDown.Value = 'Default (1)';
 
             % Create HeaderLinesSpinnerLabel
             app.HeaderLinesSpinnerLabel = uilabel(app.DataSettingsPanel);

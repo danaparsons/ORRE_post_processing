@@ -123,7 +123,6 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Beginning of Function
 
-
 Y = fft(y);
 L = length(y);
 
@@ -132,7 +131,6 @@ if isempty(fs)
 else
     Fs = fs;
 end 
-
 
 P2 = abs(Y/L);
 P1 = P2(1:L/2+1);
