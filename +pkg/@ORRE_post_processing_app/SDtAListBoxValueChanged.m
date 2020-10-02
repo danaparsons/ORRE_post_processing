@@ -7,7 +7,6 @@ app.SelectDatatoAnalyzeListBox.Multiselect = 'on';
 app.SelectDatatoAnalyzeListBox.ItemsData = 1:numel(app.SelectDatatoAnalyzeListBox.Items);
 value = app.SelectDatatoAnalyzeListBox.Value;
 
-
 app.TimeHistTimeDropDown.ItemsData = 1:numel(app.TimeHistTimeDropDown.Items);
 timehisttimevalue = app.TimeHistTimeDropDown.Value;
 

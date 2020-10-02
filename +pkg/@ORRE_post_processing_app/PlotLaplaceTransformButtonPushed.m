@@ -8,6 +8,5 @@ depvalue_laplace = app.SelectDependentVariableListBox_2.Value;
 app.laplacevalue = depvalue_laplace;
 app.Timevalue_laplace = timevalue_laplace;
 pkg.fun.plt_laplace(app.Timevalue_laplace,app.laplacevalue,app.Wavedata);
-%%i think the laplace value entry needs to be a function, not
-%%an array ??
+%%% this is just a general set up, doesn't work for laplace transform %%%
 end

@@ -1,10 +1,15 @@
 function PlotFFTButton_FilterPushed(app, event)
+% <<<<<<< HEAD
 %app.SelectIndependentVariableTimeListBox.ItemsData = 1:numel(app.SelectIndependentVariableTimeListBox.Items);
 timevalue = app.FilterTimeDropDown.Value;
-
-app.DataFilterListBox.ItemsData = 1:numel(app.DataFilterListBox.Items);
-depvalue = app.DataFilterListBox.Value;
-
+% =======
+% filttimevalue = app.FilterTimeDropDown.Value;
+% >>>>>>> 818d0e7c5d33b1b920bb909c75d482af3c802950
+% 
+% app.DataFilterListBox.ItemsData = 1:numel(app.DataFilterListBox.Items);
+% depvalue = app.DataFilterListBox.Value;
+% 
+% <<<<<<< HEAD
 %app.FFTvalue = depvalue;
 %app.Timevalue = timevalue;
 
@@ -33,5 +38,10 @@ app.Wavedata.fft.dominant_periods = [app.Wavedata.fft.dominant_periods ; temp_ta
 app.Wavedata.fft.log{end+1,1} = ['[',datestr(datetime),']',' fft performed on <',...
     current_ch,'> using a sample frequency of ',num2str(app.Wavedata.fft.fs),...
     ' Hz. T_dominant = ',num2str(T_dominant),' s.'];
+% =======
+% app.Wavedata.addprop(strcat('DominantPeriod',(num2str(filtdepvalue))));
+% app.Wavedata.addprop(strcat('FS',(num2str(filtdepvalue))));
+% [app.Wavedata.(strcat('DominantPeriod',(num2str(filtdepvalue)))),app.Wavedata.(strcat('FS',(num2str(filtdepvalue))))] =  pkg.fun.plt_fft(filttimevalue,filtdepvalue,app.Wavedata);
+% >>>>>>> 818d0e7c5d33b1b920bb909c75d482af3c802950
 
 end
