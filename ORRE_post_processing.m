@@ -1,16 +1,25 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Header %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% ------------------------------ Header ------------------------------- %%
 % Filename:     ORRE_post_processing.m
 % Description:  ORRE Post Processing Program input file (test)
 % Authors:      D. Lukas and J. Davis
 % Created on:   6-10-20
-% Last updated: 6-17-20 by J. Davis
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5%%%
+% Last updated: 8-9-20 by J. Davis
+%% --------------------------- Settings -------------------------------- %%
 
 close all % close any open figures
 
 % Execute app:
-pkg.ORRE_post_processing_app
 
+run_app = 1;
+show_examples = 0;
+
+if run_app == 1
+    pkg.ORRE_post_processing_app
+end
+
+
+%% ----------------------------- Examples ------------------------------ %%
+if show_examples == 1
 % Define inputs:
 directory = "./testdata/";     % current directory
 filename = "90_deg_reg_run1.txt";
@@ -32,7 +41,6 @@ data = pkg.fun.read_data(directory,filename,datatype);
 % required. The remaining inputs are optional and pertain only to the
 % user-defined data class (datatype 1)
 
-
 %%% Example of calling a function
 
 % test of call method 1: direct input of data arrays
@@ -44,7 +52,6 @@ dominant_period = pkg.fun.plt_fft(1,3,data);
 % test of bad calls:
 dominant_period = pkg.fun.plt_fft(10,2,data); % returns error for nonexistent channel
 dominant_period = pkg.fun.plt_fft(1.1,2,data); % returns error for non-int channel indicator
-
 
 
 %%% Plotting example with use of data.map feature:
@@ -68,58 +75,99 @@ plot(data.(strcat('ch',n)),data.(strcat('ch',m)))
 xlabel(data.map(strcat('ch',n)))
 ylabel(data.map(strcat('ch',m)))
 
+end
 
-run('+app/ORRE_post_processing_app.m');
-
-
-
-
-
-
-
-
-
-
-
-
-
-%%% deleted stuff saved for later:
-
-
-% Define data directory (here I have added a \testdata folder with an OSWEC 
-% file for testing purposes):
-% main_dir = ".";     % current directory
-% sub_dir = "/testdata";
-% filename = "090Deg_U_WaveID_Reg 1__20180413_105125_.txt";
-% data_dir = strcat(main_dir,sub_dir);
-% 
-% % Provide some input on the type of data:
-% datatype = 1;
+%% ----------------------------- Scripting ----------------------------- %%
+if run_app ~= 1
+     
+    writedata = 0;
+    
+    Ts = 0.020000;
+    
+    datatype = 1;
+    
+    myDir = 'C:\Users\jacob\Documents\ORRE_Offline\NREL TCF\OSWEC\W2 Testing\Regular Wave Response\0 Deg\';
+    myFiles = dir(fullfile(myDir,'*.txt'));
    
-% channeltypes = {'t','wp','wp','wp','wp','wp','strpot','strpot','lc'};
-% tagtypes = {'flap_orientation','date','type','run'};
-% tagformat = "%s%s%s%d";
+    dataset = cell(length(myFiles),1);
+    
+    for k = 1:length(myFiles)
+        baseFileName = myFiles(k).name;
+        fullFileName = fullfile(myDir, baseFileName);  % Changed myFolder to myDir
+        fprintf(1, 'Now reading %s\n', fullFileName);
+        data = pkg.fun.read_data(myDir,baseFileName,datatype,0,1,'~','~','~',' ','~');
+        dataset{k,1} = data;
+        
+    end
+    
+    
+    myDir2 = 'C:\Users\jacob\Documents\ORRE_Offline\NREL TCF\OSWEC\W2 Testing\From Mike\WEC testing\Labview DATA\Waves 0Deg\Test\';
+    myFiles2 = dir(fullfile(myDir2,'*.txt'));
+   
+    dataset2 = cell(length(myFiles2),1);
+    
+    for k = 1:length(myFiles2)
+        baseFileName2 = myFiles2(k).name;
+        fullFileName2 = fullfile(myDir2, baseFileName2);  % Changed myFolder to myDir
+        fprintf(1, 'Now reading %s\n', fullFileName2);
+        data2 = pkg.fun.read_data(myDir2,baseFileName2,datatype);
+        data2.ch1 = sqrt(data2.ch1).*Ts;
+        dataset2{k,1} = data2;
+    end
+    
+    plot(dataset{14}.ch1,dataset{14}.ch2)
+    
+    plot(dataset2{14}.ch1,dataset2{14}.ch7); hold on
+    plot(dataset2{14}.ch1,dataset2{14}.ch8);
+    
+    h = 0.631/2;
+    asin((dataset2{14}.ch7 - mean(dataset2{14}.ch7))/h)*180/pi;
+    
+     plot(dataset2{14}.ch1,dataset2{14}.ch7 - dataset2{14}.ch8)
+     
+     response = asin(abs(dataset2{14}.ch7)/h);
+     
+     
+end
+
+
+% 
+%   for k = 1:length(myFiles)
+%         baseFileName = myFiles(k).name;
+%         fullFileName = fullfile(myDir, baseFileName);  % Changed myFolder to myDir
+%         fprintf(1, 'Now reading %s\n', fullFileName);
+%         data = pkg.fun.read_data(myDir,baseFileName,datatype);
+%         data.ch1 = sqrt(data.ch1).*Ts;
+%         dataset{k,1} = data;
+%         if writedata == 1
+%             combined_data = [];
+%             for ch = 1:length(data.headers)
+%                 combined_data(:,ch) = data.(strcat('ch',num2str(ch)));
+%             end
+%             
+%             data.tags = split(data.tags{1},char(9));
+%             datestring = split(data.tags{2},'_');
+%             Y = extractBetween(datestring{2},1,4);
+%             M = extractBetween(datestring{2},5,6);
+%             D = extractBetween(datestring{2},7,8);
+%             
+%             data.tags{2} = datestr(datetime(cellfun(@str2num,{Y{1} M{1} D{1}})));
+%             
+%             outputdir = 'C:\Users\jacob\Documents\ORRE_Offline\NREL TCF\OSWEC\W2 Testing\Fixed\';
+%             headerfmt = [repmat('%s,',1,length(data.headers)-1),'%s'];
+%             
+%             fid = fopen(strcat(outputdir,data.filename),'wt'); 
+%             fprintf(fid, '%s %s %s \n', data.tags{1}, data.tags{3}, data.tags{2});
+%             fprintf(fid, headerfmt, data.headers{:});
+%             fclose(fid);
+%             
+% %           dlmwrite(strcat(outputdir,data.filename),combined_data,'delimiter','\t','-append','precision','%10.8f')           
+%             writematrix(combined_data,strcat(outputdir,data.filename),'WriteMode','append')      
+%         end
+%     end
 
 
 
-% fs = 128;
-% f = 2; % hz
-% tf = 2*f^-1;
-% n = fs*tf;
-% t = linspace(0,tf-fs^-1,n);
-% x = sin(2*pi*f*t);
-% 
-% signal = pkg.obj.signalClass(t,x); % test constructor without period T
-% % signal = pkg.obj.signalClass(t,x,f^-1) % with T 
-% 
-% plot(signal.t,signal.x,...
-%     signal.t,signal.x,'o'); hold on
-% plot(signal.t+tf,signal.x,...
-%     signal.t+tf,signal.x,'o')
-% 
-% signal.T = pkg.fun.plt_fft(signal.t,signal.x); % test without providing fs
-% 
-% 
-% signal
-% 
-% % signal.T = pkg.fun.plt_fft(signal.t,signal.x,fs) % with fs
+
+
+
