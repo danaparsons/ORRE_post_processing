@@ -1,7 +1,7 @@
 function OverwriteCheckBoxValueChanged(app,event)
 value = app.DataFilterListBox.Value;
 
-%%% this is a work in progress, frequency values need to replace for a channel %%%
+%%% problem to fix: frequency values need to replace for a channel %%%
 
 if app.OverwriteCheckBox.Value
     app.Wavedata.(strcat('ch',(num2str(value)))) = app.FilteredData(:,value);   
@@ -14,6 +14,4 @@ if app.OverwriteCheckBox.Value
 else
     app.FilteredData(:,value) = app.FilteredData(:,value);
 end
-
-%DataFilterListBoxValueChanged(app);
 end

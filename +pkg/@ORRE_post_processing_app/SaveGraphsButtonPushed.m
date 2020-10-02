@@ -4,24 +4,24 @@ app.GraphFileTypeDropDown.ItemsData = 1:numel(app.GraphFileTypeDropDown.Items);
 GraphFileChoice = app.GraphFileTypeDropDown.Value;
 
 if GraphFileChoice == 1
-    gsuffix = '.png';
+    app.gsuffix = '.png';
 end
 if GraphFileChoice == 2
-    gsuffix = '.jpg';
+    app.gsuffix = '.jpg';
 end
 if GraphFileChoice == 3
-    gsuffix = '.pdf';
+    app.gsuffix = '.pdf';
 end
 if GraphFileChoice == 4
-    gsuffix = '.tif';
+    app.gsuffix = '.tif';
 end
 
 if app.FilterDataTimeHistoryCheckBox.Value
-    graphfilename = strcat('FilterData_TimeHistory',gsuffix);
+    graphfilename = strcat('FilterData_TimeHistory',app.gsuffix);
     exportgraphics(app.FilterAxes,graphfilename);
 end
 if app.TimeHistoryCheckBox.Value
-    graphfilename = strcat('TimeHistory',gsuffix);
+    graphfilename = strcat('TimeHistory',app.gsuffix);
     exportgraphics(app.TimeHistoryAxes,graphfilename);
 end
 % if app.FourierTransformsCheckBox.Value

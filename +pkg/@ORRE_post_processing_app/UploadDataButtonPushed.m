@@ -8,47 +8,18 @@ datatype = 1;
 
 %%%%%% Data Settings Drop Down %%%%%%%
 %%%%%% Tag Lines %%%%%%%
-
 if app.TagLinesSpinner.Value >= 0
     ntaglines = app.TagLinesSpinner.Value;
 else
     error('The number of tag line rows cannot be a negative value.')  
 end
 
-%     
-% if(strcmp(app.TagLinesDropDown.Value,'Default (1)'))
-%     %ntaglines = pkg.fun.read_data.default_ntaglines;
-%     ntaglines = 1;
-% elseif(strcmp(app.TagLinesDropDown.Value,'2'))
-%     ntaglines = 2;
-% elseif(strcmp(app.TagLinesDropDown.Value,'3'))
-%     ntaglines = 3;
-% elseif(strcmp(app.TagLinesDropDown.Value,'4'))
-%     ntaglines = 4;
-% elseif(strcmp(app.TagLinesDropDown.Value,'5'))
-%     ntaglines = 5;
-% end
-
 %%%%%% Header Lines %%%%%%%
-
 if app.HeaderLinesSpinner.Value >= 0
     nheaderlines = app.HeaderLinesSpinner.Value;
 else
     error('The number of header line rows cannot be a negative value.')  
 end
-
-% 
-% if(strcmp(app.HeaderLinesDropDown.Value,'Default (1)'))
-%     nheaderlines = 1;
-% elseif(strcmp(app.HeaderLinesDropDown.Value,'2'))
-%     nheaderlines = 2;
-% elseif(strcmp(app.HeaderLinesDropDown.Value,'3'))
-%     nheaderlines = 3;
-% elseif(strcmp(app.HeaderLinesDropDown.Value,'4'))
-%     nheaderlines = 4;
-% elseif(strcmp(app.HeaderLinesDropDown.Value,'5'))
-%     nheaderlines = 5;
-% end
 
 %%%%% Tag Format %%%%%%%
 if(strcmp(app.TagFormatDropDown.Value,'Default (String)'))
@@ -84,12 +55,6 @@ else
     delimiter = app.DelimiterEditField.Value;
 end
 
-% if(strcmp(app.CommentStyleDropDown.Value,'Default (%)'))
-%     delimiter = '%';
-% elseif(strcmp(app.CommentStyleDropDown.Value,'#'))
-%     commentstyle = '#';
-% end
-
 %%%%% Comment Style %%%%%%%
 if(strcmp(app.CommentStyleDropDown.Value,'Default (%)'))
     commentstyle = '~'; % (accept default value defined in read_data.m)
@@ -101,16 +66,13 @@ end
 app.Wavedata = pkg.fun.read_data(data_dir,filename,datatype,ntaglines,...
     nheaderlines,tagformat,headerformat,dataformat,delimiter,commentstyle);
 
-%%% this needs to be fixed
 wavedata = app.Wavedata;
 app.Headers = wavedata.headers;
-%%%
 
 for ch = 1:length(wavedata.headers)
     combined_data(:,ch) = wavedata.(strcat('ch',num2str(ch)));
 end
 app.Combined_Channels = combined_data;
-%app.UITable.Data = array2table(app.Combined_Channels);
 app.UploadDataTable.Data = array2table(combined_data);
 app.TagInformation.Value = wavedata.tags;
 
@@ -122,7 +84,6 @@ app.UploadDataTable.ColumnName = wavedata.headers;
 app.SelectDatatoAnalyzeListBox.Items = app.Wavedata.headers;
 app.DataLegendTable.Data = wavedata.map_legend;
 
-%app.Filtered_Channels = app.Combined_Channels;
 app.SelectIndependentVariableTimeListBox.Items = app.Wavedata.headers;
 app.SelectDependentVariableListBox.Items = app.Wavedata.headers;
 
@@ -139,8 +100,6 @@ headerlength = length(app.Wavedata.headers);
 columnlength = length(app.Wavedata.ch1);
 
 app.FilteredData = zeros(columnlength,headerlength);
-
-
 
 end
 
