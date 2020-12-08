@@ -12,10 +12,10 @@ function [dominant_period,Fs] = plt_fft(t,y,varargin)
 %           plt_fft(data.ch1,data.ch2,OPTIONS...)
 %
 %   **To access additional function options when using method 1, it is
-%     neccessary to skip the third input by inserting a tilde (~), as this
-%     optional input is reserved for method 2:
+%     neccessary to skip the third input by inserting an empty array [], 
+%     as this optional input is reserved for method 2:
 %
-%           plt_fft(data.ch1,data.ch2,~,option1,option2...)
+%           plt_fft(data.ch1,data.ch2,[],option1,option2...)
 %
 % (2) Alternatively, pass the complete data object and channel indicators:
 %
@@ -33,7 +33,7 @@ function [dominant_period,Fs] = plt_fft(t,y,varargin)
 %
 % The complete call options are as follows:
 %
-%     [dominant_period] = plt_fft(t,y,data,fs,...)
+%     [dominant_period] = plt_fft(t,y,data,fs,startTime,endTime)
 % 
 %     Where "fs" is the desired sample frequency. More options to come...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -62,6 +62,8 @@ addRequired(p,'t');
 addRequired(p,'y');
 addOptional(p,'data',default_data)
 addOptional(p,'fs',default_fs,@isnumeric)
+addOptional(p,'startTime',default_fs,@isnumeric)
+addOptional(p,'endTime',default_fs,@isnumeric)
 
 % Parse the inputs:
 parse(p,t,y,varargin{:});
@@ -71,7 +73,8 @@ parse(p,t,y,varargin{:});
 % Optional inputs
 data  = p.Results.data;
 fs = p.Results.fs;
-
+startTime = p.Results.startTime;
+endTime = p.Results.endTime;
 %%% Determine whether "t" and "y" are data arrays or channel indicators:
 
 % Function handle for determining if general numeric input is an integer
@@ -106,10 +109,30 @@ elseif isaninteger(y) == 1
     else
         error('The specified channel does not exist in the data object.')
     end
+% Return error if neither method 1 or 2 is used properly
 else
     error('Required input variable "y" is not properly defined as an array or a specific channel indicator.')
 end
 
+% Adjust time list according to start and end times:
+if exist('startTime','var') && exist('endTime','var')
+   t0 = startTime; tf = endTime;  
+elseif exist('startTime','var') 
+   t0 = startTime; tf = t(end);
+elseif exist('endTime','var') 
+   t0 = t(0); tf = endTime;
+else
+   t0 = t(1); tf = t(end);
+end
+t = t(t >= t0 & t <= tf);
+y = y(t >= t0 & t <= tf);
+
+if t(end) ~= tf
+ x   
+end
+if t(1) ~= t0
+x
+end
 %%% Create variable name strings for plotting purposes:
 % If method 2 is used, use the map to retrieve channel names:
 if isprop(data,'map')

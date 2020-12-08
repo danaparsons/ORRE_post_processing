@@ -14,32 +14,37 @@ if ~isprop(app.Wavedata,'fft')
 end
 
 %--UPDATE:
-if app.StartTimeEditField == true
-    app.FFTvalue = depvalue(StartTimeEditField.Value:EndTimeEditField.Value);
-    app.Timevalue = timevalue(StartTimeEditField.Value:EndTimeEditField.Value);
-else
-    app.FFTvalue = depvalue;
-    app.Timevalue = timevalue;
-end
+% if ~isempty(app.StartTimeEditField.Value)
+%     app.FFTvalue = depvalue(StartTimeEditField.Value:EndTimeEditField.Value);
+%     app.Timevalue = timevalue(StartTimeEditField.Value:EndTimeEditField.Value);
+% else
+%     app.FFTvalue = depvalue;
+%     app.Timevalue = timevalue;
+% end
 %--%
+TimeList   = app.Wavedata.(strcat('ch',num2str(timevalue)));
+DepVarList = app.Wavedata.(strcat('ch',num2str(depvalue)));
+
+% Extract time and dependent variable lists between specified start and end values:
+% TimeList   = TimeList(TimeList >= app.StartTimeEditField.Value & TimeList <= app.EndTimeEditField.Value);
+% DepVarList = DepVarList(TimeList >= app.StartTimeEditField.Value & TimeList <= app.EndTimeEditField.Value);
+startTime = app.StartTimeEditField.Value;
+endTime = app.EndTimeEditField.Value;
 
 if app.FrequencyCheckBox.Value == 1
     app.SelectedFrequency = app.DesiredSampleFrequencyEditField.Value;
-    [T_dominant,app.Wavedata.fft.fs] = pkg.fun.plt_fft(timevalue,depvalue,app.Wavedata,app.SelectedFrequency);
+    [T_dominant,app.Wavedata.fft.fs] = pkg.fun.plt_fft(timevalue,depvalue,app.Wavedata,app.SelectedFrequency,startTime,endTime);
 elseif app.FrequencyCheckBox.Value == 0
-    [T_dominant,app.Wavedata.fft.fs] =  pkg.fun.plt_fft(timevalue,depvalue,app.Wavedata);    
-    %--UPDATE:
-    pkg.fun.plt_fft(app.Timevalue,app.FFTvalue,app.Wavedata,app.SelectedFrequency);
-    %--%
+    [T_dominant,app.Wavedata.fft.fs] =  pkg.fun.plt_fft(timevalue,depvalue,app.Wavedata,[],startTime,endTime);  
 end
 
-%--UPDATE STUFF BELOW:
-if app.FrequencyCheckBox.Value == 0
-    app.Wavedata.addprop(strcat('DominantPeriod',num2str(app.SelectDependentVariableListBox.Value)));
-    app.Wavedata.addprop(strcat('FS',num2str(app.SelectDependentVariableListBox.Value)));
-    [app.Wavedata.(strcat('DominantPeriod',num2str(app.SelectDependentVariableListBox.ItemsData))),app.Wavedata.(strcat('FS',num2str(app.SelectDependentVariableListBox.ItemsData)))] =  pkg.fun.plt_fft(app.Timevalue,app.FFTvalue,app.Wavedata);
-end
-%--%
+% %--UPDATE STUFF BELOW:
+% if app.FrequencyCheckBox.Value == 0
+%     app.Wavedata.addprop(strcat('DominantPeriod',num2str(app.SelectDependentVariableListBox.Value)));
+%     app.Wavedata.addprop(strcat('FS',num2str(app.SelectDependentVariableListBox.Value)));
+%     [app.Wavedata.(strcat('DominantPeriod',num2str(app.SelectDependentVariableListBox.ItemsData))),app.Wavedata.(strcat('FS',num2str(app.SelectDependentVariableListBox.ItemsData)))] =  pkg.fun.plt_fft(app.Timevalue,app.FFTvalue,app.Wavedata);
+% end
+% %--%
 current_ch = app.Wavedata.map(strcat('ch',num2str(depvalue)));
 temp_table = cell2table({current_ch,T_dominant});
 temp_table.Properties.VariableNames = {'Channel','T_dominant'};

@@ -1,9 +1,8 @@
 function UploadDataButtonPushed(app, event)
 [filename,data_dir] = uigetfile('*.txt','Select the 0 deg FD file');
 datatype = 1;
-% 0 - test data
-% 1 - user-defined (dataClass)
-% 2 - signal (signalClass)
+% 1 - Delimited text file (.csv,.txt)
+% 2 - Hierarchical Data Format v5 (HDF5)
 % (keep hard coded as 1 for now)
 
 %%%%%% Data Settings Drop Down %%%%%%%
@@ -48,7 +47,7 @@ elseif(strcmp(app.DataFormatDropDown.Value,'Integer'))
     dataformat = '%int64';
 end
 
-% %%%%% Delmiiter %%%%%%%
+%%%%%% Delmiiter %%%%%%%
 if isempty(app.DelimiterEditField.Value)
  	delimiter = '~'; % (accept default value defined in read_data.m)
 else
@@ -84,11 +83,20 @@ app.UploadDataTable.ColumnName = wavedata.headers;
 app.SelectDatatoAnalyzeListBox.Items = app.Wavedata.headers;
 app.DataLegendTable.Data = wavedata.map_legend;
 
+% FFT 
 app.SelectIndependentVariableTimeListBox.Items = app.Wavedata.headers;
-app.SelectDependentVariableListBox.Items = app.Wavedata.headers;
+% Use 1 as default:
+DefaultIVTLBV = 1;
+app.SelectIndependentVariableTimeListBox.Value = app.SelectIndependentVariableTimeListBox.Items{DefaultIVTLBV};
 
-app.SelectIndependentVariableTimeListBox_2.Items = app.Wavedata.headers;
-app.SelectDependentVariableListBox_2.Items = app.Wavedata.headers;
+app.SelectDependentVariableListBox.Items = app.Wavedata.headers;
+% Use 2 as default:
+DefaultDVTLBV = 2;
+app.SelectDependentVariableListBox.Value = app.SelectIndependentVariableTimeListBox.Items{DefaultDVTLBV};
+
+
+% app.SelectIndependentVariableTimeListBox_2.Items = app.Wavedata.headers;
+% app.SelectDependentVariableListBox_2.Items = app.Wavedata.headers;
 
 app.WaveletSelectIndependentVariableTimeListBox.Items = app.Wavedata.headers;
 app.WaveletSelectDependentVariableListBox.Items = app.Wavedata.headers;
@@ -101,5 +109,9 @@ columnlength = length(app.Wavedata.ch1);
 
 app.FilteredData = zeros(columnlength,headerlength);
 
+% Update default FFT start and end times
+Time = app.Wavedata.(strcat('ch',num2str(DefaultIVTLBV)));
+app.StartTimeEditField.Value = Time(1);
+app.EndTimeEditField.Value = Time(end);
 end
 

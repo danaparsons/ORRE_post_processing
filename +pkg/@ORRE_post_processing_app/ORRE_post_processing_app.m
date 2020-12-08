@@ -86,11 +86,11 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
         SelectDatatoAnalyzePANEL                            matlab.ui.container.Panel
         SelectDatatoAnalyzeListBox                          matlab.ui.control.ListBox
         ClearButton                                         matlab.ui.control.CheckBox
-% <<<<<<< HEAD
-%         SelectDatatoAnalyzeLabel                            matlab.ui.control.Label
+
+        SelectDatatoAnalyzeLabel                            matlab.ui.control.Label
 % =======
 %         SelectDatatoAnalyzeLabel                            matlab.ui.control.Label  
-% >>>>>>> 818d0e7c5d33b1b920bb909c75d482af3c802950
+
         TimeHistTimeDropDownLabel                           matlab.ui.control.Label
         TimeHistTimeDropDown                                matlab.ui.control.DropDown
         FiltFreqTable                                       matlab.ui.control.Table
@@ -124,16 +124,16 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
         WaveletSelectDependentVariableListBox               matlab.ui.control.ListBox
         PlotWaveletTransformButton                          matlab.ui.control.Button
         
-        % Laplace transform tab components
-        LaplaceTransformTab                                 matlab.ui.container.Tab
-        LaplacePanel                                            matlab.ui.container.Panel
-        LaplaceInfo                                          matlab.ui.control.TextArea
-        SelectIndependentVariableTimeListBox_2Label         matlab.ui.control.Label
-        SelectIndependentVariableTimeListBox_2              matlab.ui.control.ListBox
-        SelectDependentVariableListBox_2Label               matlab.ui.control.Label
-        SelectDependentVariableListBox_2                    matlab.ui.control.ListBox
-        PlotLaplaceTransformButton                          matlab.ui.control.Button
-        LaplaceTransformLabel                               matlab.ui.control.Label
+%         % Laplace transform tab components
+%         LaplaceTransformTab                                 matlab.ui.container.Tab
+%         LaplacePanel                                            matlab.ui.container.Panel
+%         LaplaceInfo                                          matlab.ui.control.TextArea
+%         SelectIndependentVariableTimeListBox_2Label         matlab.ui.control.Label
+%         SelectIndependentVariableTimeListBox_2              matlab.ui.control.ListBox
+%         SelectDependentVariableListBox_2Label               matlab.ui.control.Label
+%         SelectDependentVariableListBox_2                    matlab.ui.control.ListBox
+%         PlotLaplaceTransformButton                          matlab.ui.control.Button
+%         LaplaceTransformLabel                               matlab.ui.control.Label
         
         % Create report tab components
         CreateReportTab                                     matlab.ui.container.Tab
@@ -151,7 +151,7 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
         FilterDataTimeHistoryCheckBox                       matlab.ui.control.CheckBox
         TimeHistoryCheckBox                                 matlab.ui.control.CheckBox
         FourierTransformsCheckBox                           matlab.ui.control.CheckBox
-        LaplaceTransformsCheckBox                           matlab.ui.control.CheckBox
+%         LaplaceTransformsCheckBox                           matlab.ui.control.CheckBox
         WaveletTransformsCheckBox                           matlab.ui.control.CheckBox
         GraphFileTypeDropDownLabel                          matlab.ui.control.Label
         GraphFileTypeDropDown                               matlab.ui.control.DropDown
@@ -186,8 +186,8 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
         FilteredData        %holds new data filtered by user
         filtplot            %holds plot created on filter data tab
         SelectedFrequency   %holds frequency selection for FFT button
-        Timevalue_laplace %in progress
-        laplacevalue      %in progress
+%         Timevalue_laplace %in progress
+%         laplacevalue      %in progress
         
         Waveletvalue        %holds selected dependent variable for Wavelet Transform
         WaveletTimevalue    %holds selected independent variable for Wavelet Transform
@@ -227,7 +227,9 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
         
         %% ------------------- FOURIER TRANSFORM TAB ------------------- %%
 
-
+        % Select Independent Value List
+        SIVTLListBoxValueChanged(app, event)
+        
         % FFT Frequency Input 
         FrequencyCheckBoxValueChanged(app, event)
         
@@ -246,7 +248,7 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
         
         %% ------------------- LAPLACE TRANSFORM TAB ------------------- %%
 
-        PlotLaplaceTransformButtonPushed(app, event)    
+%         PlotLaplaceTransformButtonPushed(app, event)    
         
         %% -------------------- CREATE REPORT TAB ----------------------%%
         
@@ -682,13 +684,16 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             % Create SelectIndependentVariableTimeListBox
             app.SelectIndependentVariableTimeListBox = uilistbox(app.FFTPanel);
             app.SelectIndependentVariableTimeListBox.Position = [13 225 169 74];
-
+            app.SelectIndependentVariableTimeListBox.ValueChangedFcn = createCallbackFcn(app, @SIVTLListBoxValueChanged, true)
+%             app.DataFilterListBox.ValueChangedFcn = createCallbackFcn(app, @DataFilterListBoxValueChanged, true);
+            
             % Create SelectDependentVariableListBoxLabel
             app.SelectDependentVariableListBoxLabel = uilabel(app.FFTPanel);
             app.SelectDependentVariableListBoxLabel.HorizontalAlignment = 'center';
             app.SelectDependentVariableListBoxLabel.Position = [258 301 102 28];
             app.SelectDependentVariableListBoxLabel.Text = {'Select Dependent'; 'Variable'};
-
+            
+            
             % Create SelectDependentVariableListBox
             app.SelectDependentVariableListBox = uilistbox(app.FFTPanel);
             app.SelectDependentVariableListBox.Position = [220 225 172 74];
@@ -740,7 +745,8 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             % Create StartTimeEditField
             app.StartTimeEditField = uieditfield(app.OptionalSpecificationsPanel, 'numeric');
             app.StartTimeEditField.Position = [16 12 80 22];
-
+           
+            
             % Create EndTimeEditFieldLabel
             app.EndTimeEditFieldLabel = uilabel(app.OptionalSpecificationsPanel);
             app.EndTimeEditFieldLabel.HorizontalAlignment = 'right';
@@ -750,6 +756,7 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             % Create EndTimeEditField
             app.EndTimeEditField = uieditfield(app.OptionalSpecificationsPanel, 'numeric');
             app.EndTimeEditField.Position = [164 12 80 22];
+            
 
             %% ----------------- WAVELET TRANSFORM TAB ----------------- %%
             
@@ -805,55 +812,55 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
 
             %% ----------------- LAPLACE TRANSFORM TAB ----------------- %%
             
-            % Create LaplaceTransformTab
-            app.LaplaceTransformTab = uitab(app.TabGroup);
-            app.LaplaceTransformTab.Title = 'Laplace Transform';
-            app.LaplaceTransformTab.BackgroundColor = [0.651 0.8353 0.9294];
-            
-             % Create LaplacePanel
-            app.LaplacePanel = uipanel(app.LaplaceTransformTab);
-            app.LaplacePanel.Position = [179 243 421 189];
-            app.LaplacePanel.BackgroundColor = [0.8 0.8 0.8];
-
-            % Create LaplaceInfo
-            app.LaplaceInfo = uitextarea(app.LaplacePanel);
-            app.LaplaceInfo.Position = [101 138 221 40];
-            app.LaplaceInfo.Value = {'Choose channel values from the boxes below to compute Laplace Transform.'};
-
-            % Create SelectIndependentVariableTimeListBox_2Label
-            app.SelectIndependentVariableTimeListBox_2Label = uilabel(app.LaplacePanel);
-            app.SelectIndependentVariableTimeListBox_2Label.HorizontalAlignment = 'center';
-            app.SelectIndependentVariableTimeListBox_2Label.Position = [43 88 113 28];
-            app.SelectIndependentVariableTimeListBox_2Label.Text = {'Select Independent '; 'Variable (Time)'};
-
-            % Create SelectIndependentVariableTimeListBox_2
-            app.SelectIndependentVariableTimeListBox_2 = uilistbox(app.LaplacePanel);
-            app.SelectIndependentVariableTimeListBox_2.Position = [11 12 178 74];
-
-            % Create SelectDependentVariableListBox_2Label
-            app.SelectDependentVariableListBox_2Label = uilabel(app.LaplacePanel);
-            app.SelectDependentVariableListBox_2Label.HorizontalAlignment = 'center';
-            app.SelectDependentVariableListBox_2Label.Position = [268 91 102 28];
-            app.SelectDependentVariableListBox_2Label.Text = {'Select Dependent'; 'Variable'};
-
-            % Create SelectDependentVariableListBox_2
-            app.SelectDependentVariableListBox_2 = uilistbox(app.LaplacePanel);
-            app.SelectDependentVariableListBox_2.Position = [233 15 172 74];
-
-            % Create PlotLaplaceTransformButton
-            app.PlotLaplaceTransformButton = uibutton(app.LaplaceTransformTab, 'push');
-            app.PlotLaplaceTransformButton.ButtonPushedFcn = createCallbackFcn(app, @PlotLaplaceTransformButtonPushed, true);
-            app.PlotLaplaceTransformButton.Position = [339 83 100 36];
-            app.PlotLaplaceTransformButton.BackgroundColor = [0.8 0.8 0.8];
-            app.PlotLaplaceTransformButton.Text = {'Plot Laplace'; 'Transform'};
-            
-            % Create LaplaceTransformLabel
-            app.LaplaceTransformLabel = uilabel(app.LaplaceTransformTab);
-            app.LaplaceTransformLabel.HorizontalAlignment = 'center';
-            app.LaplaceTransformLabel.Position = [325 421 127 26];
-            app.LaplaceTransformLabel.BackgroundColor = [0.8 0.8 0.8];
-            app.LaplaceTransformLabel.FontWeight = 'bold';
-            app.LaplaceTransformLabel.Text = 'Laplace Transform';
+%             % Create LaplaceTransformTab
+%             app.LaplaceTransformTab = uitab(app.TabGroup);
+%             app.LaplaceTransformTab.Title = 'Laplace Transform';
+%             app.LaplaceTransformTab.BackgroundColor = [0.651 0.8353 0.9294];
+%             
+%              % Create LaplacePanel
+%             app.LaplacePanel = uipanel(app.LaplaceTransformTab);
+%             app.LaplacePanel.Position = [179 243 421 189];
+%             app.LaplacePanel.BackgroundColor = [0.8 0.8 0.8];
+% 
+%             % Create LaplaceInfo
+%             app.LaplaceInfo = uitextarea(app.LaplacePanel);
+%             app.LaplaceInfo.Position = [101 138 221 40];
+%             app.LaplaceInfo.Value = {'Choose channel values from the boxes below to compute Laplace Transform.'};
+% 
+%             % Create SelectIndependentVariableTimeListBox_2Label
+%             app.SelectIndependentVariableTimeListBox_2Label = uilabel(app.LaplacePanel);
+%             app.SelectIndependentVariableTimeListBox_2Label.HorizontalAlignment = 'center';
+%             app.SelectIndependentVariableTimeListBox_2Label.Position = [43 88 113 28];
+%             app.SelectIndependentVariableTimeListBox_2Label.Text = {'Select Independent '; 'Variable (Time)'};
+% 
+%             % Create SelectIndependentVariableTimeListBox_2
+%             app.SelectIndependentVariableTimeListBox_2 = uilistbox(app.LaplacePanel);
+%             app.SelectIndependentVariableTimeListBox_2.Position = [11 12 178 74];
+% 
+%             % Create SelectDependentVariableListBox_2Label
+%             app.SelectDependentVariableListBox_2Label = uilabel(app.LaplacePanel);
+%             app.SelectDependentVariableListBox_2Label.HorizontalAlignment = 'center';
+%             app.SelectDependentVariableListBox_2Label.Position = [268 91 102 28];
+%             app.SelectDependentVariableListBox_2Label.Text = {'Select Dependent'; 'Variable'};
+% 
+%             % Create SelectDependentVariableListBox_2
+%             app.SelectDependentVariableListBox_2 = uilistbox(app.LaplacePanel);
+%             app.SelectDependentVariableListBox_2.Position = [233 15 172 74];
+% 
+%             % Create PlotLaplaceTransformButton
+%             app.PlotLaplaceTransformButton = uibutton(app.LaplaceTransformTab, 'push');
+%             app.PlotLaplaceTransformButton.ButtonPushedFcn = createCallbackFcn(app, @PlotLaplaceTransformButtonPushed, true);
+%             app.PlotLaplaceTransformButton.Position = [339 83 100 36];
+%             app.PlotLaplaceTransformButton.BackgroundColor = [0.8 0.8 0.8];
+%             app.PlotLaplaceTransformButton.Text = {'Plot Laplace'; 'Transform'};
+%             
+%             % Create LaplaceTransformLabel
+%             app.LaplaceTransformLabel = uilabel(app.LaplaceTransformTab);
+%             app.LaplaceTransformLabel.HorizontalAlignment = 'center';
+%             app.LaplaceTransformLabel.Position = [325 421 127 26];
+%             app.LaplaceTransformLabel.BackgroundColor = [0.8 0.8 0.8];
+%             app.LaplaceTransformLabel.FontWeight = 'bold';
+%             app.LaplaceTransformLabel.Text = 'Laplace Transform';
                        
             %% ------------------- CREATE REPORT TAB ------------------- %%
             
@@ -943,10 +950,10 @@ classdef ORRE_post_processing_app < matlab.apps.AppBase
             app.FourierTransformsCheckBox.Text = 'Fourier Transforms';
             app.FourierTransformsCheckBox.Position = [8 122 122 22];
 
-            % Create LaplaceTransformsCheckBox
-            app.LaplaceTransformsCheckBox = uicheckbox(app.SaveGraphsPanel);
-            app.LaplaceTransformsCheckBox.Text = 'Laplace Transforms';
-            app.LaplaceTransformsCheckBox.Position = [8 74 127 22];
+%             % Create LaplaceTransformsCheckBox
+%             app.LaplaceTransformsCheckBox = uicheckbox(app.SaveGraphsPanel);
+%             app.LaplaceTransformsCheckBox.Text = 'Laplace Transforms';
+%             app.LaplaceTransformsCheckBox.Position = [8 74 127 22];
 
             % Create WaveletTransformsCheckBox
             app.WaveletTransformsCheckBox = uicheckbox(app.SaveGraphsPanel);
