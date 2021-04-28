@@ -1,10 +1,10 @@
-function [dominant_period,Fs] = plt_fft(t,y,varargin)
+function [f,P1,dominant_period,Fs] = plt_fft(t,y,varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Header %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Filename:     plt_fft.m    
 % Description:  ORRE Post Processing Program function to plot fft.
 % Authors:      D. Lukas and J. Davis
 % Created on:   7-9-20
-% Last updated: 7-9-20 by J. Davis
+% Last updated: 4-28-21 by J. Davis
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Notes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % The function <plt_fft.m> is designed to have two call methods:
 % (1) Pass the function explicit data arrays:
@@ -33,9 +33,9 @@ function [dominant_period,Fs] = plt_fft(t,y,varargin)
 %
 % The complete call options are as follows:
 %
-%     [dominant_period] = plt_fft(t,y,data,fs,startTime,endTime)
+%     [f,P1,dominant_period,Fs] = plt_fft(t,y,data,fs,startTime,endTime)
 % 
-%     Where "fs" is the desired sample frequency. More options to come...
+%     Where "Fs" is the desired sample frequency. More options to come...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Input Parsing
 
@@ -124,6 +124,11 @@ elseif exist('endTime','var')
 else
    t0 = t(1); tf = t(end);
 end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELETE MEEEEEE
+t0 = t(1);
+tf = t(end);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 t = t(t >= t0 & t <= tf);
 y = y(t >= t0 & t <= tf);
 
@@ -160,7 +165,7 @@ P1 = P2(1:L/2+1);
 P1(2:end-1) = 2*P1(2:end-1);
 f = Fs*(0:(L/2))/L;
 fft_fig = figure;
-plot(f,P1) 
+semilogx(f,P1) 
 title(['Single-Sided Amplitude Spectrum of ',dependent_varname])
 xlabel('f (Hz)')
 ylabel('|P1(f)|')

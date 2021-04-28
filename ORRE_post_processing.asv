@@ -20,25 +20,24 @@ end
 
 %% ----------------------------- Examples ------------------------------ %%
 if show_examples == 1
-    
 % Define inputs:
 directory = "C:\Users\orre2\Desktop\OSWEC_inertia\";     % current directory
 filename = "run1.txt";
 datatype = 1;
-ntaglines = 12;
+ntaglines = 11;
 nheaderlines = 1;
-tagformat = '%s';
-headerformat = '%s';
+tagformat = "%s";
+headerformat = "%s";
 dataformat =  '%f';
-headerdelimiter = char(9); %tab
-datadelimiter = ' ';
+default_delimiter = ' ';
 commentstyle = '%';
+     % 1 - user-defined (dataClass)
   
 % Call the <read_data.m> function to create an instance of the appropriate
 % data class:   
 
-data = pkg.fun.read_data(directory,filename,datatype,ntaglines,...
-    nheaderlines,tagformat,headerformat,dataformat,headerdelimiter,datadelimiter,commentstyle);
+data = pkg.fun.read_data(data_dir,filename,datatype,ntaglines,...
+    nheaderlines,tagformat,headerformat,dataformat,delimiter,commentstyle);
     
 %%% Note:
 % The function <read_data.m> is designed to take a variable number of input 
@@ -111,7 +110,27 @@ data.run2 = pkg.fun.read_data(directory,filename,datatype,ntaglines,...
 data.run3 = pkg.fun.read_data(directory,filename,datatype,ntaglines,...
     nheaderlines,tagformat,headerformat,dataformat,headerdelimiter,datadelimiter,commentstyle);
 
+plot(data.run1.ch1,data.run1.ch2)
 
+dominant_period = pkg.fun.plt_fft(data.run1.ch1,data.run1.ch2)
+
+%
+% y = bandpass(data.run1.ch2,[.35,1.45],(2*10^-3)^(-1)
+phi0 = data.run1.ch2(data.run1.ch2 == min(data.run1.ch2))
+t0    = data.run1.ch1(data.run1.ch2 == phi0)
+phi = data.run1.ch2(data.run1.ch2 >= min(data.run1.ch2))
+t   = data.run1.ch1(data.run1.ch2 >= min(data.run1.ch2))
+plot(t,phi)
+y = bandpass(data.run1.ch2,[.8,1.2],(2*10^-3)^(-1))
+% y = lowpass(data.run1.ch2,0.85,(2*10^-3)^(-1),'Steepness',0.95)
+figure
+pkg.fun.plt_fft(data.run1.ch1,data.run1.ch2); hold on
+pkg.fun.plt_fft(data.run1.ch1,y)
+figure
+plot(data.run1.ch1,data.run1.ch2-mean(data.run1.ch2(end-100:end))); hold on
+plot(data.run1.ch1,y)
+%      
+     
 end
 
 
