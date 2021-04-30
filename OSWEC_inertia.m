@@ -100,6 +100,6 @@ bar(1,Iyy_mean,'DisplayName','Swing Test'); hold on
     er.Color = [0 0 0];                            
     er.LineStyle = 'none';
 bar(2,IyySW,'DisplayName','SW')
-ylabel('Iyy (kg-m^2)')
-%xticks('exp','SW')
-legend()
+ylabel('I_{yy} (kg-m^2)')
+xticks([1,2])
+xticklabels({'exp','SW'})
