@@ -1,4 +1,4 @@
-function [f,P1,dominant_period,Fs] = plt_fft(t,y,varargin)
+function [f,P1,dominant_period,Fs,data] = plt_fft(t,y,varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Header %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Filename:     plt_fft.m    
 % Description:  ORRE Post Processing Program function to plot fft.
@@ -114,6 +114,15 @@ else
     error('Required input variable "y" is not properly defined as an array or a specific channel indicator.')
 end
 
+%%%%%%%%%%%%%%%%%%%%% method 2 stuff %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+if ~isempty(data)
+   if ~isprop(data,'fft')
+        data.addprop('fft');
+   end
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % Adjust time list according to start and end times:
 if exist('startTime','var') && exist('endTime','var')
    t0 = startTime; tf = endTime;  
@@ -155,7 +164,11 @@ Y = fft(y);
 L = length(y);
 
 if isempty(fs)
-    Fs = mean(diff(t))^-1;
+    try
+        Fs = data.fft.fs;
+    catch
+        Fs = mean(diff(t))^-1;
+    end
 else
     Fs = fs;
 end 
@@ -164,13 +177,20 @@ P2 = abs(Y/L);
 P1 = P2(1:L/2+1);
 P1(2:end-1) = 2*P1(2:end-1);
 f = Fs*(0:(L/2))/L;
-fft_fig = figure;
-semilogx(f,P1) 
-title(['Single-Sided Amplitude Spectrum of ',dependent_varname])
-xlabel('f (Hz)')
-ylabel('|P1(f)|')
+
+% fft_fig = figure;
+% semilogx(f,P1) 
+% title(['Single-Sided Amplitude Spectrum of ',dependent_varname])
+% xlabel('f (Hz)')
+% ylabel('|P1(f)|')
 
 [pk_fft, loc_fft]= findpeaks(P1,f);
 dominant_period = loc_fft(pk_fft == max(pk_fft))^-1;
+
+if ~isempty('data')
+    data.fft.f = f;
+    data.fft.P = P1;
+    data.fft.dominant_period = dominant_period;
+    data.fft.fs = Fs;
 end
 

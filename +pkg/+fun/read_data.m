@@ -97,11 +97,19 @@ datadelimiter = p.Results.datadelimiter;
 commentstyle = p.Results.commentstyle;
 
 %% ------------------------ Begin reading data ------------------------- %%
-
+% Convert directory to char, if it is not already
+if isstring(directory)  
+    directory = char(directory);
+end
+% Check if the directory ends in a '\' or '/'. If not, be kind and add it.
+if ~contains(directory(end),{'\','/'})
+    directory = [directory,'\'];
+end
 % Concatenate file location from provided directory and filename; assign a 
 % fileID for later use in textscan function:
 file_location = strcat(directory,filename);
 fileID = fopen(file_location,'r');
+
 
 % Interpret data type from input key:
    

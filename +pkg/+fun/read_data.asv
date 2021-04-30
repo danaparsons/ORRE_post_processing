@@ -9,7 +9,7 @@
 % of input arguments. The complete call options are as follows:
 %
 % data = pkg.fun.read_data(data_dir,filename,datatype,ntaglines,
-%    nheaderlines,tagformat,headerformat,dataformat,delimiter,commentstyle)
+%    nheaderlines,tagformat,headerformat,dataformat,headerdelimiter,datadelimiter,commentstyle)
 % 
 % Only the first three inputs (data_dir,filename, and datatype) are
 % required. The remaining inputs are optional and pertain only to the
@@ -42,8 +42,8 @@ default_nheaderlines =   1;
 default_tagformat =   '%s'; 
 default_headerformat ='%s'; 
 default_dataformat =  '%f';
-default_headerdelimiter = '\t';
-default_datadelimiter = ' ';
+default_headerdelimiter = ',';
+default_datadelimiter = ',';
 default_commentstyle = '%';
 
 % Handle defaulting of inputs using '~'
@@ -100,8 +100,13 @@ commentstyle = p.Results.commentstyle;
 
 % Concatenate file location from provided directory and filename; assign a 
 % fileID for later use in textscan function:
+if ~contains(directory{end},{'\','/'})
+    directory
+end
+
 file_location = strcat(directory,filename);
 fileID = fopen(file_location,'r');
+
 
 % Interpret data type from input key:
    
