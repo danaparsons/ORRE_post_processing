@@ -39,9 +39,11 @@ if ~exist('data','var')
 end
 
 
+run1struc = data.run1.to_struct();
+
 % moment of inertia calc loop
 g = 9.81;
-d = 0.18; % from SW, no ballast
+d = 0.18; % from hang test
 M = 6.446+7.044; % body + ballast (kg)
 
 
