@@ -5,7 +5,7 @@
 %               store user data.
 % Authors:      D. Lukas and J. Davis
 % Created on:   7-8-20
-% Last updated: 8-12-20 by J. Davis
+% Last updated: 5-6-21 by J. Davis
 % Notes: Uses dynamicprops superclass to enable the dynamic creation 
 % of class properties:
 % https://www.mathworks.com/help/matlab/matlab_oop/dynamic-properties-adding-properties-to-an-instance.html
@@ -19,8 +19,7 @@ classdef dataClass < dynamicprops
     headers     % Store data headers
     map         % Map data channels to headers
     map_legend  % Store map key and value set for user reference
-%     fs          %Store sampling frequency
-    % Channels are added using the dynamic properties function <addprop>
+    % Additional properties and channels are added using the dynamic properties function <addprop>
     
     end
 
@@ -73,12 +72,7 @@ classdef dataClass < dynamicprops
                 % association with the proper heading.
                 % For example, calling the following: dataObj.map('ch1') 
                 % will yield the string 'Time (s)'
-                
-%                 if isempty(fs)
-%                     dataObj.fs = [];
-%                 else
-%                     dataObj.fs = fs;
-%                 end 
+
             end
 
         end
@@ -101,7 +95,14 @@ classdef dataClass < dynamicprops
             group = matlab.mixin.util.PropertyGroup( props );
         end  
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-       
+        
+        function dataStruct = to_struct(obj)
+            %props =  builtin('properties',obj); % Note <properties> has been overwritten in a previous method
+            props =  properties(obj);
+            for p = 1:length(props)
+                dataStruct.(props{p}) = obj.(props{p});
+            end
+        end
     end % end of methods
 end % end of classdef
 
