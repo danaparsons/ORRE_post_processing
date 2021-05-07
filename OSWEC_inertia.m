@@ -41,7 +41,7 @@ end
 
 % moment of inertia calc loop
 g = 9.81;
-d = 0.125; % from SW, no ballast
+d = 0.18; % from SW, no ballast
 M = 6.446+7.044; % body + ballast (kg)
 
 

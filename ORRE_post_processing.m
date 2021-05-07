@@ -5,7 +5,7 @@
 % Created on:   6-10-20
 % Last updated: 8-9-20 by J. Davis
 %% ------------------------------ Inputs ------------------------------- %%
-run_app = 1;
+run_app = 0;
 show_examples = 0;
 UserDefinedScript = 'OSWEC_inertia.m';
 
