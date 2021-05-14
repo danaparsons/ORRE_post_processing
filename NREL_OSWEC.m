@@ -31,6 +31,6 @@ opts.as_struct = true;
 %if ~exist('data','var')
     data = pkg.fun.read_data2(opts);
 %end
-out = OSWEC_freedecay(data);
+data = OSWEC_freedecay(data,false);
 
 
