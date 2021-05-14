@@ -103,6 +103,14 @@ classdef dataClass < dynamicprops
                 dataStruct.(props{p}) = obj.(props{p});
             end
         end
+        
+        function rename(obj,ch,newname)
+            obj.map(ch)
+        end
+    end
+    
+    methods (Static)
+  
     end % end of methods
 end % end of classdef
 

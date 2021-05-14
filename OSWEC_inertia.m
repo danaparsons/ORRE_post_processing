@@ -39,8 +39,8 @@ if ~exist('data','var')
 end
 
 
-run1struc = data.run1.to_struct();
-
+%run1struc = data.run1.to_struct();
+data.run1.rename('ch1','y')
 % moment of inertia calc loop
 g = 9.81;
 d = 0.18; % from hang test
