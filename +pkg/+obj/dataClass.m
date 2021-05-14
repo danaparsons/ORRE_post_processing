@@ -14,7 +14,7 @@
 classdef dataClass < dynamicprops
     
     properties
-    filename    % Store original filename 
+    file        % Store original filename 
     tags        % Store any data tags relevant to the experiment 
     headers     % Store data headers
     map         % Map data channels to headers
@@ -26,7 +26,7 @@ classdef dataClass < dynamicprops
     methods
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Constructor method - constructs instance of this class
-        function dataObj = dataClass(filename,tags,headers,data)
+        function dataObj = dataClass(file,tags,headers,data)
             
             % Initialize obj when called with no input arguments
             if nargin == 0
@@ -38,11 +38,11 @@ classdef dataClass < dynamicprops
                 
             else
                 % Handle empty inputs:
-                if isempty(filename); filename = '(Empty)'; end
+                if isempty(file); file = '(Empty)'; end
                 if isempty(tags); tags = '(Empty)'; end
                 
                 % Construct tag and header properties from input:
-                dataObj.filename = filename;
+                dataObj.file = file;
                 dataObj.tags = tags;
                 dataObj.headers = headers; 
                 

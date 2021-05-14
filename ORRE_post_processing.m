@@ -5,22 +5,23 @@
 % Created on:   6-10-20
 % Last updated: 8-9-20 by J. Davis
 %% ------------------------------ Inputs ------------------------------- %%
-run_app = 1;
-show_examples = 0;
-UserDefinedScript = 'OSWEC_inertia.m';
+run_app = 0;
+show_examples = 1;
+%UserDefinedScript = 'OSWEC_inertia.m';
 
 %% -------------------------------- Run -------------------------------- %%
 if run_app == 1 
     ORRE_post_processing_app    % Execute app
-else  
+elseif show_examples == 1
+else
     run(UserDefinedScript)          % Run script
 end
 %% ----------------------------- Examples ------------------------------ %%
 if show_examples == 1
     
 % Define inputs:
-directory = "C:\Users\orre2\Desktop\OSWEC_inertia\";     % current directory
-filename = "run1.txt";
+directory = 'data\OSWEC_inertia\w_ballast';     % current directory
+file = "Run1.txt";
 datatype = 1;
 ntaglines = 12;
 nheaderlines = 1;
@@ -34,8 +35,9 @@ commentstyle = '%';
 % Call the <read_data.m> function to create an instance of the appropriate
 % data class:   
 
-data = pkg.fun.read_data(directory,filename,datatype,ntaglines,...
-    nheaderlines,tagformat,headerformat,dataformat,headerdelimiter,datadelimiter,commentstyle);
+opts = pkg.obj.readDataOpt(directory,'all');
+opts.as_struct = true;
+data = pkg.fun.read_data2(opts);
     
 %%% Note:
 % The function <read_data.m> is designed to take a variable number of input 

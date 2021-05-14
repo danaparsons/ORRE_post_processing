@@ -1,11 +1,14 @@
 %% ------------------------------ Header ------------------------------- %%
-% Filename:     ORRE_post_processing.m
-% Description:  ORRE Post Processing Program input file (test)
-% Authors:      D. Lukas and J. Davis
-% Created on:   6-10-20
-% Last updated: 8-9-20 by J. Davis
-%% ------------------------------------ -------------------------------- %%
+% Filename:     OSWEC_inerta.m
+% Description:  Calculates the inertia of an OSWEC-type model from input 
+%               dry inertia run data
+% Author:       J. Davis
+% Created on:   5-13-21
+% Last updated: 5-13-21 by J. Davis
+%% --------------------------------------------------------------------- %%
+function out = OSWEC_inertia(data)
 
+<<<<<<< HEAD
 close all % close any open figures
 
 % Define inputs:
@@ -41,10 +44,14 @@ end
 
 %run1struc = data.run1.to_struct();
 data.run1.rename('ch1','y')
+
+numruns = length(fieldnames(data)); % number of fields in the dataset
+
+
 % moment of inertia calc loop
-g = 9.81;
-d = 0.18; % from hang test
-M = 6.446+7.044; % body + ballast (kg)
+g = 9.81;           % (m/s^2)
+d = 0.18;           %  from hang test (m)
+M = 6.446+7.044;    % body + ballast (kg)
 
 
 Tn  = zeros(numruns,1); % initialize vector to store dominant periods
@@ -55,7 +62,7 @@ plotloop = false;
 
 for runnum = 1:numruns
     
-    run = ['run',num2str(runnum)];
+    run = ['Run',num2str(runnum)];
 
     phi0 = min(data.(run).ch2(data.(run).ch2 == min(data.(run).ch2)));
     t0   = min(data.(run).ch1(data.(run).ch2 == phi0));
@@ -88,20 +95,31 @@ wn(runnum)  = 2*pi/Tn(runnum);
 Iyy(runnum) = M*g*d/wn(runnum)^2; % kg-m^2        
 end
 
-Tn_mean  = mean(Tn);
-Tn_stdev = std(Tn);
+% compute basic statistics
+Tn_mean  = mean(Tn); Tn_std = std(Tn);
+Iyy_mean = mean(Iyy); Iyy_std  = std(Iyy);
 
-Iyy_mean = mean(Iyy);
-Iyy_std  = std(Iyy);
-
-IyySW   = 0.6583; % kg-m^2
-
+% visualize results
+figure; hold on
+scatter(1:numruns,Iyy,'o','MarkerFaceColor','k','MarkerEdgeColor','k','DisplayName','observations')
+    yline(Iyy_mean,'LineWidth',1.5,'DisplayName','mean')
+    ylim([0.9 1.1]*Iyy_mean)
+    xlim([1 numruns])
+    % plot 1 stddev from mean
+    inBetween = [(Iyy_mean+Iyy_std)*[1 1], fliplr((Iyy_mean-Iyy_std)*[1 1])];
+    fill([[1 numruns], fliplr([1 numruns])], inBetween, 'k','FaceAlpha',0.1,'EdgeColor','none','DisplayName','1 stdev')
+    xlabel('Observation')
+    ylabel('I_{yy} (kg-m^2)')
+    legend()
+    
+    
 figure
-bar(1,Iyy_mean,'DisplayName','Swing Test'); hold on
-    er = errorbar(1,Iyy_mean,Iyy_std,Iyy_std,'DisplayName','Swing Test STDEV');
-    er.Color = [0 0 0];                            
-    er.LineStyle = 'none';
-bar(2,IyySW,'DisplayName','SW')
-ylabel('I_{yy} (kg-m^2)')
-xticks([1,2])
-xticklabels({'exp','SW'})
+histogram(Iyy,round(numruns/2))
+xlabel('I_{yy} (kg-m^2)')
+ylabel('Count')
+
+out.Iyy_mean    = Iyy_mean;
+out.Iyy_std     = Iyy_std;
+out.Tn_mean     = Tn_mean;
+out.Tn_std      = Tn_std;
+end

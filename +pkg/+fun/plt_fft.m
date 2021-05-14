@@ -172,11 +172,12 @@ if isempty(fs)
 else
     Fs = fs;
 end 
-
+%warning('off','all')
 P2 = abs(Y/L);
-P1 = P2(1:L/2+1);
+P1 = P2(1:round(L/2+1));
 P1(2:end-1) = 2*P1(2:end-1);
-f = Fs*(0:(L/2))/L;
+f = Fs*(0:round(L/2))/L;
+%warning('on','all')
 
 % fft_fig = figure;
 % semilogx(f,P1) 
