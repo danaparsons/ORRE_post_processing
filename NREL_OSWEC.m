@@ -7,7 +7,7 @@
 %% ------------------------------ Inputs ------------------------------- %%
 
 dry_inertia = 0;
-
+free_decay = 0;
 %% ---------------------------- dry inertia ---------------------------- %%
 if dry_inertia == 1
     % Define inputs:
@@ -22,8 +22,21 @@ if dry_inertia == 1
 end
 
 %% ---------------------------- free decay ----------------------------- %%
+if free_decay == 1
+    % Define inputs:
+    directory = 'data\NREL_OSWEC\OSWEC_freedecay\';     % current directory
+    file = 'all';
+    
+    opts = pkg.obj.readDataOpt(directory,file);
+    opts.as_struct = true;
+    %if ~exist('data','var')
+    data = pkg.fun.read_data2(opts);
+    %end
+    data = OSWEC_regularwaves(data,false);
+end
+%% ---------------------------- regular ----------------------------- %%
 % Define inputs:
-directory = 'data\NREL_OSWEC\OSWEC_freedecay\';     % current directory
+directory = 'data\NREL_OSWEC\OSWEC_regularwaves\';     % current directory
 file = 'all';
 
 opts = pkg.obj.readDataOpt(directory,file);
@@ -31,6 +44,4 @@ opts.as_struct = true;
 %if ~exist('data','var')
     data = pkg.fun.read_data2(opts);
 %end
-data = OSWEC_freedecay(data,false);
-
-
+data = OSWEC_regularwaves(data,true);
