@@ -17,8 +17,8 @@ phi0    = zeros(numruns,1);
 
 for i = 1:numruns
     
+    % assign current run of the dataset
     run = setnames{i};
-    
     disp(run)
     
     phi_raw  = data.(run).ch6;
@@ -37,7 +37,8 @@ for i = 1:numruns
     [f_raw,P_raw] = pkg.fun.plt_fft(t,phi_raw);
     passbandfreq = 5; % Hz
     [phi,filter] = lowpass(phi_raw,passbandfreq,(2*10^-3)^(-1),'Steepness',0.95);
-    [f,P,Tn(i)] = pkg.fun.plt_fft(t,phi);
+    [f,P,T] = pkg.fun.plt_fft(t,phi);
+    Tn(i) = max(T);
     
     if plotloop == true
         figure
@@ -55,17 +56,19 @@ for i = 1:numruns
             xlabel('t(s)')
             ylabel('phi(deg)')
     end
-    
+
+% angular frequency:
 wn(i)  = 2*pi/Tn(i);
 
-    data.(run).t    = t;
-    data.(run).phi  = phi;
-    data.(run).t0   = t0;
-    data.(run).phi0 = phi0(i);
-    data.(run).f    = f.';
-    data.(run).P    = P;
-    data.(run).Tn   = Tn(i);
-    data.(run).wn   = wn(i);
+% populate fields:
+data.(run).t    = t;
+data.(run).phi  = phi;
+data.(run).t0   = t0;
+data.(run).phi0 = phi0(i);
+data.(run).f    = f.';
+data.(run).P    = P;
+data.(run).Tn   = Tn(i);
+data.(run).wn   = wn(i);
 end
 
 % compute basic statistics
@@ -73,18 +76,6 @@ Tn_mean  = mean(Tn); Tn_std = std(Tn);
 wn_mean = mean(wn); wn_std  = std(wn);
 
 % visualize results
-% figure; hold on
-% scatter(1:numruns,wn,'o','MarkerFaceColor','k','MarkerEdgeColor','k','DisplayName','observations')
-% yline(wn_mean,'LineWidth',1.5,'DisplayName','mean')
-%     % plot 1 stddev from mean
-%     inBetween = [(wn_mean+wn_std)*[1 1], fliplr((wn_mean-wn_std)*[1 1])];
-%     fill([[1 numruns], fliplr([1 numruns])], inBetween, 'k','FaceAlpha',0.1,'EdgeColor','none','DisplayName','1 stdev')
-%     ylim([0.9 1.1]*wn_mean)
-%     xlim([1 numruns])
-%     xlabel('Observation')
-%     ylabel('w_{n} (rad/s)')
-%     legend()
-
 figure; hold on
 scatter(phi0,wn,'o','MarkerFaceColor','k','MarkerEdgeColor','k','DisplayName','observations')
 yline(wn_mean,'LineWidth',1.5,'DisplayName','mean')

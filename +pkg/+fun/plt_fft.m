@@ -1,11 +1,11 @@
-function [f,P1,dominant_period,Fs,data] = plt_fft(t,y,varargin)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Header %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [f,P1,dominant_periods,Fs,fft_fields] = plt_fft(t,y,varargin)
+%% ------------------------------ Header ------------------------------- %%
 % Filename:     plt_fft.m    
 % Description:  ORRE Post Processing Program function to plot fft.
 % Authors:      D. Lukas and J. Davis
 % Created on:   7-9-20
 % Last updated: 4-28-21 by J. Davis
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Notes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% ------------------------------- Use --------------------------------- %%
 % The function <plt_fft.m> is designed to have two call methods:
 % (1) Pass the function explicit data arrays:
 %
@@ -36,34 +36,120 @@ function [f,P1,dominant_period,Fs,data] = plt_fft(t,y,varargin)
 %     [f,P1,dominant_period,Fs] = plt_fft(t,y,data,fs,startTime,endTime)
 % 
 %     Where "Fs" is the desired sample frequency. More options to come...
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Input Parsing
+%% -------------------------- Handle inputs ---------------------------- %%
+[t,y,fs,pkpromfactor,data] = handleinputs(t,y,varargin{:});
 
+%% ------------------------ Start of function -------------------------- %%
+% Adjust time list according to start and end times:
+if exist('startTime','var') && exist('endTime','var')
+   t0 = startTime; tf = endTime;  
+elseif exist('startTime','var') 
+   t0 = startTime; tf = t(end);
+elseif exist('endTime','var') 
+   t0 = t(0); tf = endTime;
+else
+   t0 = t(1); tf = t(end);
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELETE MEEEEEE
+t0 = t(1);
+tf = t(end);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+t = t(t >= t0 & t <= tf);
+y = y(t >= t0 & t <= tf);
+
+if t(end) ~= tf
+ x   
+end
+if t(1) ~= t0
+x
+end
+
+
+Y = fft(y);
+L = length(y);
+
+if isempty(fs)
+    try
+        Fs = data.fft.fs;
+    catch
+        Fs = mean(diff(t))^-1;
+    end
+else
+    Fs = fs;
+end 
+
+P2 = abs(Y/L);
+P1 = P2(1:round(L/2+1));
+P1(2:end-1) = 2*P1(2:end-1);
+f = Fs*(0:round(L/2))/L;
+
+
+% fft_fig = figure;
+% semilogx(f,P1) 
+% title(['Single-Sided Amplitude Spectrum of ',dependent_varname])
+% xlabel('f (Hz)')
+% ylabel(['|P1(f)| of ',dependent_varname])
+
+% CONSIDER ADDING pkprom as opt input
+pkprom = pkpromfactor*max(P1);
+
+[pk_fft, loc_fft]= findpeaks(P1,f,'MinPeakProminence',pkprom,'Annotate','extents');
+dominant_periods = loc_fft.^-1;
+peak_amps = pk_fft;
+
+% if ~isempty(data)
+%     data.fft.f = f;
+%     data.fft.P = P1;
+%     data.fft.dominant_periods = dominant_periods;
+%     data.fft.peak_amps = peak_amps;
+%     data.fft.fs = Fs;
+% end
+
+fft_fields = [];
+
+fft_fields.f = f;
+fft_fields.P = P1;
+fft_fields.dominant_periods = dominant_periods;
+fft_fields.peak_amps = peak_amps;
+fft_fields.fs = Fs;
+
+end
+%% --------------------------- Subfunctions ---------------------------- %%
+
+function bool = checkdata(x)
+   bool = false;
+   if isstruct(x)
+       bool = true;
+   elseif isobject(x)
+       bool = true;
+   else
+       error('Input is a structure or dataObject.');
+   end
+end
+
+function [t,y,fs,pkpromfactor,data] = handleinputs(t,y,varargin)
+%% Input Parsing
 % Return an error if minimum number of required arguments is not satisfied:
 if nargin < 2
     error('Not enough inputs.')
 end
    
 % Define default values for optional input arguments:
-default_data = [];
 default_fs = [];
-
+default_data = struct([]);
+default_pkpromfactor = 0.15;
 % Create input parser object
 p = inputParser;
 
-% Define valid input types:
-% valid_datatypes = @(x) mustBeMember(x,[0,1,2]); % only accept valid datatypes
-% example for a string: checkString = @(s) any(strcmp(s,{'square','rectangle'}));
-
 % Define input types:
-% The syntax for <addRequired> is
-% addRequired(inputParser,'input',default,validation)
 addRequired(p,'t');
 addRequired(p,'y');
-addOptional(p,'data',default_data)
 addOptional(p,'fs',default_fs,@isnumeric)
-addOptional(p,'startTime',default_fs,@isnumeric)
-addOptional(p,'endTime',default_fs,@isnumeric)
+addOptional(p,'pkpromfactor',default_pkpromfactor,@isnumeric)
+addOptional(p,'data',default_data,@checkdata) %@isobject
+% addOptional(p,'startTime',default_fs,@isnumeric)
+% addOptional(p,'endTime',default_fs,@isnumeric)
 
 % Parse the inputs:
 parse(p,t,y,varargin{:});
@@ -71,10 +157,12 @@ parse(p,t,y,varargin{:});
 %%% Assign parsed input variables:
 
 % Optional inputs
-data  = p.Results.data;
 fs = p.Results.fs;
-startTime = p.Results.startTime;
-endTime = p.Results.endTime;
+pkpromfactor = p.Results.pkpromfactor;
+data  = p.Results.data;
+% startTime = p.Results.startTime;
+% endTime = p.Results.endTime;
+
 %%% Determine whether "t" and "y" are data arrays or channel indicators:
 
 % Function handle for determining if general numeric input is an integer
@@ -114,84 +202,28 @@ else
     error('Required input variable "y" is not properly defined as an array or a specific channel indicator.')
 end
 
-%%%%%%%%%%%%%%%%%%%%% method 2 stuff %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% method 2 
 
 if ~isempty(data)
-   if ~isprop(data,'fft')
-        data.addprop('fft');
-   end
-end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% Adjust time list according to start and end times:
-if exist('startTime','var') && exist('endTime','var')
-   t0 = startTime; tf = endTime;  
-elseif exist('startTime','var') 
-   t0 = startTime; tf = t(end);
-elseif exist('endTime','var') 
-   t0 = t(0); tf = endTime;
-else
-   t0 = t(1); tf = t(end);
-end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELETE MEEEEEE
-t0 = t(1);
-tf = t(end);
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-t = t(t >= t0 & t <= tf);
-y = y(t >= t0 & t <= tf);
-
-if t(end) ~= tf
- x   
-end
-if t(1) ~= t0
-x
-end
-%%% Create variable name strings for plotting purposes:
-% If method 2 is used, use the map to retrieve channel names:
-if isprop(data,'map')
-    dependent_varname = data.map(y_ch);
-
-% If method 1 is used, default to generic variable name "y(t)": 
-else
-    dependent_varname = 'y(t)';
-end
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Beginning of Function
-
-Y = fft(y);
-L = length(y);
-
-if isempty(fs)
-    try
-        Fs = data.fft.fs;
-    catch
-        Fs = mean(diff(t))^-1;
+    if isobject(data)
+        if ~isprop(data,'fft')
+            data.addprop('fft');
+        end
+    elseif isstruct(data)
+        if ~isfield(data,'fft')
+            data.fft = [];
+        end
     end
-else
-    Fs = fs;
-end 
-%warning('off','all')
-P2 = abs(Y/L);
-P1 = P2(1:round(L/2+1));
-P1(2:end-1) = 2*P1(2:end-1);
-f = Fs*(0:round(L/2))/L;
-%warning('on','all')
-
-% fft_fig = figure;
-% semilogx(f,P1) 
-% title(['Single-Sided Amplitude Spectrum of ',dependent_varname])
-% xlabel('f (Hz)')
-% ylabel('|P1(f)|')
-
-[pk_fft, loc_fft]= findpeaks(P1,f);
-dominant_period = loc_fft(pk_fft == max(pk_fft))^-1;
-
-if ~isempty('data')
-    data.fft.f = f;
-    data.fft.P = P1;
-    data.fft.dominant_period = dominant_period;
-    data.fft.fs = Fs;
 end
 
+%%% Create variable name strings for plotting purposes:
+% % If method 2 is used, use the map to retrieve channel names:
+% if isprop(data,'map')
+%     dependent_varname = data.map(y_ch);
+% % If method 1 is used, default to generic variable name "y(t)": 
+% else
+%     dependent_varname = 'y(t)';
+% end
+% 
+
+end

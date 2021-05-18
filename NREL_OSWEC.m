@@ -7,7 +7,7 @@
 %% ------------------------------ Inputs ------------------------------- %%
 
 dry_inertia = 0;
-free_decay = 0;
+free_decay = 1;
 %% ---------------------------- dry inertia ---------------------------- %%
 if dry_inertia == 1
     % Define inputs:
@@ -32,16 +32,45 @@ if free_decay == 1
     %if ~exist('data','var')
     data = pkg.fun.read_data2(opts);
     %end
-    data = OSWEC_regularwaves(data,false);
+    data = OSWEC_freedecay(data,false);
+    % TO DO:
+    % 1) IMPLEMENT NL DAMPING
+    
 end
 %% ---------------------------- regular ----------------------------- %%
-% Define inputs:
-directory = 'data\NREL_OSWEC\OSWEC_regularwaves\';     % current directory
-file = 'all';
-
-opts = pkg.obj.readDataOpt(directory,file);
-opts.as_struct = true;
-%if ~exist('data','var')
-    data = pkg.fun.read_data2(opts);
-%end
-data = OSWEC_regularwaves(data,true);
+if regularwaves == 1
+    % Define inputs:
+    directory = 'data\NREL_OSWEC\OSWEC_regularwaves\';     % current directory
+    file = 'all';
+    
+    close all
+    
+    opts = pkg.obj.readDataOpt(directory,file);
+    opts.as_struct = true;
+    
+    if ~exist('data','var')
+        data = pkg.fun.read_data2(opts);
+    end
+    
+    channels = {7,9,10,11,12,13,14};
+    varnames = {'phi','fx','fy','fz','mx','my','mz'};
+    subfields = {'position','forceX','forceY','forceZ','momentX','momentY','momentZ'};
+    t0 = 10;
+    tf = 40;
+    fs = 500;
+    plotloop = false;
+    
+    data = OSWEC_regularwaves_pre(data,channels,varnames,subfields,t0,tf,fs,plotloop);
+        data.T13_A16p75_B2_8.pos.filter.f_cutoff  = 2; data.T13_A16p75_B2_8.filter.order  = 4;
+        data.T13_A16p75_B2_14.pos.filter.f_cutoff = 2; data.T13_A16p75_B2_14.filter.order = 4;
+    % rerun with modified filters:
+    data = OSWEC_regularwaves_pre(data,t0,tf,fs,true);
+    
+    % TO DO:
+    % 1) IMPLEMENT PROPER MEAN SUBTRACTION 
+    %       (see https://www.mathworks.com/help/matlab/data_analysis/detrending-data.html)
+    % 2) CHOP DATA AT A FINITE NUMBER OF CYCLES FOR FINAL FFT
+    % 3) REPEAT FOR REMAINING SIGNALS! -> DONE
+    
+    
+end
