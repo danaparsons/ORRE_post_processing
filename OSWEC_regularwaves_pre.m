@@ -36,12 +36,16 @@ for i = 1:numruns % loop over dataset runs
     y_raw  = data.(run).(ch);
     t_raw    = data.(run).ch1;
     
+    if sum(y_raw==0) > 0
+        
+    end
+    
+    
     % slice data
-    t_slice = t_raw(t_raw >= t0)-t0;
-    t_slice = t_slice(t_slice<=tf-t0);
-    y_slice = y_raw(t_raw >= t0);
-    y_slice =  y_slice(t_slice <= tf-t0);
-    y_slice = y_slice-mean(y_slice(end-round(0.05*length(y_slice)):end-5));
+    t_slice = t_raw(t_raw >= t0 & t_raw <= tf)-t0;
+    y_slice = y_raw(t_raw >= t0 & t_raw <= tf);
+    y_slice =  detrend(y_slice);
+    % y_slice = y_slice-mean(y_slice(end-round(0.05*length(y_slice)):end-5));
     
     % 0.15 for pos; 0.25 for loads
     pkpromfactor = 0.15; % threshold (as proportion of peak FFT value) below which additional peaks are considered insignificant
@@ -144,7 +148,7 @@ for i = 1:numruns % loop over dataset runs
             legend()
             xlabel('t(s)')
             ylabel(chlabel)
-            ylim(round(1.5*max(y)*[-1 1],1))
+            ylim(round(1.5*abs(max(y))*[-1 1],2))
             legend()
             
         subplot(1,2,2)
@@ -153,7 +157,7 @@ for i = 1:numruns % loop over dataset runs
             legend()
             xlabel('t(s)')
             ylabel(chlabel)
-            ylim(round(1.5*max(y)*[-1 1],1))
+            ylim(round(1.5*abs(max(y))*[-1 1],2))
             legend()  
             sgtitle(replace(run,'_',' '))
     end

@@ -5,9 +5,9 @@
 % Created on:   5-13-21
 % Last updated: 5-13-21 by J. Davis
 %% ------------------------------ Inputs ------------------------------- %%
-
 dry_inertia = 0;
-free_decay = 1;
+free_decay = 0;
+regularwaves = 1;
 %% ---------------------------- dry inertia ---------------------------- %%
 if dry_inertia == 1
     % Define inputs:
@@ -32,7 +32,7 @@ if free_decay == 1
     %if ~exist('data','var')
     data = pkg.fun.read_data2(opts);
     %end
-    data = OSWEC_freedecay(data,false);
+    data = OSWEC_freedecay(data,true);
     % TO DO:
     % 1) IMPLEMENT NL DAMPING
     
@@ -40,7 +40,8 @@ end
 %% ---------------------------- regular ----------------------------- %%
 if regularwaves == 1
     % Define inputs:
-    directory = 'data\NREL_OSWEC\OSWEC_regularwaves\';     % current directory
+    directory = 'data\NREL_OSWEC\OSWEC_regularwaves\5-14-21';
+    directory = 'data\NREL_OSWEC\OSWEC_regularwaves\5-19-21';
     file = 'all';
     
     close all
@@ -58,7 +59,7 @@ if regularwaves == 1
     t0 = 10;
     tf = 40;
     fs = 500;
-    plotloop = false;
+    plotloop = true;
     
     data = OSWEC_regularwaves_pre(data,channels,varnames,subfields,t0,tf,fs,plotloop);
         data.T13_A16p75_B2_8.pos.filter.f_cutoff  = 2; data.T13_A16p75_B2_8.filter.order  = 4;

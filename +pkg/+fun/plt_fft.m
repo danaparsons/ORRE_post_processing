@@ -37,23 +37,20 @@ function [f,P1,dominant_periods,Fs,fft_fields] = plt_fft(t,y,varargin)
 % 
 %     Where "Fs" is the desired sample frequency. More options to come...
 %% -------------------------- Handle inputs ---------------------------- %%
-[t,y,fs,pkpromfactor,data] = handleinputs(t,y,varargin{:});
+[t,y,fs,pkpromfactor,startTime,endTime,data] = handleinputs(t,y,varargin{:});
 
 %% ------------------------ Start of function -------------------------- %%
 % Adjust time list according to start and end times:
-if exist('startTime','var') && exist('endTime','var')
+if ~isempty(startTime) && ~isempty(endTime)
    t0 = startTime; tf = endTime;  
-elseif exist('startTime','var') 
+elseif ~isempty(startTime)
    t0 = startTime; tf = t(end);
-elseif exist('endTime','var') 
+elseif ~isempty(endTime)
    t0 = t(0); tf = endTime;
 else
    t0 = t(1); tf = t(end);
 end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DELETE MEEEEEE
-t0 = t(1);
-tf = t(end);
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 t = t(t >= t0 & t <= tf);
 y = y(t >= t0 & t <= tf);
@@ -91,7 +88,6 @@ f = Fs*(0:round(L/2))/L;
 % xlabel('f (Hz)')
 % ylabel(['|P1(f)| of ',dependent_varname])
 
-% CONSIDER ADDING pkprom as opt input
 pkprom = pkpromfactor*max(P1);
 
 [pk_fft, loc_fft]= findpeaks(P1,f,'MinPeakProminence',pkprom,'Annotate','extents');
@@ -124,11 +120,11 @@ function bool = checkdata(x)
    elseif isobject(x)
        bool = true;
    else
-       error('Input is a structure or dataObject.');
+       error('Input data is not a structure or dataObject.');
    end
 end
 
-function [t,y,fs,pkpromfactor,data] = handleinputs(t,y,varargin)
+function [t,y,fs,pkpromfactor,startTime,endTime,data] = handleinputs(t,y,varargin)
 %% Input Parsing
 % Return an error if minimum number of required arguments is not satisfied:
 if nargin < 2
@@ -137,8 +133,10 @@ end
    
 % Define default values for optional input arguments:
 default_fs = [];
-default_data = struct([]);
 default_pkpromfactor = 0.15;
+default_startTime = [];
+default_endTime = [];
+default_data = struct([]);
 % Create input parser object
 p = inputParser;
 
@@ -147,9 +145,9 @@ addRequired(p,'t');
 addRequired(p,'y');
 addOptional(p,'fs',default_fs,@isnumeric)
 addOptional(p,'pkpromfactor',default_pkpromfactor,@isnumeric)
-addOptional(p,'data',default_data,@checkdata) %@isobject
-% addOptional(p,'startTime',default_fs,@isnumeric)
-% addOptional(p,'endTime',default_fs,@isnumeric)
+addOptional(p,'startTime',default_startTime,@isnumeric)
+addOptional(p,'endTime',default_endTime,@isnumeric)
+addOptional(p,'data',default_data,@checkdata)
 
 % Parse the inputs:
 parse(p,t,y,varargin{:});
@@ -159,9 +157,9 @@ parse(p,t,y,varargin{:});
 % Optional inputs
 fs = p.Results.fs;
 pkpromfactor = p.Results.pkpromfactor;
+startTime = p.Results.startTime;
+endTime = p.Results.endTime;
 data  = p.Results.data;
-% startTime = p.Results.startTime;
-% endTime = p.Results.endTime;
 
 %%% Determine whether "t" and "y" are data arrays or channel indicators:
 
