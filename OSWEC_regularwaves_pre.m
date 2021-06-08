@@ -16,6 +16,14 @@ for i = 1:numruns % loop over dataset runs
     run = setnames{i};
     disp(run)
     
+    %%%
+    if contains(run,'T22_A35_B2')==1 % 'T18_A18p75_B2'
+       plotloop = true; 
+    else
+       plotloop = false;
+    end
+    %%%
+    
     for j = 1:numchs % loop over run channels
     % assign current channel of the run
     ch = ['ch',num2str(channels{j})];
@@ -58,7 +66,9 @@ for i = 1:numruns % loop over dataset runs
         type = 'butter';
         subtype = 'low';
         order = 4;
-        cutoff_margin = 1.85;
+        cutoff_margin = 1.85; 
+        
+        %%%%% CUTOFF MARGIN 4 TO 5 
         
         % specify the cutoff frequency based on the dominant fft peaks
         f_cutoff = 1/min(dominant_periods)*cutoff_margin; % Hz
@@ -96,7 +106,8 @@ for i = 1:numruns % loop over dataset runs
     % repeat fft, now using the filtered signal
     [f,P,T,~,fft_out] = pkg.fun.plt_fft(t,y,fs,pkpromfactor);
     T(i) = max(T);
-    disp(T(i))
+    disp(['T = ',num2str(T(i))])
+    disp(['A = ',num2str(max(fft_out.peak_amps))])
     
     % figures
     if plotloop == true

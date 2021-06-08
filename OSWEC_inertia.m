@@ -8,7 +8,7 @@
 %% --------------------------------------------------------------------- %%
 function out = OSWEC_inertia(data)
 
-<<<<<<< HEAD
+
 close all % close any open figures
 
 % Define inputs:
@@ -43,7 +43,7 @@ end
 
 
 %run1struc = data.run1.to_struct();
-data.run1.rename('ch1','y')
+% data.Run1.rename('ch1','y')
 
 numruns = length(fieldnames(data)); % number of fields in the dataset
 
@@ -58,7 +58,7 @@ Tn  = zeros(numruns,1); % initialize vector to store dominant periods
 wn  = zeros(numruns,1); 
 Iyy = zeros(numruns,1);
 
-plotloop = false;
+plotloop = 0;
 
 for runnum = 1:numruns
     

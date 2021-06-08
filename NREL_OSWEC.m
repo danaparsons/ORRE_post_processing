@@ -5,9 +5,9 @@
 % Created on:   5-13-21
 % Last updated: 5-13-21 by J. Davis
 %% ------------------------------ Inputs ------------------------------- %%
-dry_inertia = 0;
+dry_inertia = 1;
 free_decay = 0;
-regularwaves = 1;
+regularwaves = 0;
 %% ---------------------------- dry inertia ---------------------------- %%
 if dry_inertia == 1
     % Define inputs:
@@ -40,7 +40,7 @@ end
 %% ---------------------------- regular ----------------------------- %%
 if regularwaves == 1
     % Define inputs:
-    directory = 'data\NREL_OSWEC\OSWEC_regularwaves\5-14-21';
+%     directory = 'data\NREL_OSWEC\OSWEC_regularwaves\5-14-21';
     directory = 'data\NREL_OSWEC\OSWEC_regularwaves\5-19-21';
     file = 'all';
     
@@ -49,9 +49,9 @@ if regularwaves == 1
     opts = pkg.obj.readDataOpt(directory,file);
     opts.as_struct = true;
     
-    if ~exist('data','var')
+%     if ~exist('data','var')
         data = pkg.fun.read_data2(opts);
-    end
+%     end
     
     channels = {7,9,10,11,12,13,14};
     varnames = {'phi','fx','fy','fz','mx','my','mz'};
@@ -59,8 +59,8 @@ if regularwaves == 1
     t0 = 10;
     tf = 40;
     fs = 500;
-    plotloop = true;
-    
+    plotloop = false;
+    % fcutoff = 4to5 x  
     data = OSWEC_regularwaves_pre(data,channels,varnames,subfields,t0,tf,fs,plotloop);
         data.T13_A16p75_B2_8.pos.filter.f_cutoff  = 2; data.T13_A16p75_B2_8.filter.order  = 4;
         data.T13_A16p75_B2_14.pos.filter.f_cutoff = 2; data.T13_A16p75_B2_14.filter.order = 4;
