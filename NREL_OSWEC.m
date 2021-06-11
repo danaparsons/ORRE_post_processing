@@ -5,9 +5,9 @@
 % Created on:   5-13-21
 % Last updated: 5-13-21 by J. Davis
 %% ------------------------------ Inputs ------------------------------- %%
-dry_inertia = 1;
+dry_inertia = 0;
 free_decay = 0;
-regularwaves = 0;
+regularwaves = 1;
 %% ---------------------------- dry inertia ---------------------------- %%
 if dry_inertia == 1
     % Define inputs:
@@ -59,13 +59,13 @@ if regularwaves == 1
     t0 = 10;
     tf = 40;
     fs = 500;
-    plotloop = false;
+    plotloop = true;
     % fcutoff = 4to5 x  
     data = OSWEC_regularwaves_pre(data,channels,varnames,subfields,t0,tf,fs,plotloop);
         data.T13_A16p75_B2_8.pos.filter.f_cutoff  = 2; data.T13_A16p75_B2_8.filter.order  = 4;
         data.T13_A16p75_B2_14.pos.filter.f_cutoff = 2; data.T13_A16p75_B2_14.filter.order = 4;
     % rerun with modified filters:
-    data = OSWEC_regularwaves_pre(data,t0,tf,fs,true);
+    data = OSWEC_regularwaves_pre(data,channels,varnames,subfields,t0,tf,fs,plotloop);
     
     % TO DO:
     % 1) IMPLEMENT PROPER MEAN SUBTRACTION 

@@ -17,11 +17,11 @@ for i = 1:numruns % loop over dataset runs
     disp(run)
     
     %%%
-    if contains(run,'T22_A35_B2')==1 % 'T18_A18p75_B2'
-       plotloop = true; 
-    else
-       plotloop = false;
-    end
+%     if contains(run,'T22_A35_B2')==1 % 'T18_A18p75_B2'
+%        plotloop = true; 
+%     else
+%        plotloop = false;
+%     end
     %%%
     
     for j = 1:numchs % loop over run channels
@@ -44,10 +44,16 @@ for i = 1:numruns % loop over dataset runs
     y_raw  = data.(run).(ch);
     t_raw    = data.(run).ch1;
     
+    % interpolate the results if dropouts are present
     if sum(y_raw==0) > 0
-        
+        dropoutratio = sum(y_raw==0)/length(y_raw);
+        if dropoutratio < 0.10
+        disp([num2str(100*dropoutratio),'% of the data stored as the variable ',varname,' in the ',subfield,' subfield contains dropouts. Interpolating the results.'])
+        y_raw = interp1(t_raw(y_raw ~=0),y_raw(y_raw~=0),t_raw);
+        else
+            error([num2str(100*dropoutratio),'% of the data stored as the variable ',varname,' in the ',subfield,' subfield contains dropouts. Discard recommended.'])
+        end
     end
-    
     
     % slice data
     t_slice = t_raw(t_raw >= t0 & t_raw <= tf)-t0;
@@ -66,7 +72,7 @@ for i = 1:numruns % loop over dataset runs
         type = 'butter';
         subtype = 'low';
         order = 4;
-        cutoff_margin = 1.85; 
+        cutoff_margin = 1.85; %%% consider 2
         
         %%%%% CUTOFF MARGIN 4 TO 5 
         
@@ -77,6 +83,7 @@ for i = 1:numruns % loop over dataset runs
         filter.type = type;
         filter.subtype = subtype;
         filter.order = order;
+        filter.cutoff_margin = cutoff_margin;
         filter.f_cutoff = f_cutoff;
 
     else % if a filter has been specified, unpack specifications:
