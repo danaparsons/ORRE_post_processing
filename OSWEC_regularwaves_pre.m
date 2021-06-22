@@ -44,10 +44,12 @@ for i = 1:numruns % loop over dataset runs
     y_raw  = data.(run).(ch);
     t_raw    = data.(run).ch1;
     
+    figure
+    plot(t_raw,y_raw)
     % interpolate the results if dropouts are present
     if sum(y_raw==0) > 0
         dropoutratio = sum(y_raw==0)/length(y_raw);
-        if dropoutratio < 0.10
+        if dropoutratio < 0.15
         disp([num2str(100*dropoutratio),'% of the data stored as the variable ',varname,' in the ',subfield,' subfield contains dropouts. Interpolating the results.'])
         y_raw = interp1(t_raw(y_raw ~=0),y_raw(y_raw~=0),t_raw);
         else

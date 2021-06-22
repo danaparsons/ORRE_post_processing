@@ -6,8 +6,8 @@
 % Last updated: 5-13-21 by J. Davis
 %% ------------------------------ Inputs ------------------------------- %%
 dry_inertia = 0;
-free_decay = 0;
-regularwaves = 1;
+free_decay = 1;
+regularwaves = 0;
 %% ---------------------------- dry inertia ---------------------------- %%
 if dry_inertia == 1
     % Define inputs:
@@ -24,7 +24,7 @@ end
 %% ---------------------------- free decay ----------------------------- %%
 if free_decay == 1
     % Define inputs:
-    directory = 'data\NREL_OSWEC\OSWEC_freedecay\';     % current directory
+    directory = 'data\NREL_VGOSWEC\freedecay\VGM0';     % current directory
     file = 'all';
     
     opts = pkg.obj.readDataOpt(directory,file);
@@ -32,7 +32,10 @@ if free_decay == 1
     %if ~exist('data','var')
     data = pkg.fun.read_data2(opts);
     %end
-    data = OSWEC_freedecay(data,true);
+    
+    fs = 500;
+    plotloop = true;
+    data = OSWEC_freedecay(data,fs,plotloop);
     % TO DO:
     % 1) IMPLEMENT NL DAMPING
     
@@ -41,7 +44,8 @@ end
 if regularwaves == 1
     % Define inputs:
 %     directory = 'data\NREL_OSWEC\OSWEC_regularwaves\5-14-21';
-    directory = 'data\NREL_OSWEC\OSWEC_regularwaves\5-19-21';
+    %directory = 'data\NREL_OSWEC\OSWEC_regularwaves\5-19-21';
+    directory = 'C:\Users\orre2\Desktop\NREL_OSWEC\VGOSWEC\VGOSWEC_regularwaves\VGM0';
     file = 'all';
     
     close all
