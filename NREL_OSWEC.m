@@ -6,8 +6,8 @@
 % Last updated: 5-13-21 by J. Davis
 %% ------------------------------ Inputs ------------------------------- %%
 dry_inertia = 0;
-free_decay = 1;
-regularwaves = 0;
+free_decay = 0;
+regularwaves = 1;
 %% ---------------------------- dry inertia ---------------------------- %%
 if dry_inertia == 1
     % Define inputs:
@@ -45,7 +45,7 @@ if regularwaves == 1
     % Define inputs:
 %     directory = 'data\NREL_OSWEC\OSWEC_regularwaves\5-14-21';
     %directory = 'data\NREL_OSWEC\OSWEC_regularwaves\5-19-21';
-    directory = 'C:\Users\orre2\Desktop\NREL_OSWEC\VGOSWEC\VGOSWEC_regularwaves\VGM0';
+    directory = 'data\NREL_VGOSWEC\regularwaves\VGM0';
     file = 'all';
     
     close all

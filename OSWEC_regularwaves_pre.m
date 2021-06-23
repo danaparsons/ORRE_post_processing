@@ -121,7 +121,9 @@ for i = 1:numruns % loop over dataset runs
     % figures
     if plotloop == true
         % subplot 1: (left) raw data; (right) sliced data
-        figure
+        fig1 = figure;
+        fig1.Position(1) = fig1.Position(1) - fig1.Position(3);
+        fig1.Position(2) = fig1.Position(2) - fig1.Position(4)/2;
         subplot(1,2,1)
             plot(t_raw,y_raw)
             xline(t0,'LineWidth',1.5); xline(tf,'LineWidth',1.5)
@@ -137,6 +139,8 @@ for i = 1:numruns % loop over dataset runs
         
         % subplot 2: (left) fft of raw sliced and filtered data;(right) filter response
         figure
+        fig2 = figure;
+        fig2.Position(2) = fig2.Position(2) - fig2.Position(4)/2;
         subplot(2,1,1)
             semilogx(f_slice,P_slice,'DisplayName','Original','LineWidth',2); hold on
             semilogx(f,P,'DisplayName','Filtered','LineWidth',1.25) 
@@ -161,6 +165,9 @@ for i = 1:numruns % loop over dataset runs
             
         % subplot 3: (left) sliced and filtered signal;(right) filtered signal only
         figure
+        fig3 = figure;
+        fig3.Position(1) = fig3.Position(1) + fig3.Position(3);
+        fig3.Position(2) = fig3.Position(2) - fig3.Position(4)/2;
         subplot(1,2,1)
             title(run)
             plot(t_slice,y_slice,'DisplayName','Original'); hold on
