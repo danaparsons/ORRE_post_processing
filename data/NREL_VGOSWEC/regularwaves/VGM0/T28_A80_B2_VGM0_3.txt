@@ -9,7 +9,6 @@
 * Comments:	VGOSWEC scale model with 5.25" diameter cylindrical foundation and three pairs of opposing torsional springs. Model centered in window 2,  193.5 in from the start of the tank; probe positions: probe 1 (staff, front) - 134 in; probe 2 (sonic, alongside) - 193.5 in; probe 3 (staff, behind) - 274.5 in ; probe 4 (sonic, behind) - 332.5 in. Data aquisition specifications: wave start time: 0 s; wave end time: 40 s; delta t: 0.05; ramp time: 3 s; end time delay: 20 s; sampling rate: 2 ms. Kistler force cal factor: 5 V/N (X), 2 V/N (Y,Z); Kistler moment cal factor: 5 V/Nm (Y), 2 V/Nm (X,Z). Naming convention: T(period)_A(actuator amp)_B(beach distance)_VGM(variable geometry module angle).
 * Date and Time:	Wed 16 Jun 2021 02:54:19 PM EDT
 ***********************************************************/
-
 "Time(s)"	"ActuatorPos(mm)"	"WP1(m)"	"WP2(m)"	"WP3(m)"	"WP4(m)"	"Roll(deg)"	"Pitch(deg)"	"ForceX(N)"	"ForceY(N)"	"ForceZ(N)"	"MomentX"	"MomentY"	"MomentZ"	
 0.00000	0.00000	-2.04004	-1.96297	-0.47417	-0.44938	0.00000	0.00000	0.01143	0.00864	-0.01397	0.00146	-0.00456	-0.00240
 0.00200	0.00000	-2.04004	-1.96297	-0.47417	-0.44938	-3.24720	0.00000	0.01143	0.00864	-0.01397	0.00146	-0.00456	-0.00240
