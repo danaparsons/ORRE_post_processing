@@ -43,33 +43,60 @@ end
 %% ---------------------------- regular ----------------------------- %%
 if regularwaves == 1
     % Define inputs:
-%     directory = 'data\NREL_OSWEC\OSWEC_regularwaves\5-14-21';
-    %directory = 'data\NREL_OSWEC\OSWEC_regularwaves\5-19-21';
+    % directory = 'data\NREL_OSWEC\OSWEC_regularwaves\5-14-21';
+    % directory = 'data\NREL_OSWEC\OSWEC_regularwaves\5-19-21';
     directory = 'data\NREL_VGOSWEC\regularwaves\VGM0';
     file = 'all';
     
     close all
     
-    opts = pkg.obj.readDataOpt(directory,file);
-    opts.as_struct = true;
+    % initialize read data options:
+    readdataopts = pkg.obj.readDataOpt(directory,file);
+    readdataopts.as_struct = true;
     
 %     if ~exist('data','var')
-        data = pkg.fun.read_data2(opts);
+        data = pkg.fun.read_data2(readdataopts);
 %     end
     
-    channels = {7,9,10,11,12,13,14};
-    varnames = {'phi','fx','fy','fz','mx','my','mz'};
-    subfields = {'position','forceX','forceY','forceZ','momentX','momentY','momentZ'};
+    % define data channels, variable names, and subfields:
+    dataopts = struct();
+    dataopts.channels = {7,9,10,11,12,13,14};
+    dataopts.varnames = {'phi','fx','fy','fz','mx','my','mz'};
+    dataopts.subfields = {'position','forceX','forceY','forceZ','momentX','momentY','momentZ'};
+    
+    % initialize filters for each subfield:
+    filtopts = struct();
+    filtopts.type = repmat({'butter'},1,length(dataopts.subfields));
+    filtopts.subtype = repmat({'low'},1,length(dataopts.subfields));
+    filtopts.order = {4,4,4,4,4,4,4};
+%     filtopts.cutoff_margin = {3,[],[],[],[],[],[]};
+%     filtopts.f_cutoff = {[],10,10,10,10,10,10};
+    filtopts.cutoff_margin = {5,5,5,5,5,5,5};
+    dataopts.filters = pkg.fun.init_filters(filtopts);
+    
+    % specify start and end times, sampling frequency:
     t0 = 10;
     tf = 40;
     fs = 500;
+    
+    % plot settings
+    plotloop = false;
+    
+    % call regular waves pre-processing function:
+    data = OSWEC_regularwaves_pre(data,dataopts,t0,tf,fs,plotloop);
+    
+   % plot settings
     plotloop = true;
-    % fcutoff = 4to5 x  
-    data = OSWEC_regularwaves_pre(data,channels,varnames,subfields,t0,tf,fs,plotloop);
-        data.T13_A16p75_B2_8.pos.filter.f_cutoff  = 2; data.T13_A16p75_B2_8.filter.order  = 4;
-        data.T13_A16p75_B2_14.pos.filter.f_cutoff = 2; data.T13_A16p75_B2_14.filter.order = 4;
-    % rerun with modified filters:
-    data = OSWEC_regularwaves_pre(data,channels,varnames,subfields,t0,tf,fs,plotloop);
+    
+    % call regular waves post-processing function:
+    data = OSWEC_regularwaves_post(data,dataopts,plotloop);
+    
+    
+    
+%         data.T13_A16p75_B2_8.pos.filter.f_cutoff  = 2; data.T13_A16p75_B2_8.filter.order  = 4;
+%         data.T13_A16p75_B2_14.pos.filter.f_cutoff = 2; data.T13_A16p75_B2_14.filter.order = 4;
+%     % rerun with modified filters:
+%     data = OSWEC_regularwaves_pre(data,channels,varnames,subfields,t0,tf,fs,plotloop);
     
     % TO DO:
     % 1) IMPLEMENT PROPER MEAN SUBTRACTION 

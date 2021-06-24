@@ -5,163 +5,113 @@
 % Created on:   5-18-21
 % Last updated: 5-18-21 by J. Davis
 %% --------------------------------------------------------------------- %%
-function [data] = OSWEC_regularwaves_pre0(data,channels,varnames,subfields,t0,tf,fs,plotloop)
+function [data] = OSWEC_regularwaves_post(data,dataopts,plotloop)
 
+% extract setnames, channels, variable names, and subfields:
 setnames = fieldnames(data);
-numruns = length(setnames); % number of fields in the dataset
-numchs = length(channels);
+varnames = dataopts.varnames;
+subfields = dataopts.subfields;
+
+% extract number of runs and subfields in the dataset:
+numruns = length(setnames); 
+numsubfields = length(subfields);
 
 for i = 1:numruns
     % assign current run of the dataset
-    run = setnames{i};
-    disp(run)
+    currentrun = setnames{i};
+    disp(currentrun)
     
-    for j = 1:numchs
+    for j = 1:numsubfields
         
-    ch = ['ch',num2str(channels{j})];
-    varname = varnames{j};
-    chlabel = data.(run).map(ch);
-        if contains(chlabel,'"')
-            chlabel = strip(chlabel,'"');
-        end
     subfield = subfields{j};
-    
+    varname = varnames{j};
+%     chlabel = data.(run).map(ch);
+%         if contains(chlabel,'"')
+%             chlabel = strip(chlabel,'"');
+%         end
+    disp(subfield)
     disp(varname)
     
     % extract data
-    y_raw  = data.(run).(ch);
-    t_raw    = data.(run).ch1;
-    
-    % slice data
-    t_slice = t_raw(t_raw >= t0)-t0;
-    t_slice = t_slice(t_slice<=tf-t0);
-    y_slice = y_raw(t_raw >= t0);
-    y_slice =  y_slice(t_slice <= tf-t0);
-    y_slice = y_slice-mean(y_slice(end-round(0.05*length(y_slice)):end-5));
-    
-    % 0.15 for pos
-    pkpromfactor = 0.25; % threshold (as proportion of peak FFT value) below which additional peaks are considered insignificant
-    [f_slice,P_slice,dominant_periods,~,~] = pkg.fun.plt_fft(t_slice,y_slice,fs,pkpromfactor);
-    
-    % implement a preliminary lowpass filter, if one has not already been specified.
-    if checkfieldORprop(data,run,subfield,'filter') == 0
-        
-        % specifications
-        type = 'butter';
-        subtype = 'low';
-        order = 4;
-        cutoff_margin = 1.85;
-        
-        % specify the cutoff frequency based on the dominant fft peaks
-        f_cutoff = 1/min(dominant_periods)*cutoff_margin; % Hz
-        
-        % populate filter field information (done after for clarity):
-        filter.type = type;
-        filter.subtype = subtype;
-        filter.order = order;
-        filter.f_cutoff = f_cutoff;
+    y  = data.(currentrun).(subfield).(varname);
+    t  = data.(currentrun).(subfield).t;
 
-    else % if a filter has been specified, unpack specifications:
-        type        = data.(run).(subfield).filter.type;
-        subtype     = data.(run).(subfield).filter.subtype;
-        order       = data.(run).(subfield).filter.order;
-        f_cutoff    = data.(run).(subfield).filter.f_cutoff; 
-    end
+    % find peaks to slice at integer number of cycles
+    pkprom = 0.75*sqrt(2)*rms(y);
+    [pk, loc]= findpeaks(y,t,'MinPeakProminence',pkprom,'Annotate','extents');
     
-    % build the filter:
-    f_norm =  f_cutoff/max(f_slice);
-    [b,a] = feval(type,order,f_norm,subtype);  % [phi,~] = lowpass(phi_raw,passbandfreq,(2*10^-3)^(-1),'Steepness',0.95);
-    [h_filt,f_filt] = freqz(b,a,f_slice,fs);
-    h_ma_filt = abs(h_filt);
-    h_ph_filt = mod(angle(h_filt)*180/pi,360)-360;
+    % update t0 and tf to first and last peak
+    t0_fft = loc(2); % take loc(2) since loc(1) could be an end point
+    tf_fft = loc(end-1);
     
-    % populate filter field information:
-    filter.a = a;
-    filter.b = b;
-    filter.f_filt = f_filt;
-    filter.h_filt = h_filt;
+    % store number of cycles
+    ncycles = size(loc(2:end-1),1) - 1;
     
-    % perform the filtering
-    y = filtfilt(b,a,y_slice); % filtfilt neccessary for zero-phase filtering
-    t = t_slice;
+    % reslice t and y at integer cycles
+    t_slice = t(t >= t0_fft & t <= tf_fft)-t0_fft;
+    y_slice = y(t >= t0_fft & t <= tf_fft);
     
-    % reproduce fft using filtered signal
-    [f,P,T,~,fft_out] = pkg.fun.plt_fft(t,y,fs,pkpromfactor);
-    T(i) = max(T);
-    disp(T(i))
+    fs = data.(currentrun).(subfield).fft.pre.fs
+    % fft
+    pkpromfactor = 0.15; % threshold (as proportion of peak FFT value) below which additional peaks are considered insignificant
+    [f,Ma,~,T,A,~,~,fft_out] = functions.plt_fft(t_slice,y_slice,fs,pkpromfactor);
+    T_list(i,j) = max(T); % disp(['T = ',num2str(T_list(i,j),2),' s'])
+    A_list(i,j) = max(A); % disp(['A = ',num2str(A_list(i,j),2),' m'])
+    
+    
+    
+    
+    
     
     % figures
     if plotloop == true
         
-        figure
-        subplot(1,2,1)
-            plot(t_raw,y_raw)
-            xline(t0,'LineWidth',1.5); xline(tf,'LineWidth',1.5)
+        fig1 = figure;
+        fig1.Position(1) = fig1.Position(1) - fig1.Position(3);
+        fig1.Position(2) = fig1.Position(2) - fig1.Position(4)/2;
+            plot(t,y,'DisplayName','Original','LineWidth',1.25) 
+            legend()
             xlabel('t(s)')
-            ylabel(chlabel)
-            
-        subplot(1,2,2)
-            plot(t_slice,y_slice)
-            xlabel('t(s)')
-            ylabel(chlabel)
-            
-            sgtitle(replace(run,'_',' '))
-            
-        figure
-        
-        subplot(2,1,1)
-            semilogx(f_slice,P_slice,'DisplayName','Original','LineWidth',2); hold on
-            semilogx(f,P,'DisplayName','Filtered','LineWidth',1.25) 
-            xline(f_cutoff,'DisplayName','Cutoff frequency')
+            ylabel(varname)
             legend()
-            xlabel('f(Hz)')
-            ylabel(['P1 ',chlabel])
-            legend()
+            xlim([min(t_slice),max(t_slice)])
             
-        subplot(2,1,2)
-            yyaxis left
-            semilogx(f_filt,mag2db(h_ma_filt),'DisplayName','Ma','LineWidth',2); hold on
-            ylabel('Magnitude (dB)')
-            yyaxis right
-            semilogx(f_filt,h_ph_filt,'DisplayName','Ph','LineWidth',2);
-            xlabel('f(Hz)')
-            ylabel('Phase (deg)')
-            legend()
-            xlim([min(f),max(f)])
-            
-            sgtitle(replace(run,'_',' '))
-            
-        figure
+            sgtitle(replace(currentrun,'_',' '))
 
-        subplot(1,2,1)
-            title(run)
-            plot(t_slice,y_slice,'DisplayName','Original'); hold on
-            plot(t,y,'DisplayName','Filtered')
+        fig2 = figure;
+        fig2.Position(2) = fig2.Position(2) - fig2.Position(4)/2;
+            plot(t_slice,y_slice,'DisplayName','Sliced','LineWidth',1.25) 
+            yline(A_list(i,j),'DisplayName','Pos Amp')
+            yline(-A_list(i,j),'DisplayName','Neg Amp')
             legend()
             xlabel('t(s)')
-            ylabel(chlabel)
-            ylim(round(1.5*max(y)*[-1 1],1))
+            ylabel(varname)
             legend()
+            xlim([min(t_slice),max(t_slice)])
             
-        subplot(1,2,2)
-            title(run)
-            plot(t,y,'DisplayName','Filtered')
+            sgtitle(replace(currentrun,'_',' '))
+              
+        fig3 = figure;
+        fig3.Position(1) = fig3.Position(1) + fig3.Position(3);
+        fig3.Position(2) = fig3.Position(2) - fig3.Position(4)/2;
+            semilogx(f,Ma,'DisplayName','Sliced','LineWidth',1.25) 
             legend()
-            xlabel('t(s)')
-            ylabel(chlabel)
-            ylim(round(1.5*max(y)*[-1 1],1))
-            legend()  
-            sgtitle(replace(run,'_',' '))
+            xlabel('f(Hz)')
+            ylabel(['Ma ',varname])
+            legend()
+           
+            sgtitle(replace(currentrun,'_',' '))
+ 
     end
     
     % populate dataset fields
-    data.(run).(subfield).t        = t;
-    data.(run).(subfield).(varname)= y;
-    data.(run).(subfield).slice.t0 = t0;
-    data.(run).(subfield).slice.tf = tf;
-    data.(run).(subfield).fft      = fft_out;
-    data.(run).(subfield).filter   = filter;
-    
+%     data.(currentrun).(subfield).t        = t;
+%     data.(currentrun).(subfield).(varname)= y;
+%     data.(currentrun).(subfield).slice.t0 = t0;
+%     data.(currentrun).(subfield).slice.tf = tf;
+%     data.(currentrun).(subfield).fft.post      = fft_out;
+%     data.(currentrun).(subfield).filter   = filter;
+%     
     end
 end
 end

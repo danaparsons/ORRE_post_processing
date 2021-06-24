@@ -5,47 +5,53 @@
 % Created on:   5-17-21
 % Last updated: 5-18-21 by J. Davis
 %% --------------------------------------------------------------------- %%
-function [data] = OSWEC_regularwaves_pre(data,channels,varnames,subfields,t0,tf,fs,plotloop)
-
+function [data] = OSWEC_regularwaves_pre(data,dataopts,t0,tf,fs,plotloop)
+% extract setnames, channels, variable names, and subfields:
 setnames = fieldnames(data);
-numruns = length(setnames); % number of fields in the dataset
+channels = dataopts.channels;
+varnames = dataopts.varnames;
+subfields = dataopts.subfields;
+
+% extract number of runs and channels in the dataset:
+numruns = length(setnames); 
 numchs = length(channels);
 
 for i = 1:numruns % loop over dataset runs
     % assign current run of the dataset
-    run = setnames{i};
-    disp(run)
+    currentrun = setnames{i};
+    disp(['%',repmat('-',1,50),'%',newline,currentrun])
     
-    %%%
-%     if contains(run,'T22_A35_B2')==1 % 'T18_A18p75_B2'
-%        plotloop = true; 
-%     else
-%        plotloop = false;
-%     end
-    %%%
+ 
+    % close any open figures
+    close all
     
     for j = 1:numchs % loop over run channels
     % assign current channel of the run
     ch = ['ch',num2str(channels{j})];
+    
+%     if contains(currentrun,'T22')
+%         plotloop = true
+%     end
     
     % assign user-defined variable name corresponding to the channel
     varname = varnames{j};
     disp(varname)
     
     % assign channel label for plotting; uses dataset map feature
-    chlabel = data.(run).map(ch);
+    chlabel = data.(currentrun).map(ch);
         if contains(chlabel,'"')
             chlabel = strip(chlabel,'"');
         end
     % assign user-defined subfield
     subfield = subfields{j};
     
-    % extract data
-    y_raw  = data.(run).(ch);
-    t_raw    = data.(run).ch1;
+    % initialize subfield:
+    data.(currentrun).(subfield) = struct();
     
-    figure
-    plot(t_raw,y_raw)
+    % extract data
+    y_raw  = data.(currentrun).(ch);
+    t_raw    = data.(currentrun).ch1;
+
     % interpolate the results if dropouts are present
     if sum(y_raw==0) > 0
         dropoutratio = sum(y_raw==0)/length(y_raw);
@@ -64,59 +70,67 @@ for i = 1:numruns % loop over dataset runs
     % y_slice = y_slice-mean(y_slice(end-round(0.05*length(y_slice)):end-5));
     
     % 0.15 for pos; 0.25 for loads
-    pkpromfactor = 0.15; % threshold (as proportion of peak FFT value) below which additional peaks are considered insignificant
-    [f_slice,P_slice,dominant_periods,~,~] = pkg.fun.plt_fft(t_slice,y_slice,fs,pkpromfactor);
+    pkpromfactor = 0.35; % threshold (as proportion of peak FFT value) below which additional peaks are considered insignificant
+    [f_slice,Ma_slice,~,~,~,~,~,fft_raw] = pkg.fun.plt_fft(t_slice,y_slice,fs,pkpromfactor);
+    oscillating_period = fft_raw.oscillating_period;
     
-    % implement a preliminary lowpass filter, if one has not already been specified.
-    if checkfieldORprop(data,run,subfield,'filter') == 0
+    % FILTERING
+    % if a subfield-specific filter has been specified, unpack specifications:
+    if checkfieldORprop(dataopts,'filters') == 1 
+        filt = dataopts.filters{j};
         
+        % if a cutoff margin is specified, calculate the cutoff frequency based on the dominant fft peak
+        if isfield(filt,'cutoff_margin')
+            filt.f_cutoff = 1/oscillating_period*filt.cutoff_margin; % Hz % filt.f_cutoff = 1/min(dominant_periods)*filt.cutoff_margin;
+            
+       % if a cutoff frequency is specified, calculate the cutoff margin based on the dominant fft peak
+        elseif isfield(filt,'f_cutoff')
+            filt.cutoff_margin = filt.f_cutoff*oscillating_period;
+        end
+        
+    % if a run-specific filter has been specified, unpack specifications:
+    elseif checkfieldORprop(data.(currentrun).(subfield),'filt') == 1 
+        filt = data.(currentrun).(subfield).filt;
+        
+    % if no filter is specified, implement a preliminary lowpass filter:
+    else
         % specifications
-        type = 'butter';
-        subtype = 'low';
-        order = 4;
-        cutoff_margin = 1.85; %%% consider 2
-        
-        %%%%% CUTOFF MARGIN 4 TO 5 
+        filt.type = 'butter';
+        filt.subtype = 'low';
+        filt.order = 4;
+        filt.cutoff_margin = 3; 
         
         % specify the cutoff frequency based on the dominant fft peaks
-        f_cutoff = 1/min(dominant_periods)*cutoff_margin; % Hz
-        
-        % populate filter field information (done after for clarity):
-        filter.type = type;
-        filter.subtype = subtype;
-        filter.order = order;
-        filter.cutoff_margin = cutoff_margin;
-        filter.f_cutoff = f_cutoff;
-
-    else % if a filter has been specified, unpack specifications:
-        type        = data.(run).(subfield).filter.type;
-        subtype     = data.(run).(subfield).filter.subtype;
-        order       = data.(run).(subfield).filter.order;
-        f_cutoff    = data.(run).(subfield).filter.f_cutoff; 
+        filt.f_cutoff = 1/oscillating_period*filt.cutoff_margin; % Hz
     end
     
     % build the filter:
-    f_norm =  f_cutoff/max(f_slice);
-    [b,a] = feval(type,order,f_norm,subtype);  % [phi,~] = lowpass(phi_raw,passbandfreq,(2*10^-3)^(-1),'Steepness',0.95);
+    f_norm =  filt.f_cutoff/max(f_slice);
+    [b,a] = feval(filt.type,filt.order,f_norm,filt.subtype);  % [phi,~] = lowpass(phi_raw,passbandfreq,(2*10^-3)^(-1),'Steepness',0.95);
     [h_filt,f_filt] = freqz(b,a,f_slice,fs);
     h_ma_filt = abs(h_filt);
     h_ph_filt = mod(angle(h_filt)*180/pi,360)-360;
     
     % populate filter field information:
-    filter.a = a;
-    filter.b = b;
-    filter.f_filt = f_filt;
-    filter.h_filt = h_filt;
+    filt.a = a;
+    filt.b = b;
+    filt.f_filt = f_filt;
+    filt.h_filt = h_filt;
     
     % perform the filtering
     y = filtfilt(b,a,y_slice); % filtfilt neccessary for zero-phase filtering
     t = t_slice;
+
+    % repeat fft, now using the filtered signal    
+    [f,Ma,~,~,~,~,~,fft_pre] = pkg.fun.plt_fft(t,y,fs,pkpromfactor);
     
-    % repeat fft, now using the filtered signal
-    [f,P,T,~,fft_out] = pkg.fun.plt_fft(t,y,fs,pkpromfactor);
-    T(i) = max(T);
-    disp(['T = ',num2str(T(i))])
-    disp(['A = ',num2str(max(fft_out.peak_amps))])
+    % store period and amplitude for summary table
+    T_list(i,j) = fft_pre.oscillating_period;
+    A_list(i,j) = fft_pre.peak_amp;
+    
+    % display to commmand window
+    disp(['T = ',num2str(fft_pre.oscillating_period)])
+    disp(['A = ',num2str(fft_pre.peak_amp)])
     
     % figures
     if plotloop == true
@@ -135,19 +149,18 @@ for i = 1:numruns % loop over dataset runs
             xlabel('t(s)')
             ylabel(chlabel)
             
-            sgtitle(replace(run,'_',' '))
+            sgtitle(replace(currentrun,'_',' '))
         
         % subplot 2: (left) fft of raw sliced and filtered data;(right) filter response
-        figure
         fig2 = figure;
         fig2.Position(2) = fig2.Position(2) - fig2.Position(4)/2;
         subplot(2,1,1)
-            semilogx(f_slice,P_slice,'DisplayName','Original','LineWidth',2); hold on
-            semilogx(f,P,'DisplayName','Filtered','LineWidth',1.25) 
-            xline(f_cutoff,'DisplayName','Cutoff frequency')
+            semilogx(f_slice,Ma_slice,'DisplayName','Original','LineWidth',2); hold on
+            semilogx(f,Ma,'DisplayName','Filtered','LineWidth',1.25) 
+            xline(filt.f_cutoff,'DisplayName','Cutoff frequency')
             legend()
             xlabel('f(Hz)')
-            ylabel(['P1 ',chlabel])
+            ylabel(['Ma ',chlabel])
             legend()
             
         subplot(2,1,2)
@@ -161,54 +174,67 @@ for i = 1:numruns % loop over dataset runs
             legend()
             xlim([min(f),max(f)])
             
-            sgtitle(replace(run,'_',' '))
+            sgtitle(replace(currentrun,'_',' '))
             
         % subplot 3: (left) sliced and filtered signal;(right) filtered signal only
-        figure
         fig3 = figure;
         fig3.Position(1) = fig3.Position(1) + fig3.Position(3);
         fig3.Position(2) = fig3.Position(2) - fig3.Position(4)/2;
         subplot(1,2,1)
-            title(run)
+            title(currentrun)
             plot(t_slice,y_slice,'DisplayName','Original'); hold on
             plot(t,y,'DisplayName','Filtered')
             legend()
             xlabel('t(s)')
             ylabel(chlabel)
-            ylim(round(1.5*abs(max(y))*[-1 1],2))
+            ylim(round(1.5*abs(max(y_slice))*[-1 1],2))
             legend()
             
         subplot(1,2,2)
-            title(run)
+            title(currentrun)
             plot(t,y,'DisplayName','Filtered')
             legend()
             xlabel('t(s)')
             ylabel(chlabel)
-            ylim(round(1.5*abs(max(y))*[-1 1],2))
+            ylim(round(1.5*abs(max(y_slice))*[-1 1],2))
             legend()  
-            sgtitle(replace(run,'_',' '))
+            sgtitle(replace(currentrun,'_',' '))
     end
     
     % populate dataset fields
-    data.(run).(subfield).t        = t;
-    data.(run).(subfield).(varname)= y;
-    data.(run).(subfield).slice.t0 = t0;
-    data.(run).(subfield).slice.tf = tf;
-    data.(run).(subfield).fft      = fft_out;
-    data.(run).(subfield).filter   = filter;
+    data.(currentrun).(subfield).t        = t;
+    data.(currentrun).(subfield).(varname)= y;
+    data.(currentrun).(subfield).slice.t0 = t0;
+    data.(currentrun).(subfield).slice.tf = tf;
+    data.(currentrun).(subfield).fft.raw  = fft_raw;
+    data.(currentrun).(subfield).fft.pre  = fft_pre;
+    data.(currentrun).(subfield).filt     = filt;
     
     end
 end
+
+A_table = array2table(A_list);
+A_table.Properties.VariableNames = strcat(varnames,{'_'},{'A'});
+A_table.Properties.RowNames = setnames;
+
+T_table = array2table(T_list);
+T_table.Properties.VariableNames = strcat(varnames,{'_'},{'T'});
+T_table.Properties.RowNames = setnames;
+
+disp(A_table)
+disp(T_table)
+
+
 end
 
 %% --------------------------- Subfunctions ---------------------------- %%
 
-function bool = checkfieldORprop(structORobj,run,subfield,fieldORprop)
+function bool = checkfieldORprop(structORobj,fieldORprop)
    bool = false;
    try
-       if isfield(structORobj.(run).(subfield),fieldORprop)
+       if isfield(structORobj,fieldORprop)
            bool = true;
-       elseif isprop(structORobj.(subfield).(run),fieldORprop)
+       elseif isprop(structORobj,fieldORprop)
            bool = true;
        end
    catch

@@ -67,7 +67,7 @@ for i = 1:numruns
 
     % FFT of raw data
     pkpromfactor = 0.15; % threshold (as proportion of peak FFT value) below which additional peaks are considered insignificant
-    [f_raw,P_raw,dominant_periods,~,~] = pkg.fun.plt_fft(t_slice,phi_raw_slice,fs,pkpromfactor);
+    [f_raw,P_raw,~,dominant_periods,~,~] = pkg.fun.plt_fft(t_slice,phi_raw_slice,fs,pkpromfactor);
     
      % implement a preliminary lowpass filter, if one has not already been specified.
     if checkfieldORprop(data,run,subfield,'filter') == 0
@@ -116,7 +116,7 @@ for i = 1:numruns
     phi0(i) = phi(1);
     
     % repeat fft, now using the filtered signal
-    [f,P,T,~,fft_out] = pkg.fun.plt_fft(t_slice,phi,fs,pkpromfactor);
+    [f,P,~,T,~,~,~,fft_out] = pkg.fun.plt_fft(t_slice,phi,fs,pkpromfactor);
     Tn(i) = max(T);
     disp(['T = ',num2str(Tn(i))])
  
