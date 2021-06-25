@@ -1,4 +1,4 @@
-function [f,Ma,Ph,dominant_periods,dominant_amps,phase_angles,Fs,fft_fields] = plt_fft(t,y,varargin)
+function [f,Ma,Ph,dominant_period,dominant_amp,phase_angles,Fs,fft_fields] = plt_fft(t,y,varargin)
 %% ------------------------------ Header ------------------------------- %%
 % Filename:     plt_fft.m    
 % Description:  ORRE Post Processing Program function to plot fft.
@@ -102,10 +102,10 @@ f = Fs*(0:round(L/2))/L;
 pkprom = pkpromfactor*max(Ma);
 
 [pk_fft, loc_fft]= findpeaks(Ma,f,'MinPeakProminence',pkprom,'Annotate','extents');
-dominant_periods = loc_fft.^-1;
-dominant_amps = pk_fft;
-peak_amp = max(dominant_amps);
-oscillating_period = dominant_periods(dominant_amps == peak_amp);
+significant_periods = loc_fft.^-1;
+significant_amps = pk_fft.';
+dominant_amp = max(significant_amps);
+dominant_period = significant_periods(significant_amps == dominant_amp);
 
 phase_angles = zeros(size(loc_fft));
 for i = 1:length(loc_fft)
@@ -127,13 +127,15 @@ fft_fields = [];
 fft_fields.f = f;
 fft_fields.Ma = Ma;
 fft_fields.Ph = Ph;
-fft_fields.dominant_periods = dominant_periods;
-fft_fields.dominant_amps = dominant_amps;
-fft_fields.oscillating_period = oscillating_period;
-fft_fields.peak_amp = peak_amp;
+fft_fields.significant_periods = significant_periods;
+fft_fields.significant_amps = significant_amps;
+fft_fields.dominant_period = dominant_period;
+fft_fields.dominant_amp = dominant_amp;
 fft_fields.phase_angles = phase_angles;
 fft_fields.pkpromfactor = pkpromfactor;
 fft_fields.fs = Fs;
+fft_fields.t0 = t0;
+fft_fields.tf = tf;
 
 end
 %% --------------------------- Subfunctions ---------------------------- %%
