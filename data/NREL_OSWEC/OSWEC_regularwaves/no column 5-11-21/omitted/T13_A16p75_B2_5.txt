@@ -1,0 +1,14 @@
+/***********************************************************
+* Ocean Resources and Renewable Energy Laboratory
+* Version: v1.0 (Released on May 1st, 2021)
+* Programmed by: Jessica Nguyen (Email: nvnguyen@umass.edu)
+*----------------------------------------------------------
+* Project Name:	NREL_OSWEC_regularwaves
+* Project Lead:	JD
+* Labview Operator:	JD
+* Comments:	naming convention: T(period in s)_A(actuator amp in mm)_B(beach pos in inches); refer to test matrix for target wave amplitude corresponding to the  set actuator amplitude; model centered in window 2; probe 1 aligned with the edge of the first inlet section (where it transitions to glass); probe 2 centered in window 2.
+* Date and Time:	Tue 11 May 2021 03:06:57 PM EDT
+***********************************************************/
+
+"Time(s)"	"WP1(m)"	"WP2(m)"	"WP3(m)"	"WP4(m)"	"Roll(deg)"	"Pitch(deg)"	"ForceX(N)"	"ForceY(N)"	"ForceZ(N)"	"MomentX"	"MomentY"	"MomentZ"	
+0.00000	-1.96926	-1.96147	-0.38494	-0.37271	0.00000	0.00000	-0.04667	-0.05859	-0.06032	0.00388	-0.01191	0.00621

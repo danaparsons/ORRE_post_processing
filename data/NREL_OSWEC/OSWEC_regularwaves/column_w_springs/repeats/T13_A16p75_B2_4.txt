@@ -1,0 +1,20 @@
+/***********************************************************
+* Ocean Resources and Renewable Energy Laboratory
+* Version: v1.0 (Released on May 1st, 2021)
+* Programmed by: Jessica Nguyen (Email: nvnguyen@umass.edu)
+*----------------------------------------------------------
+* Project Name:	NREL_OSWEC_regularwaves_column_w_springs
+* Project Lead:	JD
+* Labview Operator:	JD
+* Comments:	OSWEC scale model with 5.25" diameter cylindrical foundation and torsional springs. Model centered in window 2,  193.5 in from the start of the tank; probe positions: probe 1 (sonic, front) - 134 in; probe 2 (sonic, alongside) - 193.5 in; probe 3 (staff, back) - 274.5 in ; probe 4 (staff, back) - 332.5 in. Data aquisition specifications: wave start time: 0 s; wave end time: 40 s; delta t: 0.05; ramp time: 3 s; end time delay: 20 s; sampling rate: 2 ms.
+* Date and Time:	Fri 11 Jun 2021 10:07:08 AM EDT
+***********************************************************/
+
+"Time(s)"	"ActuatorPos(mm)"	"WP1(m)"	"WP2(m)"	"WP3(m)"	"WP4(m)"	"Roll(deg)"	"Pitch(deg)"	"ForceX(N)"	"ForceY(N)"	"ForceZ(N)"	"MomentX"	"MomentY"	"MomentZ"	
+0.00000	0.00000	-1.96465	-1.96050	-0.47320	-0.36784	0.00000	0.00000	0.00490	-0.00730	0.02584	-0.00438	-0.00398	-0.00140
+0.00200	0.00000	-1.96465	-1.96050	-0.47320	-0.36784	-0.54120	-89.91000	0.00490	-0.00730	0.02584	-0.00438	-0.00398	-0.00140
+0.00400	0.00000	-1.96465	-1.96050	-0.47320	-0.36784	-0.63140	-89.91000	0.00490	-0.00730	0.02584	-0.00438	-0.00398	-0.00140
+0.00600	0.00000	-1.96465	-1.96050	-0.47320	-0.36784	-0.63140	-90.00000	0.00490	-0.00730	0.02584	-0.00438	-0.00398	-0.00140
+0.00800	0.00000	0.00141	0.00300	-0.00172	0.00352	-0.63140	-90.00000	0.00490	-0.00730	0.02584	-0.00438	-0.00398	-0.00140
+0.01000	0.00000	0.00141	0.00300	-0.00172	0.00352	-0.45100	-89.91000	0.00490	-0.00730	0.02584	-0.00438	-0.00398	-0.00140
+0.01200	0.00000	0.00141	0.00300	-0.00172	0.00352	-0.45100	-89.91000	0.00490	-0.00730	0.02584	-0.00438	-0.00398	-0.00140

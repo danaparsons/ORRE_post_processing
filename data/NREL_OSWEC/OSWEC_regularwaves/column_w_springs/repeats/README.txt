@@ -1,0 +1,1 @@
+T13_A16p5_B2_x have a force and moment calibration of 1 vs 0.33 > multiply by 3.
