@@ -3,9 +3,9 @@
 % Description:  Post-process OSWEC-type model regular wave experiments
 % Author:       J. Davis
 % Created on:   5-18-21
-% Last updated: 6-24-21 by J. Davis
+% Last updated: 6-25-21 by J. Davis
 %% --------------------------------------------------------------------- %%
-function [data] = OSWEC_regularwaves_post(data,dataopts,plotloop)
+function [data] = OSWEC_regularwaves_post(data,dataopts,plotloop,verbose)
 
 % extract setnames, channels, variable names, and subfields:
 setnames = fieldnames(data);
@@ -13,10 +13,12 @@ varnames = dataopts.varnames;
 subfields = dataopts.subfields;
 
 % append subfield to results variable name if varname is repeated:
-[~,~,repeatvars] = unique(varnames(:));
-if sum(repeatvars) > 1
+[~,~,repeatvars] = unique(varnames);
+if length(repeatvars) ~=(unique(repeatvars))
     repeatvars = logical(repeatvars);
     varnames_results = strcat(varnames(repeatvars),'_',subfields(repeatvars));
+else
+    varnames_results = varnames;
 end
 
 % extract number of runs and subfields in the dataset:
@@ -24,17 +26,17 @@ numruns = length(setnames);
 numsubfields = length(subfields);
 
 % initialize results structure:
-% Results = zeros(numruns,4,numsubfields);
 Results = struct();
 
 for i = 1:numruns
     % assign current run of the dataset:
     currentrun = setnames{i};
-    disp(currentrun)
+    if verbose==1; disp(['%',repmat('-',1,100),'%',newline,currentrun]); end
     
     % extract run identifiers:    
     runID(i,:) = strsplit(currentrun,'_');
 
+    % keep track of run repeats:
     if i>1 && strcmp(runID{i,1},runID{i-1,1})==1
         cnt=cnt+1;
     else
@@ -44,8 +46,15 @@ for i = 1:numruns
     for j = 1:numsubfields
         % assign current subfield and variable name:
         subfield = subfields{j};
-        varname = varnames{j};   disp(varname)
+        varname = varnames{j};   
         varname_results = varnames_results{j};
+        if verbose==1; disp(varname); end
+        
+%         if contains(currentrun,'T22')
+%             plotloop = true;
+%         else
+%             plotloop = false;
+%         end
         
         % close any open figures
         close all
@@ -62,11 +71,11 @@ for i = 1:numruns
         t  = data.(currentrun).(subfield).t;
         
         % find peaks to slice at integer number of cycles
-        pkprom = 0.75*sqrt(2)*rms(y);
-        [pk, loc]= findpeaks(y,t,'MinPeakProminence',pkprom,'Annotate','extents');
-        
-        [negpk,~]= findpeaks(-y,t,'MinPeakProminence',pkprom,'Annotate','extents');
-        
+        pkprom = 0.90*sqrt(2)*rms(y);
+        pkheight = 0.80*sqrt(2)*rms(y);
+        [pk, loc]= findpeaks(y,t,'MinPeakProminence',pkprom,'MinPeakHeight',pkheight,'Annotate','extents');
+        [negpk,~]= findpeaks(-y,t,'MinPeakProminence',pkprom,'MinPeakHeight',pkheight,'Annotate','extents');
+                
         % pos and neg amps by mean of peaks
         A_pks1 = mean(pk);
         A_pks2 = -mean(negpk);
@@ -94,14 +103,40 @@ for i = 1:numruns
         [f,Ma,~,T,A_fft,~,~,fft_post] = pkg.fun.plt_fft(t_slice,y_slice,fs,pkpromfactor);
         fft_post.ncycles = ncycles;
         
+        % Check if the dominant period identified by the fft is less than the maximum significant
+        % period. If it is, check if the dominant period is an integer multiple of the maximum 
+        % signficiant period. A whole number remainder indicates it is a higher harmonic reflection,  
+        % and the fundamental and its amplitude will instead be used as the output period T and amplitude A.
+        if fft_post.dominant_period < max(fft_post.significant_periods) 
+            sigperiodratio = max(fft_post.significant_periods)./fft_post.dominant_period;
+            if rem(round(sigperiodratio,1),1)==0 && sigperiodratio < 3
+                T =  max(fft_post.significant_periods);
+                A =  fft_post.significant_amps(fft_post.significant_periods ==  max(fft_post.significant_periods));
+            end
+        end
+
+        % display to commmand window
+        if verbose==1
+            disp(['T = ',num2str(T)])
+            disp(['A = ',num2str(A_fft)])
+        end
+        
+%         T_list(cnt) = T;
+%         A_fft_list(cnt) = A_fft;
+%         A_pks_list(cnt) = 
+        
         % store results by period run identifier:
         Results.(runID{i,1}).(varname_results).T(cnt) = T;
         Results.(runID{i,1}).(varname_results).A_fft(cnt) = A_fft;
         Results.(runID{i,1}).(varname_results).A_pks(cnt) = A_pks_combined;
         
+%         T_list{i,j} = T;
+%         A_list{i,j}  = A_fft;
+%         A_list{i,j}  = A_pks_combined;
+        
         % figures
         if plotloop == true
-            
+            % plot 1: complete signal
             fig1 = figure;
             fig1.Position(1) = fig1.Position(1) - fig1.Position(3);
             fig1.Position(2) = fig1.Position(2) - fig1.Position(4)/2;
@@ -111,9 +146,9 @@ for i = 1:numruns
             ylabel(varname)
             legend()
             xlim([min(t_slice),max(t_slice)])
-            
             sgtitle(replace(currentrun,'_',' '))
             
+            % plot 2: sliced signal used to obtain the integer-cycle fft
             fig2 = figure;
             fig2.Position(2) = fig2.Position(2) - fig2.Position(4)/2;
             plot(t,y,'DisplayName','Original','LineWidth',1.25); hold on
@@ -132,6 +167,7 @@ for i = 1:numruns
             text(0.75*xl(2),0.9*yl(1),['ncycles = ',num2str(ncycles)])
             sgtitle(replace(currentrun,'_',' '))
             
+            % plot 3: integer-cycle fft used to obtain the amplitude and period
             fig3 = figure;
             fig3.Position(1) = fig3.Position(1) + fig3.Position(3);
             fig3.Position(2) = fig3.Position(2) - fig3.Position(4)/2;
@@ -140,7 +176,6 @@ for i = 1:numruns
             xlabel('f(Hz)')
             ylabel(['Ma ',varname])
             legend()
-            
             sgtitle(replace(currentrun,'_',' '))
             
         end
@@ -176,6 +211,10 @@ for i = 1:numperiods
     varname = varnames_results{j};
     
     % calculate mean and stdev of each property
+    T_list{i,j} = Results.(currentperiod).(varname).T;
+    A_fft_list{i,j}  = Results.(currentperiod).(varname).A_fft;
+    A_pks_list{i,j}  = Results.(currentperiod).(varname).A_pks;
+    
     T_mean(i,j) = mean(Results.(currentperiod).(varname).T);
     A_fft_mean(i,j)  = mean(Results.(currentperiod).(varname).A_fft);
     A_pks_mean(i,j)  = mean(Results.(currentperiod).(varname).A_pks);
@@ -189,50 +228,34 @@ for i = 1:numperiods
     Results.(currentperiod).(varname).A_pks_mean = A_pks_mean(i,j);
     Results.(currentperiod).(varname).T_std = T_std(i,j);
     Results.(currentperiod).(varname).A_fft_std = A_fft_std(i,j);
-    Results.(currentperiod).(varname).A_pks_stdn = A_pks_std(i,j);
+    Results.(currentperiod).(varname).A_pks_std = A_pks_std(i,j);
     end
 end
 
 % loop to store results by variable name:
 for j = 1:numsubfields
     varname = varnames_results{j};
-
-    tablebyvar = array2table([T_mean(:,j) T_std(:,j) A_fft_mean(:,j) A_fft_std(:,j) A_pks_mean(:,j) A_pks_std(:,j)]);
-    tablebyvar.Properties.VariableNames = {'T_mean','T_std','A_fft_mean','A_fft_std','A_pks_mean','A_pks_std'};
-    Results.(varname) = tablebyvar;
+    tablebyvar = [cell2table(T_list(:,j),'VariableNames',{'T'}) ...
+        array2table([T_mean(:,j) T_std(:,j)],'VariableNames',{'T_mean','T_std'})...
+        cell2table(A_fft_list(:,j),'VariableNames',{'A_fft'})...
+        array2table([A_fft_mean(:,j) A_fft_std(:,j)],'VariableNames',{'A_fft_mean','A_fft_std'})...
+        cell2table(A_pks_list(:,j),'VariableNames',{'A_pks'})...
+        array2table([A_pks_mean(:,j) A_pks_std(:,j)],'VariableNames',{'A_pks_mean','A_pks_std'})...
+        ];
+%   tablebyvar = array2table([T_mean(:,j) T_std(:,j) A_fft_mean(:,j) A_fft_std(:,j) A_pks_mean(:,j) A_pks_std(:,j)]);
+%     tablebyvar.Properties.VariableNames = {'T_mean','T_std','A_fft_mean','A_fft_std','A_pks_mean','A_pks_std'};
+    Results.(varname) = sortrows(tablebyvar,'T_mean');
 end
 
-% % store combined results as a table:
-% columnnames = ['T',reshape([strcat(varnames,{'_A_fft_mean'});...
-%                             strcat(varnames,{'_A_fft_std'});...
-%                             strcat(varnames,{'_A_pks_mean'});...
-%                             strcat(varnames,{'_A_pks_std'})],...
+% store combined results as a table:
+% columnnames = ['T',reshape([strcat(varnames_results,{'_A_fft_mean'});...
+%                             strcat(varnames_results,{'_A_fft_std'});...
+%                             strcat(varnames_results,{'_A_pks_mean'});...
+%                             strcat(varnames_results,{'_A_pks_std'})],...
 %                             1,4*numsubfields)];
 % Results.combined = array2table([T_mean(:,1) reshape([A_fft_mean;A_fft_std;A_pks_mean;A_pks_std], numperiods, [])]);
 % Results.combined.Properties.VariableNames = columnnames;
 
+% store results in data structure:
 data.Results = Results;
-
-
-figure
-errorbar(data.Results.eta_wp2.T_mean,data.Results.eta_wp2.A_pks_mean,data.Results.eta_wp2.A_pks_std,...
-    '.','CapSize',0); hold on
-
-
-figure
-errorbar(data.Results.my.T_mean,data.Results.my.A_pks_mean,data.Results.my.A_pks_std,'o'); hold on
-errorbar(data.Results.my.T_mean,data.Results.my.A_fft_mean,data.Results.my.A_fft_std,'o')
-
-end
-
-function bool = checkfieldORprop(structORobj,run,subfield,fieldORprop)
-   bool = false;
-   try
-       if isfield(structORobj.(run).(subfield),fieldORprop)
-           bool = true;
-       elseif isprop(structORobj.(subfield).(run),fieldORprop)
-           bool = true;
-       end
-   catch
-   end
 end

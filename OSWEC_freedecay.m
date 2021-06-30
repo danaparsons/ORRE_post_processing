@@ -27,7 +27,7 @@ for i = 1:numruns
     % assign raw data
     phi_raw  = data.(run).ch6;
     t_raw    = data.(run).ch1;
-    
+   plot(t_raw,phi_raw) 
 %     figure   
 %     plot(t,phi_raw)
     % interpolate the results if dropouts are present
