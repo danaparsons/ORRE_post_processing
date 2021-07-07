@@ -103,7 +103,7 @@ if regularwaves == 1
  
   %% ---------------------- model run processing ----------------------- %%
     % READ DATA:
-    directory = 'data\NREL_OSWEC\regularwaves\column'; % 'data\NREL_OSWEC\OSWEC_regularwaves\5-14-21' 'data\NREL_OSWEC\OSWEC_regularwaves\5-19-21'
+    directory = 'data\NREL_VGOSWEC\regularwaves\VGM45'; % 'data\NREL_OSWEC\OSWEC_regularwaves\5-14-21' 'data\NREL_OSWEC\OSWEC_regularwaves\5-19-21'
     file = 'all';
     
     % initialize read data options:
@@ -111,16 +111,17 @@ if regularwaves == 1
     readdataopts.as_struct = true;
     
     % call read data function:
-    column = pkg.fun.read_data2(readdataopts);
+%     if ~exist('VGM90','var')
+        VGM45 = pkg.fun.read_data2(readdataopts);
+%     end
 
     % PRE-PROCESSING:
     % define data channels, variable names, and subfields to be pre-processed:
     regularwaves_pre_opts = struct();
-    regularwaves_pre_opts.channels = {7,9,11,13};
-    regularwaves_pre_opts.varnames = {'phi','fx','fz','my'};
-    regularwaves_pre_opts.subfields = {'position','forceX','forceZ','momentY'};
+    regularwaves_pre_opts.channels = {7,9,10,11,12,13,14};
+    regularwaves_pre_opts.varnames = {'phi','fx','fy','fz','mx','my','mz'};
+    regularwaves_pre_opts.subfields = {'position','forceX','forceY','forceZ','momentX','momentY','momentZ'};
     regularwaves_pre_opts.exval_factor = 5;
-    regularwaves_pre_opts.min_period = 0.5;
     
     % initialize filters for each subfield:
     filtopts = struct();
@@ -140,7 +141,7 @@ if regularwaves == 1
     verbose = true;
     
     % call regular waves pre-processing function:
-    column = OSWEC_regularwaves_pre(column,regularwaves_pre_opts,t0,tf,fs,plotloop,verbose);
+    VGM45 = OSWEC_regularwaves_pre(VGM45,regularwaves_pre_opts,t0,tf,fs,plotloop,verbose);
     
     % POST-PROCESSING:
     % define data channels, variable names, and subfields to be post-processed:
@@ -148,25 +149,28 @@ if regularwaves == 1
     regularwaves_post_opts.subfields = {'position','forceX','forceZ','momentY'};
     
    % plot settings
-    plotloop =false;
+    plotloop = false;
     verbose = true;
     
     % call regular waves post-processing function:
-   column = OSWEC_regularwaves_post(column,regularwaves_post_opts,plotloop,verbose);
+   VGM45 = OSWEC_regularwaves_post(VGM45,regularwaves_post_opts,plotloop,verbose);
    
 %    save('VGM45_regularwaves.mat','VGM45')
     
   %% -------------------------- analysis ----------------------------- %%
-   OSWEC_loadpaths(column,{'forceX','forceZ'},{'fx','fz'})
-  
+   OSWEC_loadpaths(VGM0,{'forceX','forceZ'},{'fx','fz'})
    
+   
+   
+   
+
   %% ---------------------------- plots ------------------------------ %%
    load('designwaves.mat')
-%    load('VGM0_regularwaves.mat')
-%    load('VGM10_regularwaves.mat')
-%    load('VGM20_regularwaves.mat')
-%    load('VGM45_regularwaves.mat')
-%    load('VGM90_regularwaves.mat')
+   load('VGM0_regularwaves.mat')
+   load('VGM10_regularwaves.mat')
+   load('VGM20_regularwaves.mat')
+   load('VGM45_regularwaves.mat')
+   load('VGM90_regularwaves.mat')
    
    k = wave_disp(2*pi./designwaves.Results.eta_wp2.T_mean,1,9.81,0.001);
    phi_norm = 1;
@@ -182,20 +186,31 @@ if regularwaves == 1
    xlabel('period (s)')
    
    figure; hold on
-   errorbar(column.Results.phi.T_mean,column.Results.phi.A_fft_mean.*phi_norm,column.Results.phi.A_fft_std.*phi_norm,':o',...
-       'DisplayName','column')
-%    errorbar(VGM0.Results.phi.T_mean,VGM0.Results.phi.A_fft_mean.*phi_norm,VGM0.Results.phi.A_fft_std.*phi_norm,':o',...
-%        'DisplayName','VGM0')
-
+   errorbar(VGM0.Results.phi.T_mean,VGM0.Results.phi.A_fft_mean.*phi_norm,VGM0.Results.phi.A_fft_std.*phi_norm,':o',...
+       'DisplayName','VGM0')
+   errorbar(VGM10.Results.phi.T_mean,VGM10.Results.phi.A_fft_mean.*phi_norm,VGM10.Results.phi.A_fft_std.*phi_norm,':o',...
+       'DisplayName','VGM10')
+   errorbar(VGM20.Results.phi.T_mean,VGM20.Results.phi.A_fft_mean.*phi_norm,VGM20.Results.phi.A_fft_std.*phi_norm,':o',...
+       'DisplayName','VGM20')
+   errorbar(VGM45.Results.phi.T_mean,VGM45.Results.phi.A_fft_mean.*phi_norm,VGM45.Results.phi.A_fft_std.*phi_norm,':o',...
+       'DisplayName','VGM45')
+   errorbar(VGM90.Results.phi.T_mean,VGM90.Results.phi.A_fft_mean.*phi_norm,VGM90.Results.phi.A_fft_std.*phi_norm,':o',...
+       'DisplayName','VGM90')
    legend('Location','northwest')
    ylabel('\phi (deg)')
    xlabel('period (s)')
    
    figure; hold on
-   errorbar(column.Results.phi.T_mean,column.Results.phi.A_fft_mean.*RAO_norm,column.Results.phi.A_fft_std.*RAO_norm,':o',...
-       'DisplayName','column')
-%    errorbar(VGM90.Results.phi.T_mean,VGM90.Results.phi.A_fft_mean.*RAO_norm,VGM90.Results.phi.A_fft_std.*RAO_norm,':o',...
-%        'DisplayName','VGM90')
+   errorbar(VGM0.Results.phi.T_mean,VGM0.Results.phi.A_fft_mean.*RAO_norm,VGM0.Results.phi.A_fft_std.*RAO_norm,':o',...
+       'DisplayName','VGM0')
+   errorbar(VGM10.Results.phi.T_mean,VGM10.Results.phi.A_fft_mean.*RAO_norm,VGM10.Results.phi.A_fft_std.*RAO_norm,':o',...
+       'DisplayName','VGM10')
+   errorbar(VGM20.Results.phi.T_mean,VGM20.Results.phi.A_fft_mean.*RAO_norm,VGM20.Results.phi.A_fft_std.*RAO_norm,':o',...
+       'DisplayName','VGM20')
+   errorbar(VGM45.Results.phi.T_mean,VGM45.Results.phi.A_fft_mean.*RAO_norm,VGM45.Results.phi.A_fft_std.*RAO_norm,':o',...
+       'DisplayName','VGM45')
+   errorbar(VGM90.Results.phi.T_mean,VGM90.Results.phi.A_fft_mean.*RAO_norm,VGM90.Results.phi.A_fft_std.*RAO_norm,':o',...
+       'DisplayName','VGM90')
    legend('Location','northwest')
    ylabel('\phi/(kA)')
    xlabel('period  (s)')
@@ -216,33 +231,54 @@ if regularwaves == 1
 %    xlabel('period (s)')
    
       figure; hold on
-   errorbar(column.Results.fx.T_mean,column.Results.fx.A_fft_mean.*fx_norm,column.Results.fx.A_fft_std.*fx_norm,':o',...
+   errorbar(VGM0.Results.fx.T_mean,VGM0.Results.fx.A_fft_mean.*fx_norm,VGM0.Results.fx.A_fft_std.*fx_norm,':o',...
+       'DisplayName','VGM0')
+   errorbar(VGM10.Results.fx.T_mean,3*VGM10.Results.fx.A_fft_mean.*fx_norm,VGM10.Results.fx.A_fft_std.*fx_norm,':o',...
+       'DisplayName','VGM10')
+   errorbar(VGM20.Results.fx.T_mean,3*VGM20.Results.fx.A_fft_mean.*fx_norm,VGM20.Results.fx.A_fft_std.*fx_norm,':o',...
+       'DisplayName','VGM20')
+   errorbar(VGM45.Results.fx.T_mean,VGM45.Results.fx.A_fft_mean.*fx_norm,VGM45.Results.fx.A_fft_std.*fx_norm,':o',...
        'DisplayName','VGM45')
-%    errorbar(VGM90.Results.fx.T_mean,VGM90.Results.fx.A_fft_mean.*fx_norm,VGM90.Results.fx.A_fft_std.*fx_norm,':o',...
-%        'DisplayName','VGM90')
+   errorbar(VGM90.Results.fx.T_mean,VGM90.Results.fx.A_fft_mean.*fx_norm,VGM90.Results.fx.A_fft_std.*fx_norm,':o',...
+       'DisplayName','VGM90')
    legend('Location','northwest')
    ylabel('Fx (N)')
    xlabel('period (s)')
    
    figure; hold on
-   errorbar(column.Results.fz.T_mean,column.Results.fz.A_fft_mean.*fz_norm,column.Results.fz.A_fft_std.*fz_norm,':o',...
+   errorbar(VGM0.Results.fz.T_mean,VGM0.Results.fz.A_fft_mean.*fz_norm,VGM0.Results.fz.A_fft_std.*fz_norm,':o',...
+       'DisplayName','VGM0')
+   errorbar(VGM10.Results.fz.T_mean,VGM10.Results.fz.A_fft_mean.*fz_norm,VGM10.Results.fz.A_fft_std.*fz_norm,':o',...
+       'DisplayName','VGM10')
+   errorbar(VGM20.Results.fz.T_mean,VGM20.Results.fz.A_fft_mean.*fz_norm,VGM20.Results.fz.A_fft_std.*fz_norm,':o',...
+       'DisplayName','VGM20')
+   errorbar(VGM45.Results.fz.T_mean,VGM45.Results.fz.A_fft_mean.*fz_norm,VGM45.Results.fz.A_fft_std.*fz_norm,':o',...
        'DisplayName','VGM45')
-%    errorbar(VGM90.Results.fz.T_mean,VGM90.Results.fz.A_fft_mean.*fz_norm,VGM90.Results.fz.A_fft_std.*fz_norm,':o',...
-%        'DisplayName','VGM90')
+   errorbar(VGM90.Results.fz.T_mean,VGM90.Results.fz.A_fft_mean.*fz_norm,VGM90.Results.fz.A_fft_std.*fz_norm,':o',...
+       'DisplayName','VGM90')
    legend('Location','northwest')
    ylabel('Fz (N)')
    xlabel('period (s)')
    
    figure; hold on
-   errorbar(column.Results.my.T_mean,column.Results.my.A_fft_mean.*my_norm,column.Results.my.A_fft_std.*my_norm,':o',...
+   errorbar(VGM0.Results.my.T_mean,VGM0.Results.my.A_fft_mean.*my_norm,VGM0.Results.my.A_fft_std.*my_norm,':o',...
+       'DisplayName','VGM0')
+   errorbar(VGM10.Results.my.T_mean,VGM10.Results.my.A_fft_mean.*my_norm,VGM10.Results.my.A_fft_std.*my_norm,':o',...
+       'DisplayName','VGM10')
+   errorbar(VGM20.Results.my.T_mean,VGM20.Results.my.A_fft_mean.*my_norm,VGM20.Results.my.A_fft_std.*my_norm,':o',...
+       'DisplayName','VGM20')
+   errorbar(VGM45.Results.my.T_mean,VGM45.Results.my.A_fft_mean.*my_norm,VGM45.Results.my.A_fft_std.*my_norm,':o',...
        'DisplayName','VGM45')
+   errorbar(VGM90.Results.my.T_mean,VGM90.Results.my.A_fft_mean.*my_norm,VGM90.Results.my.A_fft_std.*my_norm,':o',...
+       'DisplayName','VGM90')
+   legend('Location','northwest')
    ylabel('My (N-m)')
    xlabel('period (s)')
    
    figure
-   errorbar(column.Results.phi.T_mean,column.Results.phi.A_pks_mean,column.Results.phi.A_pks_std,'o',...
+   errorbar(VGM90.Results.phi.T_mean,VGM90.Results.phi.A_pks_mean,VGM90.Results.phi.A_pks_std,'o',...
        'DisplayName','VGM90 pks'); hold on
-   errorbar(column.Results.phi.T_mean,column.Results.phi.A_fft_mean,column.Results.phi.A_fft_std,'o',...
+   errorbar(VGM90.Results.phi.T_mean,VGM90.Results.phi.A_fft_mean,VGM90.Results.phi.A_fft_std,'o',...
        'DisplayName','VGM90 fft');
    legend('Location','northwest')
    ylabel('\phi (deg)')

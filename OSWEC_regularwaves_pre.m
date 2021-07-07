@@ -29,7 +29,7 @@ for i = 1:numruns % loop over dataset runs
         ch = ['ch',num2str(channels{j})];
         
 
-%         if contains(currentrun,'T13')
+%         if contains(currentrun,'T28')
 %             plotloop = true;
 %         else
 %             plotloop = false;
@@ -101,7 +101,13 @@ for i = 1:numruns % loop over dataset runs
         % 0.15 for pos; 0.25 for loads
         pkpromfactor = 0.25; % threshold (as proportion of peak FFT value) below which additional peaks are considered insignificant
         [f_trim,Ma_trim,~,~,~,~,~,fft_raw] = pkg.fun.plt_fft(t_trim,y_trim,fs,pkpromfactor);
-        dominant_period = fft_raw.dominant_period;
+        
+        if fft_raw.dominant_period < dataopts.min_period
+            dominant_period = max(fft_raw.significant_periods(fft_raw.significant_periods > dataopts.min_period));
+        else
+            dominant_period = fft_raw.dominant_period;
+        end
+        
         
         % FILTERING
         % if a subfield-specific filter has been specified, unpack specifications:
