@@ -6,48 +6,69 @@
 % Last updated: 5-13-21 by J. Davis
 %% ------------------------------ Inputs ------------------------------- %%
 dry_inertia = 0;
-free_decay = 0;
+free_decay = 1;
 regularwaves = 1;
 %% ---------------------------- dry inertia ---------------------------- %%
 if dry_inertia == 1
     % Define inputs:
-    directory = 'data\NREL_OSWEC\OSWEC_inertia\body_w_ballast';     % current directory
+    directory = 'data\NREL_OSWEC\inertia\body_w_ballast';     % current directory
     file = 'all';
     
     opts = pkg.obj.readDataOpt(directory,file);
     opts.as_struct = true;
     inertia = pkg.fun.read_data2(opts);
-    
-    out = OSWEC_inertia(inertia);
-end
 
+%          out = OSWEC_inertia(inertia);
+    
+    dataopts.fs = 500;
+    dataopts.phi_ch = 2;
+    dataopts.minwidth = 0.1; % width (in seconds) below which peaks are considered noise
+    dataopts.min_period = 0.1;
+    dataopts.max_period = 2;
+    dataopts.phi0_pkpromfactor = 0.25; % threshold, as a fraction of the maximum, for which peaks should be considered
+    dataopts.fft_pkpromfactor = 0.15; % threshold (as proportion of peak FFT value) below which additional peaks are considered insignificant
+    plotloop = true;
+    inertia_body_w_ballast = OSWEC_freedecay(inertia,dataopts,plotloop);
+    
+%     save('inertia_body_w_ballast.mat','inertia_body_w_ballast')
+
+end
 %% ---------------------------- free decay ----------------------------- %%
 if free_decay == 1
     % Define inputs:
-    directory = 'data\NREL_VGOSWEC\freedecay\VGM90';     % current directory
+    directory = 'data\NREL_OSWEC\freedecay\column';     % current directory
     file = 'all';
     
     opts = pkg.obj.readDataOpt(directory,file);
     opts.as_struct = true;
     %if ~exist('data','var')
-    VGM0freedecay = pkg.fun.read_data2(opts);
+    freedecay = pkg.fun.read_data2(opts);
     %end
     
-    fs = 500;
-    plotloop = false;
-    VGM0freedecay = OSWEC_freedecay(VGM0freedecay,fs,plotloop);
-    % TO DO:
-    % 1) IMPROVE NATURAL PERIOD ESTIMATE FROM PEAKS NOT FFT (NOT SHARP
-    % ENOUGH)
-    % 2) IMPLEMENT NL DAMPING
-    
+    dataopts = [];
+    dataopts.fs = 500;
+    dataopts.phi_ch = 6;
+    dataopts.minwidth = 0.1; % width (in seconds) below which peaks are considered noise
+    dataopts.min_period = 0.1;
+    dataopts.max_period = 6;
+    dataopts.phi0_pkpromfactor = 0.75; % threshold, as a fraction of the maximum, for which peaks should be considered for finding phi0
+    dataopts.fft_pkpromfactor = 0.15; % threshold (as proportion of peak FFT value) below which additional peaks are considered insignificant
+    dataopts.pks_pkpromfactor = 0.05; % threshold, as a fraction of the maximum, for which peaks should be considered for identifying Tn_pks and damping
+%     dataopts.max_duration = 8; % maximum free decay duration
+    plotloop = true;
+
+    freedecay_cws = OSWEC_freedecay(freedecay,dataopts,plotloop);
+
+    %     save('freedecay_column_w_springs.mat','freedecay_cws')
+
     
 end
 %% ----------------------------- regular ------------------------------- %%
 if regularwaves == 1
   %% --------------------- design wave processing ---------------------- %%
   % READ DATA:
-    directory = 'data\NREL_VGOSWEC\designwaves\combined';
+  % directory = 'data\NREL_OSWEC\designwaves\column_w_springs';
+   directory = 'data\NREL_OSWEC\designwaves\column';
     file = 'all';
     
     % initialize read data options:
@@ -97,13 +118,14 @@ if regularwaves == 1
     verbose = true;
     
     % call regular waves post-processing function:
-    designwaves = OSWEC_regularwaves_post(designwaves,regularwaves_post_opts,plotloop,verbose);
+    designwaves_c = OSWEC_regularwaves_post(designwaves,regularwaves_post_opts,plotloop,verbose);
     
-%     save('designwaves.mat','designwaves')
+%     save('designwaves_column.mat','designwaves_c')
  
   %% ---------------------- model run processing ----------------------- %%
     % READ DATA:
     directory = 'data\NREL_OSWEC\regularwaves\column'; % 'data\NREL_OSWEC\OSWEC_regularwaves\5-14-21' 'data\NREL_OSWEC\OSWEC_regularwaves\5-19-21'
+%     directory = 'data\NREL_OSWEC\regularwaves\column_w_springs';
     file = 'all';
     
     % initialize read data options:
@@ -148,78 +170,133 @@ if regularwaves == 1
     regularwaves_post_opts.subfields = {'position','forceX','forceZ','momentY'};
     
    % plot settings
-    plotloop =false;
+    plotloop = false;
     verbose = true;
     
     % call regular waves post-processing function:
-   column = OSWEC_regularwaves_post(column,regularwaves_post_opts,plotloop,verbose);
+   regularwaves_cws= OSWEC_regularwaves_post(column,regularwaves_post_opts,plotloop,verbose);
    
-%    save('VGM45_regularwaves.mat','VGM45')
+%     save('regularwaves_column_w_springs_updated.mat','regularwaves_cws')
     
   %% -------------------------- analysis ----------------------------- %%
-   OSWEC_loadpaths(column,{'forceX','forceZ'},{'fx','fz'})
+%    OSWEC_loadpaths(column,{'forceX','forceZ'},{'fx','fz'})
   
+  load('data\NREL_OSWEC\_processed\inertia_body_w_ballast.mat') 
+  load('data\NREL_OSWEC\_processed\inertia_body_w_ballast_and_springs.mat') 
+  
+  % load paths:
+%   OSWEC_loadpaths(VGM0,{'forceX','forceZ'},{'fx','fz'})
+   
+  % external torsional spring constant:
+   g = 9.81;     % (m/s^2)
+   d = 0.18; %  from hang test (m)
+   M = 13.49;    % body + ballast (kg)
+   C_yy = M*g*d;
+   I_yy = C_yy/inertia_body_w_ballast.results.wn_mean^2; % kg-m^2
+   C_ext = I_yy*(inertia_body_w_ballast_and_springs.results.wn_mean)^2 - C_yy;
+   
+   
    
   %% ---------------------------- plots ------------------------------ %%
-   load('designwaves.mat')
-%    load('VGM0_regularwaves.mat')
+   load('data\NREL_OSWEC\_processed\designwaves_column_w_springs.mat')
+   load('data\NREL_OSWEC\_processed\designwaves_column.mat')
+   load('data\NREL_OSWEC\_processed\regularwaves_column_w_springs.mat')
+   load('data\NREL_OSWEC\_processed\regularwaves_column.mat')
 %    load('VGM10_regularwaves.mat')
 %    load('VGM20_regularwaves.mat')
 %    load('VGM45_regularwaves.mat')
 %    load('VGM90_regularwaves.mat')
-   
-   k = wave_disp(2*pi./designwaves.Results.eta_wp2.T_mean,1,9.81,0.001);
+   %%
+   k_c = wave_disp(2*pi./designwaves_c.Results.eta_wp2.T_mean,1,9.81,0.001);
+   k_cws = wave_disp(2*pi./designwaves_cws.Results.eta_wp2.T_mean,1,9.81,0.001);
    phi_norm = 1;
-   RAO_norm = 2*pi/180./(k.*designwaves.Results.eta_wp2.A_pks_mean);
-   fx_norm = 1;
+   RAO_norm_c = 2*pi/180./(k_c.*designwaves_c.Results.eta_wp2.A_pks_mean);
+   RAO_norm_cws = 2*pi/180./(k_cws.*designwaves_cws.Results.eta_wp2.A_pks_mean);
+%    fx_norm_c = 1./designwaves_c.Results.eta_wp2.A_pks_mean;
+%    fx_norm_cws = 1./designwaves_cws.Results.eta_wp2.A_pks_mean;
+   fx_norm_c = 1;
+   fx_norm_cws = 1;
    fz_norm = 1;
    my_norm = 1;
    
    figure
-   errorbar(designwaves.Results.eta_wp2.T_mean,designwaves.Results.eta_wp2.A_pks_mean,designwaves.Results.eta_wp2.A_pks_std,...
+   errorbar(designwaves_cws.Results.eta_wp2.T_mean,designwaves_cws.Results.eta_wp2.A_pks_mean,designwaves_cws.Results.eta_wp2.A_pks_std,...
+       '.','CapSize',0); hold on
+   errorbar(designwaves_c.Results.eta_wp2.T_mean,designwaves_c.Results.eta_wp2.A_pks_mean,designwaves_c.Results.eta_wp2.A_pks_std,...
        '.','CapSize',0); hold on
    ylabel('wave amplitude (m)')
    xlabel('period (s)')
    
+   
+   
    figure; hold on
    errorbar(column.Results.phi.T_mean,column.Results.phi.A_fft_mean.*phi_norm,column.Results.phi.A_fft_std.*phi_norm,':o',...
        'DisplayName','column')
-%    errorbar(VGM0.Results.phi.T_mean,VGM0.Results.phi.A_fft_mean.*phi_norm,VGM0.Results.phi.A_fft_std.*phi_norm,':o',...
-%        'DisplayName','VGM0')
-
+   errorbar(column_w_springs.Results.phi.T_mean,column_w_springs.Results.phi.A_fft_mean.*phi_norm,column_w_springs.Results.phi.A_fft_std.*phi_norm,':o',...
+       'DisplayName','column w springs')
    legend('Location','northwest')
    ylabel('\phi (deg)')
    xlabel('period (s)')
    
+      
    figure; hold on
-   errorbar(column.Results.phi.T_mean,column.Results.phi.A_fft_mean.*RAO_norm,column.Results.phi.A_fft_std.*RAO_norm,':o',...
+   plot([column.Results.phi.T{:}],[column.Results.phi.A_fft{:}].*phi_norm,':o',...
        'DisplayName','column')
-%    errorbar(VGM90.Results.phi.T_mean,VGM90.Results.phi.A_fft_mean.*RAO_norm,VGM90.Results.phi.A_fft_std.*RAO_norm,':o',...
-%        'DisplayName','VGM90')
+   plot([column_w_springs.Results.phi.T{:}],[column_w_springs.Results.phi.A_fft{:}].*phi_norm,':o',...
+       'DisplayName','column w springs')
+   legend('Location','northwest')
+   ylabel('\phi (deg)')
+   xlabel('period (s)')
+   
+   figure
+   scatter([column.Results.phi.T{:}],[column.Results.fx.A_fft{:}],'o',...
+       'DisplayName','column')
+   legend('Location','northwest')
+   ylabel('Fx (N)')
+   xlabel('period (s)')
+   
+   figure
+   scatter([column_w_springs.Results.phi.T{:}],[column_w_springs.Results.fx.A_fft{:}],'o',...
+       'DisplayName','column w springs')
+   legend('Location','northwest')
+   ylabel('Fx (N)')
+   xlabel('period (s)')
+   
+   figure; hold on
+   errorbar(column.Results.phi.T_mean,column.Results.phi.A_fft_mean.*RAO_norm_c,column.Results.phi.A_fft_std.*RAO_norm_c,...
+            ':o','DisplayName','column')
+%        'ko','MarkerFaceColor','k','DisplayName','column')
+         
+   errorbar(column_w_springs.Results.phi.T_mean,column_w_springs.Results.phi.A_fft_mean.*RAO_norm_cws,column_w_springs.Results.phi.A_fft_std.*RAO_norm_cws,...
+            ':o','DisplayName','column w springs') 
+%      'ro','MarkerFaceColor','r','DisplayName','column w springs')
    legend('Location','northwest')
    ylabel('\phi/(kA)')
    xlabel('period  (s)')
    
 %    figure; hold on
-%    errorbar(VGM0.Results.fx.T_mean,VGM0.Results.fx.A_pks_mean.*fx_norm,VGM0.Results.fx.A_pks_std.*fx_norm,':o',...
-%        'DisplayName','VGM0')
-%    errorbar(VGM10.Results.fx.T_mean,VGM10.Results.fx.A_pks_mean.*fx_norm,VGM10.Results.fx.A_pks_std.*fx_norm,':o',...
-%        'DisplayName','VGM10')
-%    errorbar(VGM20.Results.fx.T_mean,VGM20.Results.fx.A_pks_mean.*fx_norm,VGM20.Results.fx.A_pks_std.*fx_norm,':o',...
-%        'DisplayName','VGM20')
-%    errorbar(VGM45.Results.fx.T_mean,VGM45.Results.fx.A_pks_mean.*fx_norm,VGM45.Results.fx.A_pks_std.*fx_norm,':o',...
-%        'DisplayName','VGM45')
-%    errorbar(VGM90.Results.fx.T_mean,VGM90.Results.fx.A_pks_mean.*fx_norm,VGM90.Results.fx.A_pks_std.*fx_norm,':o',...
-%        'DisplayName','VGM90')
+%    plot([column.Results.phi.T{:}],[column.Results.phi.A_fft{:}].*RAO_norm_c,':o',...
+%        'DisplayName','column')
+%    plot([column_w_springs.Results.phi.T{:}],[column_w_springs.Results.phi.A_fft{:}].*RAO_norm_cws,':o',...
+%        'DisplayName','column w springs')
 %    legend('Location','northwest')
-%    ylabel('Fx (N)')
+%    ylabel('\phi (deg)')
 %    xlabel('period (s)')
    
-      figure; hold on
-   errorbar(column.Results.fx.T_mean,column.Results.fx.A_fft_mean.*fx_norm,column.Results.fx.A_fft_std.*fx_norm,':o',...
-       'DisplayName','VGM45')
-%    errorbar(VGM90.Results.fx.T_mean,VGM90.Results.fx.A_fft_mean.*fx_norm,VGM90.Results.fx.A_fft_std.*fx_norm,':o',...
-%        'DisplayName','VGM90')
+   
+   
+   figure; hold on
+   errorbar(column.Results.fx.T_mean,column.Results.fx.A_fft_mean.*fx_norm_c,column.Results.fx.A_fft_std.*fx_norm_c,':o',...
+       'DisplayName','column')
+   errorbar(column_w_springs.Results.fx.T_mean,column_w_springs.Results.fx.A_fft_mean.*fx_norm_cws,column_w_springs.Results.fx.A_fft_std.*fx_norm_cws,':o',...
+       'DisplayName','column w springs')
+   legend('Location','northwest')
+   ylabel('Fx (N)')
+   xlabel('period (s)')
+   
+   figure
+   scatter([column.Results.fx.T{:}],[column.Results.fx.A_fft{:}],'o',...
+       'DisplayName','column')
    legend('Location','northwest')
    ylabel('Fx (N)')
    xlabel('period (s)')
@@ -235,7 +312,10 @@ if regularwaves == 1
    
    figure; hold on
    errorbar(column.Results.my.T_mean,column.Results.my.A_fft_mean.*my_norm,column.Results.my.A_fft_std.*my_norm,':o',...
-       'DisplayName','VGM45')
+       'DisplayName','column')
+   errorbar(column_w_springs.Results.my.T_mean,column_w_springs.Results.my.A_fft_mean.*my_norm,column_w_springs.Results.my.A_fft_std.*my_norm,':o',...
+       'DisplayName','column w springs')
+   legend('Location','northwest')
    ylabel('My (N-m)')
    xlabel('period (s)')
    
@@ -249,8 +329,6 @@ if regularwaves == 1
    xlabel('period (s)')
    
 
-   
-   figure; hold on
    
    
 end

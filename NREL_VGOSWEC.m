@@ -5,20 +5,32 @@
 % Created on:   5-13-21
 % Last updated: 5-13-21 by J. Davis
 %% ------------------------------ Inputs ------------------------------- %%
-dry_inertia = 0;
+dry_inertia = 1;
 free_decay = 0;
 regularwaves = 1;
 %% ---------------------------- dry inertia ---------------------------- %%
 if dry_inertia == 1
     % Define inputs:
-    directory = 'data\NREL_OSWEC\OSWEC_inertia\body_w_ballast';     % current directory
+%     directory = 'data\NREL_VGOSWEC\inertia\body_w_springs';     % current directory
+    directory = 'data\NREL_VGOSWEC\inertia\body_only';
     file = 'all';
     
     opts = pkg.obj.readDataOpt(directory,file);
     opts.as_struct = true;
     inertia = pkg.fun.read_data2(opts);
+    dataopts.fs = 500;
+    dataopts.phi_ch = 2;
+    dataopts.minwidth = 0.1; % width (in seconds) below which peaks are considered noise
+    dataopts.min_period = 0.1;
+    dataopts.max_period = 2;
     
-    out = OSWEC_inertia(inertia);
+    plotloop = false;
+    inertia_body_only = OSWEC_freedecay(inertia,dataopts,plotloop);
+    
+    %     save('inertia_body_only.mat','inertia_body_only')
+    
+    %     out = OSWEC_inertia(inertia);
+
 end
 
 %% ---------------------------- free decay ----------------------------- %%
@@ -158,19 +170,29 @@ if regularwaves == 1
 %    save('VGM45_regularwaves.mat','VGM45')
     
   %% -------------------------- analysis ----------------------------- %%
-   OSWEC_loadpaths(VGM0,{'forceX','forceZ'},{'fx','fz'})
+  load('data\NREL_VGOSWEC\_processed\inertia_body_only.mat') 
+  load('data\NREL_VGOSWEC\_processed\inertia_body_w_springs.mat') 
+  
+  % load paths:
+%   OSWEC_loadpaths(VGM0,{'forceX','forceZ'},{'fx','fz'})
    
-   
+  % external torsional spring constant:
+   g = 9.81;     % (m/s^2)
+   d = 0.268732; %  from hang test (m)
+   M = 6.676;    % body + ballast (kg)
+   C_yy = M*g*d;
+   I_yy = C_yy/inertia_body_only.results.wn_mean^2; % kg-m^2
+   C_ext = I_yy*(inertia_body_w_springs.results.wn_mean)^2 - C_yy;
    
    
 
   %% ---------------------------- plots ------------------------------ %%
-   load('designwaves.mat')
-   load('VGM0_regularwaves.mat')
-   load('VGM10_regularwaves.mat')
-   load('VGM20_regularwaves.mat')
-   load('VGM45_regularwaves.mat')
-   load('VGM90_regularwaves.mat')
+   load('data\NREL_VGOSWEC\_processed\designwaves.mat')
+   load('data\NREL_VGOSWEC\_processed\VGM0_regularwaves.mat')
+   load('data\NREL_VGOSWEC\_processed\VGM10_regularwaves.mat')
+   load('data\NREL_VGOSWEC\_processed\VGM20_regularwaves.mat')
+   load('data\NREL_VGOSWEC\_processed\VGM45_regularwaves.mat')
+   load('data\NREL_VGOSWEC\_processed\VGM90_regularwaves.mat')
    
    k = wave_disp(2*pi./designwaves.Results.eta_wp2.T_mean,1,9.81,0.001);
    phi_norm = 1;

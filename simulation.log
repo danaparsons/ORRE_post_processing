@@ -1,0 +1,36 @@
+
+WEC-Sim Read Input File ...   
+{Error using <a href="matlab:matlab.internal.language.introspective.errorDocCallback('lt')" style="font-weight:bold"> < </a>
+Not enough input arguments.
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('wecSim', 'C:\Users\jacob\Documents\Open-Source\WEC-Sim\source\wecSim.m', 108)" style="font-weight:bold">wecSim</a> (<a href="matlab: opentoline('C:\Users\jacob\Documents\Open-Source\WEC-Sim\source\wecSim.m',108,0)">line 108</a>)
+        if h5Info.bytes < 1000
+} 
+clear all
+wecSimInputFile
+WEC-Sim: An open-source code for simulating wave energy converters
+Version: NOT DEFINED
+
+Initializing the Simulation Class...
+	Case Dir: C:\Users\jacob\Documents\Open-Source\WEC-Sim\NREL_TCF\WECSim-UMA-RegularCIC\Solid-Paddle V2 
+if system_dependent('IsDebugMode')==1, dbstep; end
+if system_dependent('IsDebugMode')==1, dbquit; end
+CD5 = 3*pi/4*(I55+A55_wn)*m
+
+CD5 =
+
+   10.4419
+
+Bv55 = 2*(I55+A55_wn)*wn_exp*zeta_exp - B55_wn
+
+Bv55 =
+
+    1.6987
+
+Cext*5.25
+
+ans =
+
+   77.8167
+
+wecSim

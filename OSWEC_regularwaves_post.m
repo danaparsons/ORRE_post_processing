@@ -50,8 +50,8 @@ for i = 1:numruns
         varname_results = varnames_results{j};
         if verbose==1; disp(varname); end
         
-%         if contains(currentrun,'T22')
-%             plotloop = true;
+%         if contains(currentrun,'T20')
+            plotloop = true;
 %         else
 %             plotloop = false;
 %         end
@@ -99,7 +99,7 @@ for i = 1:numruns
         
         % fft
         fs = data.(currentrun).(subfield).fft.pre.fs;
-        pkpromfactor = 0.15; % threshold (as proportion of peak FFT value) below which additional peaks are considered insignificant
+        pkpromfactor = 0.25; % threshold (as proportion of peak FFT value) below which additional peaks are considered insignificant
         [f,Ma,~,T,A_fft,~,~,fft_post] = pkg.fun.plt_fft(t_slice,y_slice,fs,pkpromfactor);
         fft_post.ncycles = ncycles;
         
@@ -115,6 +115,19 @@ for i = 1:numruns
             end
         end
 
+%         if contains(currentrun,'T20')
+%             dataopts.min_period = 1.5;
+%         else
+%             ;
+%         end
+%         
+%         if isfield(dataopts,'min_period') && fft_post.dominant_period < dataopts.min_period
+%             T = max(fft_post.significant_periods(fft_post.significant_periods > dataopts.min_period));
+%         else
+%             T = fft_post.dominant_period;
+%         end
+        
+        
         % display to commmand window
         if verbose==1
             disp(['T = ',num2str(T)])
@@ -145,7 +158,7 @@ for i = 1:numruns
             xlabel('t(s)')
             ylabel(varname)
             legend()
-            xlim([min(t_slice),max(t_slice)])
+            xlim([min(t),max(t)])
             sgtitle(replace(currentrun,'_',' '))
             
             % plot 2: sliced signal used to obtain the integer-cycle fft

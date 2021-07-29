@@ -45,7 +45,8 @@ end
 %run1struc = data.run1.to_struct();
 % data.Run1.rename('ch1','y')
 
-numruns = length(fieldnames(data)); % number of fields in the dataset
+runnames = fieldnames(data);
+numruns = length(runnames); % number of fields in the dataset
 
 
 % moment of inertia calc loop
@@ -58,14 +59,17 @@ Tn  = zeros(numruns,1); % initialize vector to store dominant periods
 wn  = zeros(numruns,1); 
 Iyy = zeros(numruns,1);
 
-plotloop = 0;
+plotloop = 1;
 
 for runnum = 1:numruns
     
-    run = ['Run',num2str(runnum)];
-
+%     run = ['Run',num2str(runnum)];
+    run = runnames{runnum};
+    disp(run)
+    
     phi0 = min(data.(run).ch2(data.(run).ch2 == min(data.(run).ch2)));
     t0   = min(data.(run).ch1(data.(run).ch2 == phi0));
+    t0 = 0
     t    = data.(run).ch1(data.(run).ch1 >= t0)-t0;
     phi_raw  = data.(run).ch2(data.(run).ch1 >= t0); phi_raw = phi_raw-mean(phi_raw(end-100:end-5));
 
@@ -73,7 +77,9 @@ for runnum = 1:numruns
     [f_raw,P_raw] = pkg.fun.plt_fft(t,phi_raw);
     passbandfreq = 5; % Hz
     [phi,filter] = lowpass(phi_raw,passbandfreq,(2*10^-3)^(-1),'Steepness',0.95);
-    [f,P,Tn(runnum)] = pkg.fun.plt_fft(t,phi);
+    [f,P,~,Tn(runnum)] = pkg.fun.plt_fft(t,phi);
+    
+
     
     if plotloop == true
         figure

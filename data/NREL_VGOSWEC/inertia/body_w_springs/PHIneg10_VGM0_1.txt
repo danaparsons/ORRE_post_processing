@@ -4,7 +4,6 @@
 * Programmed by: Jessica Nguyen (Email: nvnguyen@umass.edu)
 *----------------------------------------------------------
 * Project Name:	NREL_VGOSWEC_inertia_springs
-
 * Project Lead:	JD
 * Labview Operator:	PH
 * Comments:	Dry swing test to determine moment of inertia of VGOSWEC with springs. Naming convention: PHI (signed initial pos in deg) VGM (variable geometry module angle in deg).
