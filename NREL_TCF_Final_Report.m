@@ -213,7 +213,7 @@ saveas(f,'freedecay_VGM_comparison.fig')
    load('data\NREL_OSWEC\_processed\regularwaves_column_w_springs.mat')
    load('data\NREL_OSWEC\_processed\regularwaves_column.mat')
 
-   %%
+   
    % settings
    
    H_O= 0.5;
@@ -525,7 +525,7 @@ pitchresponse_label = 'Pitch Amplitude $|\phi|$ (deg)';
 fx_label = ['Foundation Surge Reaction ',char(10),'Force Magnitude $|F_{fr1}|$ (N)'];
 fz_label = ['Foundation Heave Reaction ',char(10),'Force Magnitude $|F_{fr3}|$ (N)'];
 my_label = ['Foundation Pitch Reaction ',char(10),'Moment Magnitude $|M_{Mr5}|$ (N-m)'];
-%%
+
 
 A_wep = [46.8	52.8	107.2	41.2	65.2]./2;
 T_wep = [1.03	1.39	1.63	1.80	2.33];
@@ -547,15 +547,15 @@ figure(); hold on
     f = gcf;
     exportgraphics(f,'designwaves.png','Resolution',600)
     saveas(f,'designwaves.fig')
-%%
+
 % Pitch response
 figure(); hold on
     x0=4; y0=4;
     width=7; height=3;
     set(gcf,'units','inches','position',[x0,y0,width,height])
-    scatter([waveenergyprize_c.Results.phi.T{:}],[waveenergyprize_c.Results.phi.A_fft{:}]*pitchresponse_norm_c,...
+    scatter(waveenergyprize_c.Results.phi.T_mean,waveenergyprize_c.Results.phi.A_pks_mean.*pitchresponse_norm_c,...
         25,'o','MarkerFaceAlpha',markeralpha,'MarkerEdgeAlpha',0.9,'MarkerFaceColor',markercolor_c,'MarkerEdgeColor',markercolor_c,'DisplayName',displayname_c)
-    scatter([waveenergyprize_cws.Results.phi.T{:}],[waveenergyprize_cws.Results.phi.A_fft{:}]*pitchresponse_norm_cws,...
+    scatter(waveenergyprize_cws.Results.phi.T_mean,waveenergyprize_cws.Results.phi.A_pks_mean.*pitchresponse_norm_cws,...
         25,'o','MarkerFaceAlpha',markeralpha,'MarkerEdgeAlpha',0.9,'MarkerFaceColor',markercolor_cws,'MarkerEdgeColor',markercolor_cws,'DisplayName',displayname_cws)
     legend('Location','northwest')
     ylabel(pitchresponse_label,'Interpreter','Latex');
@@ -563,17 +563,17 @@ figure(); hold on
     legend('Interpreter','Latex','Location','NorthWest')
     set(gca,'FontSize',10); box on
     f = gcf;
-%     exportgraphics(f,'pitchresponse.png','Resolution',600)
-%     saveas(f,'pitchresponse.fig')    
+    exportgraphics(f,'pitchresponse.png','Resolution',600)
+    saveas(f,'pitchresponse.fig')    
 
 % fx
 figure(); hold on
     x0=4; y0=4;
     width=7; height=3;
     set(gcf,'units','inches','position',[x0,y0,width,height])
-    scatter([waveenergyprize_c.Results.phi.T{:}],[waveenergyprize_c.Results.fx.A_fft{:}],...
+    scatter(waveenergyprize_c.Results.phi.T_mean,waveenergyprize_c.Results.fx.A_pks_mean,...
         25,'o','MarkerFaceAlpha',markeralpha,'MarkerEdgeAlpha',0.9,'MarkerFaceColor',markercolor_c,'MarkerEdgeColor',markercolor_c,'DisplayName',displayname_c)
-    scatter([waveenergyprize_cws.Results.phi.T{:}],[waveenergyprize_cws.Results.fx.A_fft{:}],...
+    scatter(waveenergyprize_cws.Results.phi.T_mean,waveenergyprize_cws.Results.fx.A_pks_mean,...
         25,'o','MarkerFaceAlpha',markeralpha,'MarkerEdgeAlpha',0.9,'MarkerFaceColor',markercolor_cws,'MarkerEdgeColor',markercolor_cws,'DisplayName',displayname_cws)
     legend('Location','northwest')
     ylabel(fx_label,'Interpreter','Latex');
@@ -581,17 +581,17 @@ figure(); hold on
     legend('Interpreter','Latex','Location','NorthWest')
     set(gca,'FontSize',10); box on
     f = gcf;
-%     exportgraphics(f,'fx.png','Resolution',600)
-%     saveas(f,'fx.fig')
+    exportgraphics(f,'fx.png','Resolution',600)
+    saveas(f,'fx.fig')
     
 % fz
 figure(); hold on
     x0=4; y0=4;
     width=7; height=3;
     set(gcf,'units','inches','position',[x0,y0,width,height])
-    scatter([waveenergyprize_c.Results.phi.T{:}],[waveenergyprize_c.Results.fz.A_fft{:}],...
+    scatter(waveenergyprize_c.Results.phi.T_mean,waveenergyprize_c.Results.fz.A_pks_mean,...
         25,'o','MarkerFaceAlpha',markeralpha,'MarkerEdgeAlpha',0.9,'MarkerFaceColor',markercolor_c,'MarkerEdgeColor',markercolor_c,'DisplayName',displayname_c)
-    scatter([waveenergyprize_cws.Results.phi.T{:}],[waveenergyprize_cws.Results.fz.A_fft{:}],...
+    scatter(waveenergyprize_cws.Results.phi.T_mean,waveenergyprize_cws.Results.fz.A_pks_mean,...
         25,'o','MarkerFaceAlpha',markeralpha,'MarkerEdgeAlpha',0.9,'MarkerFaceColor',markercolor_cws,'MarkerEdgeColor',markercolor_cws,'DisplayName',displayname_cws)
     legend('Location','northwest')
     ylabel(fz_label,'Interpreter','Latex');
@@ -599,17 +599,17 @@ figure(); hold on
     legend('Interpreter','Latex','Location','SouthEast')
     set(gca,'FontSize',10); box on
     f = gcf;
-%     exportgraphics(f,'fz.png','Resolution',600)
-%     saveas(f,'fz.fig')
+    exportgraphics(f,'fz.png','Resolution',600)
+    saveas(f,'fz.fig')
 
 % my
 figure(); hold on
     x0=4; y0=4;
     width=7; height=3;
     set(gcf,'units','inches','position',[x0,y0,width,height])
-    scatter([waveenergyprize_c.Results.phi.T{:}],[waveenergyprize_c.Results.my.A_fft{:}],...
+    scatter(waveenergyprize_c.Results.phi.T_mean,waveenergyprize_c.Results.my.A_pks_mean,...
         25,'o','MarkerFaceAlpha',markeralpha,'MarkerEdgeAlpha',0.9,'MarkerFaceColor',markercolor_c,'MarkerEdgeColor',markercolor_c,'DisplayName',displayname_c)
-    scatter([waveenergyprize_cws.Results.phi.T{:}],[waveenergyprize_cws.Results.my.A_fft{:}],...
+    scatter(waveenergyprize_cws.Results.phi.T_mean,waveenergyprize_cws.Results.my.A_pks_mean,...
         25,'o','MarkerFaceAlpha',markeralpha,'MarkerEdgeAlpha',0.9,'MarkerFaceColor',markercolor_cws,'MarkerEdgeColor',markercolor_cws,'DisplayName',displayname_cws)
     legend('Location','northwest')
     ylabel(my_label,'Interpreter','Latex');
@@ -617,8 +617,8 @@ figure(); hold on
     legend('Interpreter','Latex','Location','NorthWest')
     set(gca,'FontSize',10); box on
     f = gcf;
-%     exportgraphics(f,'my.png','Resolution',600)
-%     saveas(f,'my.fig')
+    exportgraphics(f,'my.png','Resolution',600)
+    saveas(f,'my.fig')
    
 %% ---------------------- Regular Waves, VGOSWEC ----------------------- %%
    load('data/NREL_VGOSWEC/_processed/designwaves.mat')
@@ -910,10 +910,6 @@ load('data/NREL_VGOSWEC/_processed/waveenergyprize_VGM10.mat')
 load('data/NREL_VGOSWEC/_processed/waveenergyprize_VGM20.mat')
 load('data/NREL_VGOSWEC/_processed/waveenergyprize_VGM45.mat')
 load('data/NREL_VGOSWEC/_processed/waveenergyprize_VGM90.mat')
-%%
-
-t = waveenergyprize_VGM10.T163_A140_B2_VGM10_1
-
 
 pitchresponse_norm = 1;
 fx_norm = 1;
@@ -933,7 +929,7 @@ my_label = ['Foundation Pitch Reaction ',char(10),'Moment Magnitude $|M_{Mr5}|$ 
 % Design wave conditions
 A_wep = [46.8	52.8	107.2	41.2	65.2]./2;
 T_wep = [1.03	1.39	1.63	1.80	2.33];
-%%
+
 % Pitch response
 figure(); hold on
     x0=4; y0=4;
@@ -981,7 +977,7 @@ figure(); hold on
     f = gcf;
     exportgraphics(f,'fx.png','Resolution',600)
     saveas(f,'fx.fig')
-%%
+
 % fz
 figure(); hold on
     x0=4; y0=4;
@@ -1005,7 +1001,7 @@ figure(); hold on
     f = gcf;
     exportgraphics(f,'fz.png','Resolution',600)
     saveas(f,'fz.fig')
-%%
+
 % my
 figure(); hold on
     x0=4; y0=4;
