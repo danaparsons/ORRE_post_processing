@@ -122,7 +122,7 @@ if regularwaves == 1
     
 %     save('designwaves_column.mat','designwaves_c')
  
-  %% ---------------------- model run processing ----------------------- %%
+  %% -------------------------- regular wave --------------------------- %%
     % READ DATA:
     directory = 'data/NREL_OSWEC/waveenergyprize/column_w_springs/'; % 'data\NREL_OSWEC\OSWEC_regularwaves\5-14-21' 'data\NREL_OSWEC\OSWEC_regularwaves\5-19-21'
 %     directory = 'data\NREL_OSWEC\regularwaves\column_w_springs';
@@ -177,7 +177,61 @@ if regularwaves == 1
    regularwaves_cws= OSWEC_regularwaves_post(column,regularwaves_post_opts,plotloop,verbose);
    
 %     save('regularwaves_column_w_springs_updated.mat','regularwaves_cws')
-    
+
+  %% ------------------------ wave energy prize ------------------------ %%
+
+directory = 'OSWECwaveenergyprize/column/'; % 
+file = 'all';
+
+% initialize read data options:
+readdataopts = pkg.obj.readDataOpt(directory,file);
+readdataopts.as_struct = true;
+
+column = pkg.fun.read_data2(readdataopts);
+
+% PRE-PROCESSING:
+% define data channels, variable names, and subfields to be pre-processed:
+regularwaves_pre_opts = struct();
+regularwaves_pre_opts.channels = {7,9,10,11,12,13,14};
+regularwaves_pre_opts.varnames = {'phi','fx','fy','fz','mx','my','mz'};
+regularwaves_pre_opts.subfields = {'position','forceX','forceY','forceZ','momentX','momentY','momentZ'};
+regularwaves_pre_opts.exval_factor = 5;
+
+% initialize filters for each subfield:
+filtopts = struct();
+filtopts.type = repmat({'butter'},1,length(regularwaves_pre_opts.subfields));
+filtopts.subtype = repmat({'low'},1,length(regularwaves_pre_opts.subfields));
+filtopts.order = {4,4,4,4,4,4,4};
+filtopts.cutoff_margin = {5,5,5,5,5,5,5}; % filtopts.cutoff_margin = {3,[],[],[],[],[],[]}; % filtopts.f_cutoff = {[],10,10,10,10,10,10};
+regularwaves_pre_opts.filters = pkg.fun.init_filters(filtopts);
+
+% specify start and end times; sampling frequency:
+t0 = 10;
+tf = 40;
+fs = 500;
+
+% other settings
+plotloop = false;
+verbose = true;
+
+% call regular waves pre-processing function:
+column = OSWEC_regularwaves_pre(column,regularwaves_pre_opts,t0,tf,fs,plotloop,verbose);
+
+% POST-PROCESSING:
+% define data channels, variable names, and subfields to be post-processed:
+regularwaves_post_opts.varnames = {'phi','fx','fz','my'};
+regularwaves_post_opts.subfields = {'position','forceX','forceZ','momentY'};
+
+% plot settings
+plotloop = false;
+verbose = true;
+
+% call regular waves post-processing function:
+waveenergyprize_c = OSWEC_regularwaves_post(column,regularwaves_post_opts,plotloop,verbose);
+
+% save('waveenergyprize_column.mat','waveenergyprize_c')
+
+
   %% -------------------------- analysis ----------------------------- %%
 %    OSWEC_loadpaths(column,{'forceX','forceZ'},{'fx','fz'})
   
@@ -194,8 +248,6 @@ if regularwaves == 1
    C_yy = M*g*d;
    I_yy = C_yy/inertia_body_w_ballast.results.wn_mean^2; % kg-m^2
    C_ext = I_yy*(inertia_body_w_ballast_and_springs.results.wn_mean)^2 - C_yy;
-   
-   
    
   %% ---------------------------- plots ------------------------------ %%
    load('data\NREL_OSWEC\_processed\designwaves_column_w_springs.mat')

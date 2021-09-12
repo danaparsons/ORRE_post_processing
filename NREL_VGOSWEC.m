@@ -137,7 +137,8 @@ if regularwaves == 1
     
 %     save('designwaves.mat','designwaves')
  
-  %% ---------------------- model run processing ----------------------- %%
+  %% -------------------------- regular wave --------------------------- %%
+
     % READ DATA:
     directory = 'data/NREL_VGOSWEC/waveenergyprize/VGM90/'; % 'data\NREL_OSWEC\OSWEC_regularwaves\5-14-21' 'data\NREL_OSWEC\OSWEC_regularwaves\5-19-21'
     file = 'all';
@@ -193,6 +194,59 @@ if regularwaves == 1
    
     save('waveenergyprize_VGM0.mat','waveenergyprize_VGM0')
     
+  %% ------------------------ wave energy prize ------------------------ %%
+% READ DATA:
+directory = 'VGOSWECwaveenergyprize/VGM0/'; 
+file = 'all';
+
+% initialize read data options:
+readdataopts = pkg.obj.readDataOpt(directory,file);
+readdataopts.as_struct = true;
+
+VGM0 = pkg.fun.read_data2(readdataopts);
+
+% PRE-PROCESSING:
+% define data channels, variable names, and subfields to be pre-processed:
+regularwaves_pre_opts = struct();
+regularwaves_pre_opts.channels = {7,9,10,11,12,13,14};
+regularwaves_pre_opts.varnames = {'phi','fx','fy','fz','mx','my','mz'};
+regularwaves_pre_opts.subfields = {'position','forceX','forceY','forceZ','momentX','momentY','momentZ'};
+regularwaves_pre_opts.exval_factor = 5;
+
+% initialize filters for each subfield:
+filtopts = struct();
+filtopts.type = repmat({'butter'},1,length(regularwaves_pre_opts.subfields));
+filtopts.subtype = repmat({'low'},1,length(regularwaves_pre_opts.subfields));
+filtopts.order = {4,4,4,4,4,4,4};
+filtopts.cutoff_margin = {5,5,5,5,5,5,5}; % filtopts.cutoff_margin = {3,[],[],[],[],[],[]}; % filtopts.f_cutoff = {[],10,10,10,10,10,10};
+regularwaves_pre_opts.filters = pkg.fun.init_filters(filtopts);
+
+% specify start and end times; sampling frequency:
+t0 = 10;
+tf = 40;
+fs = 500;
+
+% other settings
+plotloop = false;
+verbose = true;
+
+% call regular waves pre-processing function:
+VGM0 = OSWEC_regularwaves_pre(VGM0,regularwaves_pre_opts,t0,tf,fs,plotloop,verbose);
+
+% POST-PROCESSING:
+% define data channels, variable names, and subfields to be post-processed:
+regularwaves_post_opts.varnames = {'phi','fx','fz','my'};
+regularwaves_post_opts.subfields = {'position','forceX','forceZ','momentY'};
+
+% plot settings
+plotloop = false;
+verbose = true;
+
+% call regular waves post-processing function:
+waveenergyprize_VGM0 = OSWEC_regularwaves_post(VGM0,regularwaves_post_opts,plotloop,verbose);
+
+% save('waveenergyprize_VGM0.mat','waveenergyprize_VGM0')
+
   %% -------------------------- analysis ----------------------------- %%
   load('data\NREL_VGOSWEC\_processed\inertia_body_only.mat') 
   load('data\NREL_VGOSWEC\_processed\inertia_body_w_springs.mat') 
