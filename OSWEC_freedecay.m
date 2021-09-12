@@ -41,8 +41,12 @@ for i = 1:numruns
     phi_raw  = data.(run).(['ch',num2str(dataopts.phi_ch)]);
     t_raw    = data.(run).ch1;
     
-%     figure   
-%     plot(t,phi_raw)
+    
+    
+    figure   
+    plot(t_raw,phi_raw)
+    
+    
     % interpolate the results if dropouts are present
     if sum(phi_raw==0) > 0
         dropoutratio = sum(phi_raw==0)/length(phi_raw);
@@ -66,7 +70,7 @@ for i = 1:numruns
 %     phi_raw = detrend(phi_raw);
     
     % identify initial position 
-    [t0,phi0(i),~,~] = fdecay_peaks(t_raw,phi_raw,phi0sign,dataopts.phi0_pkpromfactor,dataopts.minwidth);
+    [t0,phi0(i),~,~] = fdecay_peaks(t_raw,phi_raw,phi0sign,dataopts.phi0_pkpromfactor,dataopts.min_width);
     
     if isfield(dataopts,'max_duration')
         tmax = dataopts.max_duration;
@@ -91,7 +95,7 @@ for i = 1:numruns
     else
         dominant_period = fft_raw.dominant_period;
     end
-    
+
      % implement a preliminary lowpass filter, if one has not already been specified.
     if checkfieldORprop(data,run,subfield,'filter') == 0
         
@@ -160,30 +164,50 @@ for i = 1:numruns
     Tn_pks(i) = mean([Tside1;Tside2]);
     disp(['Tn_pks = ',num2str(Tn_pks(i))])
     
-    phi_km1 = side1pks(1:end-2);
-    phi_kp1 = side1pks(3:end);
+    if length(side1locs) > 3
+        
+        phi_km1 = side1pks(1:end-2);
+        phi_kp1 = side1pks(3:end);
+        
+        phi_km1_side2 = side2pks(1:end-2);
+        phi_kp1_side2 = side2pks(3:end);
+        
+        
+        y_ax_side1 =  1/(2*pi)*log(phi_km1./phi_kp1);
+        xk_side1 = side1pks(2:end-1);
+        
+        y_ax_side2 =  1/(2*pi)*log(phi_km1_side2./phi_kp1_side2);
+        xk_side2 = side2pks(2:end-1);
+        
+        y_ax_presort = [y_ax_side1;y_ax_side2];
+        [xk{i}, idx] = sort([xk_side1;xk_side2]);
+        y_ax{i} = y_ax_presort(idx);
+        [p,S] = polyfit(xk{i},y_ax{i},1);
+        zeta_quaddamp = p(2);
+        m_quaddamp = p(1);
+        Rsq_quaddamp = 1 - (S.normr/norm(y_ax{i} - mean(y_ax{i})))^2;
+    else
+        xk{i} = [];
+        y_ax{i} = [];
+        zeta_quaddamp = [];
+        m_quaddamp = [];
+        Rsq_quaddamp = [];
+    end
     
-    phi_km1_side2 = side2pks(1:end-2);
-    phi_kp1_side2 = side2pks(3:end);
-
+    if length(side1pks) > 1
+        zeta_side1 = logdec(side1pks,1);
+    else
+        zeta_side1 = [];
+    end
+    if length(side2pks) > 1
+        zeta_side2 = logdec(side2pks,1);
+    else 
+        zeta_side2 = [];
+    end
     
-    y_ax_side1 =  1/(2*pi)*log(phi_km1./phi_kp1);
-    xk_side1 = side1pks(2:end-1);
     
-    y_ax_side2 =  1/(2*pi)*log(phi_km1_side2./phi_kp1_side2);
-    xk_side2 = side2pks(2:end-1);
-    
-    y_ax_presort = [y_ax_side1;y_ax_side2];
-    [xk{i}, idx] = sort([xk_side1;xk_side2]);
-    y_ax{i} = y_ax_presort(idx);
-    [p,S] = polyfit(xk{i},y_ax{i},1);
-    zeta_quaddamp = p(2);
-    m_quaddamp = p(1);
-    Rsq_quaddamp = 1 - (S.normr/norm(y_ax{i} - mean(y_ax{i})))^2;
-    
-    zeta_side1 = logdec(side1pks,1);
-    zeta_side2 = logdec(side2pks,1);
     zeta_logdec(i) = mean([zeta_side1;zeta_side2]);
+    
     if plotloop == true
         
         % subplot 1: (left) raw data; (right) sliced data
@@ -256,6 +280,7 @@ for i = 1:numruns
             legend()  
             sgtitle(replace(run,'_',' '))
             
+            if length(side1locs) > 3
             figure
                 x0=4; y0=4;
                 width=4.0;
@@ -279,6 +304,7 @@ for i = 1:numruns
                     char(10),'$R^2 = ',num2str(round(Rsq_quaddamp,3)),'$'],...
                     'Interpreter','Latex','FontSize',12)
                 pbaspect([1 1 1])
+            end
     end
     
     % angular frequency:
@@ -297,60 +323,60 @@ for i = 1:numruns
     data.(run).(subfield).logdec.zeta_side1 = zeta_side1;
     data.(run).(subfield).logdec.zeta_side2 = zeta_side2;
     data.(run).(subfield).logdec.zeta  = zeta_logdec(i);
-    data.(run).(subfield).quaddamp.xk = xk{i};
-    data.(run).(subfield).quaddamp.y_ax = y_ax{i};
-    data.(run).(subfield).quaddamp.zeta = zeta_quaddamp;
-    data.(run).(subfield).quaddamp.m    = m_quaddamp;
-    data.(run).(subfield).quaddamp.Rsq = Rsq_quaddamp;
+%     data.(run).(subfield).quaddamp.xk = xk{i};
+%     data.(run).(subfield).quaddamp.y_ax = y_ax{i};
+%     data.(run).(subfield).quaddamp.zeta = zeta_quaddamp;
+%     data.(run).(subfield).quaddamp.m    = m_quaddamp;
+%     data.(run).(subfield).quaddamp.Rsq = Rsq_quaddamp;
     data.(run).(subfield).fft      = fft_out;
     data.(run).(subfield).filter   = filter;
 
 end
 
-xk_combined = vertcat(xk{:});
-y_ax_combined = vertcat(y_ax{:});
-[xk_combined,idx] = sort(xk_combined);
-y_ax_combined = y_ax_combined(idx);
-
-[p,S] = polyfit(xk_combined,y_ax_combined,1);
-Rsq_quaddamp = 1 - (S.normr/norm(y_ax_combined - mean(y_ax_combined)))^2;
-zeta_quaddamp    = p(2);
-m_quaddamp       = p(1);
-
-% plot quadratic damping ID fit:
-markercolor = 'k';
-markeralpha = 0.65;
-
-figure
-x0=4; y0=4;
-width=4.0;
-height=4.0;
-set(gcf,'units','inches','position',[x0,y0,width,height])
-plot([0 ceil(max(xk_combined))],p(2)+[0 ceil(max(xk_combined))]*p(1),'Color',[200 200 200]./255,'LineWidth',1.5); hold on
-scatter(xk_combined,y_ax_combined,25,'o',...
-    'MarkerFaceAlpha',markeralpha,'MarkerEdgeAlpha',0.9,'MarkerFaceColor',markercolor,'MarkerEdgeColor',markercolor)
-set(gca,'FontSize',12)
-xlabel('$\phi_k$','Interpreter','Latex','FontSize',18)
-ylabel('$\frac{1}{2\pi} \ln \frac{\phi_{k-1}}{\phi_{k+1}}$','Interpreter','Latex','FontSize',18)
-%     set(gca,'TickLabelInterpreter','latex')
-%     ylim([round(1.5*min(y_ax_combined),2) round(1.5*max(y_ax_combined),2)])
-%     xlim([0 round(1.5*max([max(xk_combined) max(y_ax_combined)]),2)])
-ylim([round(0.7*min(y_ax_combined),1) round(1.2*max(y_ax_combined),1)])
-xlim([0 round(1.2*max(xk_combined),3)])
-xl = xlim; yl = ylim;
-text(0.7*xl(2),1.25*yl(1),...
-    ['$\zeta \,\,\;= ',num2str(round(zeta_quaddamp,3)),'$',...
-    char(10),'$m \; = ',num2str(round(m_quaddamp,3)),'$',...
-    char(10),'$R^2 = ',num2str(round(Rsq_quaddamp,3)),'$'],...
-    'Interpreter','Latex','FontSize',12)
-pbaspect([1 1 1])
+% xk_combined = vertcat(xk{:});
+% y_ax_combined = vertcat(y_ax{:});
+% [xk_combined,idx] = sort(xk_combined);
+% y_ax_combined = y_ax_combined(idx);
+% 
+% [p,S] = polyfit(xk_combined,y_ax_combined,1);
+% Rsq_quaddamp = 1 - (S.normr/norm(y_ax_combined - mean(y_ax_combined)))^2;
+% zeta_quaddamp    = p(2);
+% m_quaddamp       = p(1);
+% 
+% % plot quadratic damping ID fit:
+% markercolor = 'k';
+% markeralpha = 0.65;
+% 
+% figure
+% x0=4; y0=4;
+% width=4.0;
+% height=4.0;
+% set(gcf,'units','inches','position',[x0,y0,width,height])
+% plot([0 ceil(max(xk_combined))],p(2)+[0 ceil(max(xk_combined))]*p(1),'Color',[200 200 200]./255,'LineWidth',1.5); hold on
+% scatter(xk_combined,y_ax_combined,25,'o',...
+%     'MarkerFaceAlpha',markeralpha,'MarkerEdgeAlpha',0.9,'MarkerFaceColor',markercolor,'MarkerEdgeColor',markercolor)
+% set(gca,'FontSize',12)
+% xlabel('$\phi_k$','Interpreter','Latex','FontSize',18)
+% ylabel('$\frac{1}{2\pi} \ln \frac{\phi_{k-1}}{\phi_{k+1}}$','Interpreter','Latex','FontSize',18)
+% %     set(gca,'TickLabelInterpreter','latex')
+% %     ylim([round(1.5*min(y_ax_combined),2) round(1.5*max(y_ax_combined),2)])
+% %     xlim([0 round(1.5*max([max(xk_combined) max(y_ax_combined)]),2)])
+% ylim([round(0.7*min(y_ax_combined),1) round(1.2*max(y_ax_combined),1)])
+% xlim([0 round(1.2*max(xk_combined),3)])
+% xl = xlim; yl = ylim;
+% text(0.7*xl(2),1.25*yl(1),...
+%     ['$\zeta \,\,\;= ',num2str(round(zeta_quaddamp,3)),'$',...
+%     char(10),'$m \; = ',num2str(round(m_quaddamp,3)),'$',...
+%     char(10),'$R^2 = ',num2str(round(Rsq_quaddamp,3)),'$'],...
+%     'Interpreter','Latex','FontSize',12)
+% pbaspect([1 1 1])
 
 % compute basic statistics
 Tn_fft_mean  = mean(Tn_fft); Tn_fft_std = std(Tn_fft);
 wn_fft_mean = mean(wn_fft); wn_fft_std  = std(wn_fft);
-Tn_pks_mean  = mean(Tn_pks); Tn_pks_std = std(Tn_pks);
-wn_pks_mean = mean(wn_pks); wn_pks_std  = std(wn_pks);
-zeta_logdec_mean = mean(zeta_logdec); zeta_logdec_std = std(zeta_logdec);
+Tn_pks_mean  = mean(Tn_pks,'omitnan'); Tn_pks_std = std(Tn_pks,'omitnan');
+wn_pks_mean = mean(wn_pks,'omitnan'); wn_pks_std  = std(wn_pks,'omitnan');
+zeta_logdec_mean = mean(zeta_logdec,'omitnan'); zeta_logdec_std = std(zeta_logdec,'omitnan');
 
 % visualize results
 figure; hold on
@@ -360,7 +386,7 @@ inBetween = [(wn_fft_mean+wn_fft_std)*[1 1], fliplr((wn_fft_mean-wn_fft_std)*[1 
 fill([xlim, fliplr(xlim)], inBetween, 'r','FaceAlpha',0.1,'EdgeColor','none','DisplayName','1 stdev, fft')
 
 scatter(phi0,wn_pks,'o','MarkerFaceColor','b','MarkerEdgeColor','b','DisplayName','observations, pks')
-yline(wn_pks_mean,'b','LineWidth',1.5,'DisplayName','mean, pks')
+if ~isnan(wn_pks_mean); yline(wn_pks_mean,'b','LineWidth',1.5,'DisplayName','mean, pks'); end
 inBetween = [(wn_pks_mean+wn_pks_std)*[1 1], fliplr((wn_pks_mean-wn_pks_std)*[1 1])];
 fill([xlim, fliplr(xlim)], inBetween, 'b','FaceAlpha',0.1,'EdgeColor','none','DisplayName','1 stdev, pks')
 %     ylim([0.9 1.1]*wn_mean)
@@ -390,12 +416,14 @@ data.results.Tn_pks_mean     = Tn_pks_mean;
 data.results.Tn_pks_std      = Tn_pks_std;
 data.results.zeta_logdec_mean = zeta_logdec_mean;
 data.results.zeta_logdec_std = zeta_logdec_std;
-data.results.Rsq_quaddamp = Rsq_quaddamp; 
-data.results.zeta_quaddamp  = zeta_quaddamp; 
-data.results.m_quaddamp = m_quaddamp; 
-data.results.xk_combined = xk_combined;
-data.results.y_ax_combined = y_ax_combined;
+% data.results.Rsq_quaddamp = Rsq_quaddamp; 
+% data.results.zeta_quaddamp  = zeta_quaddamp; 
+% data.results.m_quaddamp = m_quaddamp; 
+% data.results.xk_combined = xk_combined;
+% data.results.y_ax_combined = y_ax_combined;
 data.results.tabulated   = tabulated;
+
+data.dataopts = dataopts;
 
 end
 

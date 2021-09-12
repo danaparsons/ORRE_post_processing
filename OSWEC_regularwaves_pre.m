@@ -292,3 +292,9 @@ function bool = checkfieldORprop(structORobj,fieldORprop)
    catch
    end
 end
+
+function x_rms = rms(X)
+
+x_rms = sqrt(mean(X.^2));
+
+end

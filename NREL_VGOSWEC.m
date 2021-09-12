@@ -5,8 +5,8 @@
 % Created on:   5-13-21
 % Last updated: 5-13-21 by J. Davis
 %% ------------------------------ Inputs ------------------------------- %%
-dry_inertia = 1;
-free_decay = 0;
+dry_inertia = 0;
+free_decay = 1;
 regularwaves = 1;
 %% ---------------------------- dry inertia ---------------------------- %%
 if dry_inertia == 1
@@ -36,25 +36,49 @@ end
 %% ---------------------------- free decay ----------------------------- %%
 if free_decay == 1
     % Define inputs:
-    directory = 'data\NREL_VGOSWEC\freedecay\VGM90';     % current directory
+    directory = 'data/NREL_VGOSWEC/freedecay/VGM20/';     % current directory
     file = 'all';
     
     opts = pkg.obj.readDataOpt(directory,file);
     opts.as_struct = true;
     %if ~exist('data','var')
-    VGM0freedecay = pkg.fun.read_data2(opts);
+    freedecay = pkg.fun.read_data2(opts);
     %end
     
-    fs = 500;
-    plotloop = false;
-    VGM0freedecay = OSWEC_freedecay(VGM0freedecay,fs,plotloop);
-    % TO DO:
-    % 1) IMPROVE NATURAL PERIOD ESTIMATE FROM PEAKS NOT FFT (NOT SHARP
-    % ENOUGH)
-    % 2) IMPLEMENT NL DAMPING
-    
+    dataopts = [];
+    dataopts.fs = 500;
+    dataopts.phi_ch = 6;
+    dataopts.min_width = 0.1; % width (in seconds) below which peaks are considered noise
+%     dataopts.min_period = 0.1;
+%     dataopts.max_period = 6;
+    dataopts.phi0_pkpromfactor = 0.40; % threshold, as a fraction of the maximum, for which peaks should be considered for finding phi0
+    dataopts.fft_pkpromfactor = 0.15; % threshold (as proportion of peak FFT value) below which additional peaks are considered insignificant
+    dataopts.pks_pkpromfactor = 0.001; % threshold, as a fraction of the maximum, for which peaks should be considered for identifying Tn_pks and damping
+    dataopts.max_duration = 15; % maximum free decay duration
+    plotloop = true;
+
+    VGM20_freedecay = OSWEC_freedecay(freedecay,dataopts,plotloop);
+
+    %     save('VGM90_freedecay.mat','VGM90_freedecay')
+
     
 end
+    
+%     opts = pkg.obj.readDataOpt(directory,file);
+%     opts.as_struct = true;
+%     %if ~exist('data','var')
+%     VGM0freedecay = pkg.fun.read_data2(opts);
+%     %end
+%     
+%     fs = 500;
+%     plotloop = false;
+%     VGM0freedecay = OSWEC_freedecay(VGM0freedecay,fs,plotloop);
+%     % TO DO:
+%     % 1) IMPROVE NATURAL PERIOD ESTIMATE FROM PEAKS NOT FFT (NOT SHARP
+%     % ENOUGH)
+%     % 2) IMPLEMENT NL DAMPING
+%     
+    
 %% ----------------------------- regular ------------------------------- %%
 if regularwaves == 1
   %% --------------------- design wave processing ---------------------- %%
@@ -115,7 +139,7 @@ if regularwaves == 1
  
   %% ---------------------- model run processing ----------------------- %%
     % READ DATA:
-    directory = 'data\NREL_VGOSWEC\regularwaves\VGM45'; % 'data\NREL_OSWEC\OSWEC_regularwaves\5-14-21' 'data\NREL_OSWEC\OSWEC_regularwaves\5-19-21'
+    directory = 'data/NREL_VGOSWEC/waveenergyprize/VGM90/'; % 'data\NREL_OSWEC\OSWEC_regularwaves\5-14-21' 'data\NREL_OSWEC\OSWEC_regularwaves\5-19-21'
     file = 'all';
     
     % initialize read data options:
@@ -124,7 +148,7 @@ if regularwaves == 1
     
     % call read data function:
 %     if ~exist('VGM90','var')
-        VGM45 = pkg.fun.read_data2(readdataopts);
+        VGM90 = pkg.fun.read_data2(readdataopts);
 %     end
 
     % PRE-PROCESSING:
@@ -153,7 +177,7 @@ if regularwaves == 1
     verbose = true;
     
     % call regular waves pre-processing function:
-    VGM45 = OSWEC_regularwaves_pre(VGM45,regularwaves_pre_opts,t0,tf,fs,plotloop,verbose);
+    VGM0 = OSWEC_regularwaves_pre(VGM0,regularwaves_pre_opts,t0,tf,fs,plotloop,verbose);
     
     % POST-PROCESSING:
     % define data channels, variable names, and subfields to be post-processed:
@@ -165,9 +189,9 @@ if regularwaves == 1
     verbose = true;
     
     % call regular waves post-processing function:
-   VGM45 = OSWEC_regularwaves_post(VGM45,regularwaves_post_opts,plotloop,verbose);
+   waveenergyprize_VGM0 = OSWEC_regularwaves_post(VGM0,regularwaves_post_opts,plotloop,verbose);
    
-%    save('VGM45_regularwaves.mat','VGM45')
+    save('waveenergyprize_VGM0.mat','waveenergyprize_VGM0')
     
   %% -------------------------- analysis ----------------------------- %%
   load('data\NREL_VGOSWEC\_processed\inertia_body_only.mat') 
@@ -188,11 +212,11 @@ if regularwaves == 1
 
   %% ---------------------------- plots ------------------------------ %%
    load('data\NREL_VGOSWEC\_processed\designwaves.mat')
-   load('data\NREL_VGOSWEC\_processed\VGM0_regularwaves.mat')
-   load('data\NREL_VGOSWEC\_processed\VGM10_regularwaves.mat')
-   load('data\NREL_VGOSWEC\_processed\VGM20_regularwaves.mat')
-   load('data\NREL_VGOSWEC\_processed\VGM45_regularwaves.mat')
-   load('data\NREL_VGOSWEC\_processed\VGM90_regularwaves.mat')
+   load('data\NREL_VGOSWEC\_processed\regularwaves_VGM0.mat')
+   load('data\NREL_VGOSWEC\_processed\regularwaves_VGM10.mat')
+   load('data\NREL_VGOSWEC\_processed\regularwaves_VGM20.mat')
+   load('data\NREL_VGOSWEC\_processed\regularwaves_VGM45.mat')
+   load('data\NREL_VGOSWEC\_processed\regularwaves_VGM90.mat')
    
    k = wave_disp(2*pi./designwaves.Results.eta_wp2.T_mean,1,9.81,0.001);
    phi_norm = 1;

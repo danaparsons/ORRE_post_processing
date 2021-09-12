@@ -124,7 +124,7 @@ if regularwaves == 1
  
   %% ---------------------- model run processing ----------------------- %%
     % READ DATA:
-    directory = 'data\NREL_OSWEC\regularwaves\column'; % 'data\NREL_OSWEC\OSWEC_regularwaves\5-14-21' 'data\NREL_OSWEC\OSWEC_regularwaves\5-19-21'
+    directory = 'data/NREL_OSWEC/waveenergyprize/column_w_springs/'; % 'data\NREL_OSWEC\OSWEC_regularwaves\5-14-21' 'data\NREL_OSWEC\OSWEC_regularwaves\5-19-21'
 %     directory = 'data\NREL_OSWEC\regularwaves\column_w_springs';
     file = 'all';
     
@@ -133,7 +133,7 @@ if regularwaves == 1
     readdataopts.as_struct = true;
     
     % call read data function:
-    column = pkg.fun.read_data2(readdataopts);
+    column_w_springs = pkg.fun.read_data2(readdataopts);
 
     % PRE-PROCESSING:
     % define data channels, variable names, and subfields to be pre-processed:
