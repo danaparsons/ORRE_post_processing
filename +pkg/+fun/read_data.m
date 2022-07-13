@@ -118,7 +118,8 @@ if datatype == 1 % generic channel-based dataClass
     % Read tags, headers, and data from file using textscan:
     tags = textscan(fileID,tagformat,ntaglines,'delimiter','\n','CommentStyle',commentstyle);
     headers = textscan(fileID,headerformat,nheaderlines,'delimiter','\n','CommentStyle',commentstyle);
-    headers = transpose(split(headers{1},headerdelimiter));
+%     headers = transpose(split(headers{1},headerdelimiter)); # removed 2022Jul13 to accomodate tab-delimited files
+    headers = strsplit(headers{1}{1},headerdelimiter);
     data = textscan(fileID,repmat(dataformat,1,length(headers)),'Delimiter',datadelimiter,'CommentStyle',commentstyle);
 
    % Create dataClass object: 

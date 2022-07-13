@@ -69,16 +69,6 @@ end
 app.Wavedata = pkg.fun.read_data(data_dir,filename,datatype,ntaglines,...
     nheaderlines,tagformat,headerformat,dataformat,headerdelimiter,datadelimiter,commentstyle);
 
-%     if varargin{1} == '~'; varargin{1} = default_ntaglines;         end
-%     if varargin{2} == '~'; varargin{2} = default_nheaderlines;      end
-%     if varargin{3} == '~'; varargin{3} = default_tagformat;         end
-%     if varargin{4} == '~'; varargin{4} = default_headerformat;      end
-%     if varargin{5} == '~'; varargin{5} = default_dataformat;        end
-%     if varargin{6} == '~'; varargin{6} = default_headerdelimiter;   end
-%     if varargin{6} == '~'; varargin{6} = default_datadelimiter;     end
-%     if varargin{7} == '~'; varargin{7} = default_commentstyle;      end
-
-
 wavedata = app.Wavedata;
 app.Headers = wavedata.headers;
 
