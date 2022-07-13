@@ -47,12 +47,16 @@ elseif(strcmp(app.DataFormatDropDown.Value,'Integer'))
     dataformat = '%int64';
 end
 
-%%%%%% Delmiiter %%%%%%%
+%%%%%% Data Delmiiter %%%%%%%
 if isempty(app.DelimiterEditField.Value)
- 	delimiter = '~'; % (accept default value defined in read_data.m)
+ 	datadelimiter = '~'; % (accept default value defined in read_data.m)
 else
-    delimiter = app.DelimiterEditField.Value;
+    datadelimiter = app.DelimiterEditField.Value;
 end
+
+%%%%%% Header Delmiiter %%%%%%%
+%TODO: update this; This needs to become an input and have GUI entry
+headerdelimiter = datadelimiter; % For now, set it to the data delimiter.
 
 %%%%% Comment Style %%%%%%%
 if(strcmp(app.CommentStyleDropDown.Value,'Default (%)'))
@@ -63,7 +67,17 @@ end
 %%%%%% End Data Settings Drop Down %%%%%%%
 
 app.Wavedata = pkg.fun.read_data(data_dir,filename,datatype,ntaglines,...
-    nheaderlines,tagformat,headerformat,dataformat,delimiter,commentstyle);
+    nheaderlines,tagformat,headerformat,dataformat,headerdelimiter,datadelimiter,commentstyle);
+
+%     if varargin{1} == '~'; varargin{1} = default_ntaglines;         end
+%     if varargin{2} == '~'; varargin{2} = default_nheaderlines;      end
+%     if varargin{3} == '~'; varargin{3} = default_tagformat;         end
+%     if varargin{4} == '~'; varargin{4} = default_headerformat;      end
+%     if varargin{5} == '~'; varargin{5} = default_dataformat;        end
+%     if varargin{6} == '~'; varargin{6} = default_headerdelimiter;   end
+%     if varargin{6} == '~'; varargin{6} = default_datadelimiter;     end
+%     if varargin{7} == '~'; varargin{7} = default_commentstyle;      end
+
 
 wavedata = app.Wavedata;
 app.Headers = wavedata.headers;
